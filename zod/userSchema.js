@@ -116,6 +116,14 @@ const changePasswordSchema = z.object({
 
 const getUserDataSchema = z.void();
 
+const applyTeachSchema = z.object({
+    demoVideo: z.string().min(5).max(500),
+    subjectToTeach: z.string().min(2).max(100),
+    qualifications: z.array(z.string().min(2).max(100)),
+    experience: z.string().min(5).max(500),
+    resume: z.string().min(5).max(500)
+}).strict();
+
 export {
     signupSchema,
     signinSchema,
@@ -124,5 +132,6 @@ export {
     checkOTPSchema,
     refreshTokenSchema,
     signoutSchema,
-    getUserDataSchema
+    getUserDataSchema,
+    applyTeachSchema
 }

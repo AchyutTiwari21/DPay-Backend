@@ -5,6 +5,7 @@ import { logoutUser } from "./logoutUser.controller.js";
 import { refreshAccessToken } from "./refreshAccessToken.controller.js";
 import { changePassword } from "./changePassword.controller.js";
 import { getCurrentUser } from "./getCurrentUser.controller.js";
+import { applyTeach } from "./applyToTeach.controller.js";
 
 export {
     sendOTP,
@@ -15,5 +16,6 @@ export {
     logoutUser,
     refreshAccessToken,
     changePassword,
-    getCurrentUser
+    getCurrentUser,
+    applyTeach
 }
