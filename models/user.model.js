@@ -61,6 +61,32 @@ userSchema.methods.generateAccessToken = function() {
     )
 }
 
+userSchema.methods.generateAdminAccessToken = function() {
+    return jwt.sign(
+        {
+            _id: this._id,
+            email: this.email
+        },
+        process.env.ADMIN_ACCESS_TOKEN_SECRET,
+        {
+            expiresIn: process.env.ADMIN_ACCESS_TOKEN_EXPIRY
+        }
+    )
+}
+
+userSchema.methods.generateTutorAccessToken = function() {
+    return jwt.sign(
+        {
+            _id: this._id,
+            email: this.email
+        },
+        process.env.TUTOR_ACCESS_TOKEN_SECRET,
+        {
+            expiresIn: process.env.TUTOR_ACCESS_TOKEN_EXPIRY
+        }
+    )
+}
+
 userSchema.methods.generateRefreshToken = function() {
     return jwt.sign(
         {
@@ -69,6 +95,30 @@ userSchema.methods.generateRefreshToken = function() {
         process.env.REFRESH_TOKEN_SECRET,
         {
             expiresIn: process.env.REFRESH_TOKEN_EXPIRY
+        }
+    )
+}
+
+userSchema.methods.generateAdminRefreshToken = function() {
+    return jwt.sign(
+        {
+            _id: this._id,
+        },
+        process.env.ADMIN_REFRESH_TOKEN_SECRET,
+        {
+            expiresIn: process.env.ADMIN_REFRESH_TOKEN_EXPIRY
+        }
+    )
+}
+
+userSchema.methods.generateTutorRefreshToken = function() {
+    return jwt.sign(
+        {
+            _id: this._id,
+        },
+        process.env.TUTOR_REFRESH_TOKEN_SECRET,
+        {
+            expiresIn: process.env.TUTOR_REFRESH_TOKEN_EXPIRY
         }
     )
 }
