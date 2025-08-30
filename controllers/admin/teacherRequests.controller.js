@@ -1,5 +1,6 @@
-import { ApplyTeacherRequest } from "../../models/index.js";
+import { ApplyTeacherRequest, TutorProfile, User } from "../../models/index.js";
 import { ApiResponse, asyncHandler } from "../../utils/index.js";
+import { mailSender } from "../../utils/mailSender.js";
 
 export const getAllTeacherRequests = asyncHandler(async (req, res) => {
     try {
@@ -27,6 +28,33 @@ export const updateTeacherRequest = asyncHandler(async (req, res) => {
             return res.status(404).json(
                 new ApiResponse(false, null, "Teacher request not found")
             );
+        }
+
+        if(status == "ACCEPTED") {
+            const tutorProfile = await TutorProfile.create({
+                user: updatedRequest.user,
+                about: "",
+                modeOfClass: "offline",
+                experience: updatedRequest.experience,
+                totalClasses: 0,
+                skills: [],
+                languages: [],
+                subjects: updatedRequest.subjectsToTeach,
+            });
+
+            await User.findByIdAndUpdate(updatedRequest.user._id, { $set: { role: "TUTOR" } });
+
+            await mailSender(tutorProfile.user.email, "Congratulations! Your application has been accepted", `
+                <p>Dear ${tutorProfile.user.name},</p>
+                <p>Congratulations! Your application to become a tutor has been accepted.</p>
+                <p>We are excited to have you on board.</p>
+            `);
+        } else if(status == "REJECTED") {
+            await mailSender(updatedRequest.user.email, "Application Update", `
+                <p>Dear ${updatedRequest.user.name},</p>
+                <p>We regret to inform you that your application to become a tutor has been rejected.</p>
+                <p>Thank you for your interest, and we encourage you to apply again in the future.</p>
+            `);
         }
 
         return res.status(200).json(

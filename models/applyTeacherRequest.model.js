@@ -15,14 +15,14 @@ const applyTeacherRequestSchema = new Schema({
     demoVideo: {
         type: String
     },
-    subjectToTeach: {
+    subjectsToTeach: [{
         type: String,
         required: true
-    },
-    qualifications: {
-        type: [String],
+    }],
+    qualifications: [{
+        type: String,
         required: true
-    },
+    }],
     experience: {
         type: String,
         required: true

@@ -16,23 +16,23 @@ export const applyTeach = asyncHandler(async (req, res) => {
         );
     }
 
-    const { demoVideo, subjectToTeach, qualifications, experience, resume } = req.body;
+    const { demoVideo, subjectsToTeach, qualifications, experience, resume } = req.body;
 
     try {
         const newApplication = await ApplyTeacherRequest.create({
             user: user._id,
             demoVideo,
-            subjectToTeach,
+            subjectsToTeach,
             qualifications,
             experience,
             resume
         });
 
-        await mailSender('achyut.s.tiwari@gmail.com', 'New Teacher Application', 
+        await mailSender(process.env.ADMIN_EMAIL, 'New Teacher Application', 
             `<p>A new teacher application has been submitted.</p>
             <p><strong>User:</strong> ${user.name} (${user.email})</p>
             <p><strong>Demo Video:</strong> ${demoVideo}</p>
-            <p><strong>Subject to Teach:</strong> ${subjectToTeach}</p>
+            <p><strong>Subjects to Teach:</strong> ${subjectsToTeach}</p>
             <p><strong>Qualifications:</strong> ${qualifications}</p>
             <p><strong>Experience:</strong> ${experience}</p>
             <p><strong>Resume:</strong> ${resume}</p>`

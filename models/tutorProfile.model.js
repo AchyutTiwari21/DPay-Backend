@@ -7,21 +7,38 @@ const tutorProfileSchema = new Schema({
     ref: "User", 
     required: true 
   },
-  bio: { 
+  about: { 
     type: String 
   },
-  hourlyRate: { 
-    type: Number, 
-    required: true 
+  modeOfClass: {
+    type: String,
+    enum: ["online", "offline", "hybrid"],
+    default: "offline"
   },
-  languages: [{ 
-    type: String 
-  }],
-  ratingAvg: { 
+  experience: {
+    type: String
+  },
+  totalClasses: { 
     type: Number, 
     default: 0 
   },
-  totalLessons: { 
+  skills: [{ 
+    type: String 
+  }],
+  languages: [{ 
+    type: String 
+  }],
+  title: {
+    type: String
+  },
+  subjects: [{
+    type: Schema.Types.ObjectId,
+    ref: "Subject"
+  }],
+  hourlyRate: { 
+    type: Number
+  },
+  ratingAvg: { 
     type: Number, 
     default: 0 
   },
