@@ -32,20 +32,14 @@ export const updateTeacherRequest = asyncHandler(async (req, res) => {
 
         if(status == "ACCEPTED") {
             const tutorProfile = await TutorProfile.create({
-                user: updatedRequest.user,
-                about: "",
-                modeOfClass: "offline",
+                user: updatedRequest.user._id,
                 experience: updatedRequest.experience,
-                totalClasses: 0,
-                skills: [],
-                languages: [],
-                subjects: updatedRequest.subjectsToTeach,
             });
 
-            await User.findByIdAndUpdate(updatedRequest.user._id, { $set: { role: "TUTOR" } });
+            const user = await User.findByIdAndUpdate(updatedRequest.user._id, { $set: { role: "TUTOR" } });
 
-            await mailSender(tutorProfile.user.email, "Congratulations! Your application has been accepted", `
-                <p>Dear ${tutorProfile.user.name},</p>
+            await mailSender(user.email, "Congratulations! Your application has been accepted", `
+                <p>Dear ${user.name},</p>
                 <p>Congratulations! Your application to become a tutor has been accepted.</p>
                 <p>We are excited to have you on board.</p>
             `);
@@ -61,6 +55,8 @@ export const updateTeacherRequest = asyncHandler(async (req, res) => {
             new ApiResponse(true, updatedRequest, "Teacher request updated successfully")
         );
     } catch (error) {
+        console.log("Error updating teacher request:", error.message);
+
         return res.status(500).json(new ApiResponse(false, null, "Error updating teacher request", error.message));
     }
 });
