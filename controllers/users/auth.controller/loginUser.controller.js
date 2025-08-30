@@ -1,7 +1,7 @@
 import { User } from "../../../models/index.js";
 import { asyncHandler, ApiResponse } from "../../../utils/index.js";
 import { cookieOptions } from "../../../constants.js";
-import { generateAccessAndRefreshTokens, generateAdminAccessAndRefreshTokens, generateTutorAccessAndRefreshTokens } from "../../../utils/index.js";
+import { generateAccessAndRefreshTokens } from "../../../utils/index.js";
 
 export const loginUser = asyncHandler( (async (req, res) => {
     // req body -> data
@@ -38,23 +38,8 @@ export const loginUser = asyncHandler( (async (req, res) => {
                 )
             );
         }
-    
-        let accessToken = null;
-        let refreshToken = null;
 
-        if(user.role === "ADMIN") {
-            const tokens = await generateAdminAccessAndRefreshTokens(user._id);
-            accessToken = tokens.accessToken;
-            refreshToken = tokens.refreshToken;
-        } else if(user.role === "TUTOR") {
-            const tokens = await generateTutorAccessAndRefreshTokens(user._id);
-            accessToken = tokens.accessToken;
-            refreshToken = tokens.refreshToken;
-        } else {
-            const tokens = await generateAccessAndRefreshTokens(user._id);
-            accessToken = tokens.accessToken;
-            refreshToken = tokens.refreshToken;
-        }
+        const {accessToken, refreshToken} = await generateAccessAndRefreshTokens(user._id);
 
         const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
     
