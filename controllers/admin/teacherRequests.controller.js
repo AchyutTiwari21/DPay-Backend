@@ -31,7 +31,7 @@ export const updateTeacherRequest = asyncHandler(async (req, res) => {
         }
 
         if(status == "ACCEPTED") {
-            const tutorProfile = await TutorProfile.create({
+            await TutorProfile.create({
                 user: updatedRequest.user._id,
                 experience: updatedRequest.experience,
             });
@@ -52,7 +52,7 @@ export const updateTeacherRequest = asyncHandler(async (req, res) => {
         }
 
         return res.status(200).json(
-            new ApiResponse(true, updatedRequest, "Teacher request updated successfully")
+            new ApiResponse(true, null, "Teacher request updated successfully")
         );
     } catch (error) {
         console.log("Error updating teacher request:", error.message);

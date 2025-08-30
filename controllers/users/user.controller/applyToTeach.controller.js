@@ -41,7 +41,7 @@ export const applyTeach = asyncHandler(async (req, res) => {
         return res.status(201).json(
             new ApiResponse(
                 201,
-                newApplication,
+                null,
                 "Application for teaching submitted successfully."
             )
         );
