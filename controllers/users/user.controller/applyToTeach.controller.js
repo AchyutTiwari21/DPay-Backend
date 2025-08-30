@@ -1,5 +1,5 @@
-import { ApplyTeacherRequest } from "../../models/index.js";
-import { asyncHandler, ApiResponse } from "../../utils/index.js";
+import { ApplyTeacherRequest } from "../../../models/index.js";
+import { asyncHandler, ApiResponse } from "../../../utils/index.js";
 
 export const applyTeach = asyncHandler(async (req, res) => {
     

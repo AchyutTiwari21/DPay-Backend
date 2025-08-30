@@ -1,5 +1,5 @@
-import { User } from "../../models/index.js";
-import { asyncHandler, ApiResponse } from "../../utils/index.js";
+import { User } from "../../../models/index.js";
+import { asyncHandler, ApiResponse } from "../../../utils/index.js";
 
 export const changePassword = asyncHandler(async (req, res) => {
     const { newPassword } = req.body;

@@ -1,4 +1,4 @@
-import { asyncHandler, ApiResponse } from "../../utils/index.js";
+import { asyncHandler, ApiResponse } from "../../../utils/index.js";
 
 export const getCurrentUser = asyncHandler(async (req, res) => {
     return res

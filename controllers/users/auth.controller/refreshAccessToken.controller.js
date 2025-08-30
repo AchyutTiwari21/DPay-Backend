@@ -1,9 +1,9 @@
-import { User } from "../../models/index.js";
-import { asyncHandler, ApiResponse } from "../../utils/index.js";
+import { User } from "../../../models/index.js";
+import { asyncHandler, ApiResponse } from "../../../utils/index.js";
 import jwt from "jsonwebtoken";
-import { cookieOptions } from "../../constants.js";
+import { cookieOptions } from "../../../constants.js";
 
-import { generateAccessAndRefreshTokens } from "../../utils/index.js";
+import { generateAccessAndRefreshTokens } from "../../../utils/index.js";
 
 export const refreshAccessToken = asyncHandler( async (req, res) => {
     const incomingRefreshToken = req.cookies.refreshToken;

@@ -1,8 +1,8 @@
 import otpGenerator from 'otp-generator';
-import { OTP, User } from '../../models/index.js';
-import { asyncHandler, ApiResponse } from '../../utils/index.js';
-import { generateAccessAndRefreshTokens } from '../../utils/index.js';
-import { cookieOptions } from '../../constants.js';
+import { OTP, User } from '../../../models/index.js';
+import { asyncHandler, ApiResponse } from '../../../utils/index.js';
+import { generateAccessAndRefreshTokens } from '../../../utils/index.js';
+import { cookieOptions } from '../../../constants.js';
 
 export const sendOTP = asyncHandler(async (req, res) => {
   const { email } = req.body;

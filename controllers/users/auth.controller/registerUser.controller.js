@@ -1,5 +1,5 @@
-import { User, OTP } from "../../models/index.js";
-import { asyncHandler, ApiResponse } from "../../utils/index.js";
+import { User, OTP } from "../../../models/index.js";
+import { asyncHandler, ApiResponse } from "../../../utils/index.js";
 
 export const registerUser = asyncHandler(async (req, res) => {
     console.log('Request reached! ', req.body);
