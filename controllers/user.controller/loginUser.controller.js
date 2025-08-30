@@ -39,8 +39,8 @@ export const loginUser = asyncHandler( (async (req, res) => {
             );
         }
     
-        const accessToken = null;
-        const refreshToken = null;
+        let accessToken = null;
+        let refreshToken = null;
 
         if(user.role === "ADMIN") {
             const tokens = await generateAdminAccessAndRefreshTokens(user._id);

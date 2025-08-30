@@ -1,5 +1,9 @@
-import { getAllTeacherRequests } from "./teacherRequests.controller.js";
+import { 
+    getAllTeacherRequests, 
+    updateTeacherRequest 
+} from "./teacherRequests.controller.js";
 
 export {
-    getAllTeacherRequests
+    getAllTeacherRequests,
+    updateTeacherRequest
 };

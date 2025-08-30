@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { Schema } from "mongoose";
 
 const applyTeacherRequestSchema = new Schema({
-    userId: {
+    user: {
         type: Schema.Types.ObjectId,
         ref: "User",
         required: true
@@ -20,7 +20,7 @@ const applyTeacherRequestSchema = new Schema({
         required: true
     },
     qualifications: {
-        type: String,
+        type: [String],
         required: true
     },
     experience: {

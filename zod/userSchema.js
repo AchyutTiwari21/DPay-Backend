@@ -119,8 +119,8 @@ const getUserDataSchema = z.void();
 const applyTeachSchema = z.object({
     demoVideo: z.string().min(5).max(500),
     subjectToTeach: z.string().min(2).max(100),
-    qualifications: z.array(z.string().min(2).max(100)),
-    experience: z.string().min(5).max(500),
+    qualifications: z.array(z.string().min(2).max(100)).min(1).max(50),
+    experience: z.string().min(1).max(500),
     resume: z.string().min(5).max(500)
 }).strict();
 

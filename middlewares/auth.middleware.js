@@ -67,7 +67,7 @@ export const verifyAdminJWT = asyncHandler(async (req, res, next) => {
           );
         }
         return res.status(401).json(
-          new ApiResponse(401, null, error?.message || "Invalid access token.", "invalid_access_token")
+          new ApiResponse(401, null, "Admin Access is not allowed", "admin_access_denied")
         );
     }
 });

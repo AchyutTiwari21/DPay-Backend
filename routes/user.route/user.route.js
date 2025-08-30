@@ -40,7 +40,7 @@ router.route("/send-refresh-otp").post(validateSchema(otpSchema), sendRefreshOTP
 
 router.route("/check-otp").post(validateSchema(checkOTPSchema), checkOTP);
 
-router.route("/change-password").post(validateSchema(changePasswordSchema), verifyJWT, changePassword);
+router.route("/change-password").put(validateSchema(changePasswordSchema), verifyJWT, changePassword);
 
 router.route("/me").get(validateSchema(getUserDataSchema), verifyJWT, getCurrentUser);
 
