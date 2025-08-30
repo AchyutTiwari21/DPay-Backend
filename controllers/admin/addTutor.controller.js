@@ -1,4 +1,4 @@
-import { TutorProfile, User } from "../../models/index.js";
+import { TutorProfile, User, Subject } from "../../models/index.js";
 import { ApiResponse, asyncHandler } from "../../utils/index.js";
 import { mailSender } from "../../utils/mailSender.js";
 
@@ -6,7 +6,7 @@ export const addTutor = asyncHandler(async (req, res) => {
     const { userId } = req.body;
 
     try {
-        const tutorProfile = await TutorProfile.create({
+        await TutorProfile.create({
             user: userId,
         });
 
@@ -25,5 +25,21 @@ export const addTutor = asyncHandler(async (req, res) => {
         console.log("Error adding tutor:", error.message);
 
         return res.status(500).json(new ApiResponse(false, null, "Error adding tutor", error.message));
+    }
+});
+
+export const addSubject = asyncHandler(async (req, res) => {
+    const { name, category } = req.body;
+
+    try {
+        await Subject.create({ name, category });
+        return res.status(201).json(
+            new ApiResponse(201, null, "Subject added successfully")
+        );
+    } catch (error) {
+        console.error("Error adding subject:", error.message);
+        return res.status(500).json(
+            new ApiResponse(500, null, "Internal Server Error")
+        );
     }
 });

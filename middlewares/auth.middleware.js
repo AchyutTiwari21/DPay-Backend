@@ -47,7 +47,7 @@ export const verifyAdmin = asyncHandler(async (req, res, next) => {
 });
 
 export const verifyTutor = asyncHandler(async (req, res, next) => {
-    if (req.user.role !== "TUTOR") {
+    if (req.user.role !== "TUTOR" && req.user.role !== "ADMIN") {
         return res.status(403).json(
             new ApiResponse(403, null, "Access denied", "tutor_access_required")
         );

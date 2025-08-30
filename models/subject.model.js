@@ -3,7 +3,8 @@ const { Schema } = mongoose;
 
 const subjectSchema = new Schema({
   name: { 
-    type: String, 
+    type: String,
+    unique: true, 
     required: true 
   },
   category: { 

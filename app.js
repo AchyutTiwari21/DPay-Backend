@@ -17,9 +17,11 @@ app.use(cookieParser());
 import authRouter from "./routes/user.route/auth.route.js"
 import userRouter from "./routes/user.route/user.route.js";
 import adminRouter from "./routes/admin.route/admin.route.js";
+import tutorRouter from "./routes/tutor.route/tutor.route.js";
 
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/tutor", tutorRouter);
 
 export { app };
