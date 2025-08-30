@@ -2,7 +2,7 @@ import { Router } from "express";
 import { 
     getAllTeacherRequests, 
     updateTeacherRequest 
-} from "../../controllers/admin.controller/index.js";
+} from "../../controllers/admin/index.js";
 import { verifyJWT, verifyAdmin } from "../../middlewares/index.js";
 
 const router = Router();
