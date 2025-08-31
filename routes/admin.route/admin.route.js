@@ -7,7 +7,6 @@ import {
     getTutor,
     removeTutor,
     addSubject,
-    getSubjects,
     removeSubject
 } from "../../controllers/admin/index.js";
 import { verifyJWT, verifyAdmin } from "../../middlewares/index.js";
@@ -25,8 +24,6 @@ router.route("/get-tutors").get(verifyJWT, verifyAdmin, getTutors);
 router.route("/get-tutor/:userId").get(verifyJWT, verifyAdmin, getTutor);
 
 router.route("/remove-tutor/:userId").delete(verifyJWT, verifyAdmin, removeTutor);
-
-router.route("/get-subjects").get(verifyJWT, verifyAdmin, getSubjects);
 
 router.route("/add-subject").post(verifyJWT, verifyAdmin, addSubject);
 

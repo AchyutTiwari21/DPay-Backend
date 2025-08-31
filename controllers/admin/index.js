@@ -8,7 +8,6 @@ import {
     getTutor,
     removeTutor,
     addSubject,
-    getSubjects,
     removeSubject
 } from "./addTutor.controller.js";
 
@@ -20,6 +19,5 @@ export {
     getTutor,
     removeTutor,
     addSubject,
-    getSubjects,
     removeSubject
 };

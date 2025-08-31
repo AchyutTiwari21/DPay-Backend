@@ -41,7 +41,7 @@ export const addTutor = asyncHandler(async (req, res) => {
 });
 
 export const getTutors = asyncHandler(async (req, res) => {
-    const { cursor, direction = "forward", limit = 2 } = req.query;
+    const { cursor, direction = "forward", limit = 5 } = req.query;
     let query = {};
     let sort = { _id: 1 }; // default ascending (forward)
 
@@ -144,16 +144,6 @@ export const addSubject = asyncHandler(async (req, res) => {
         return res.status(500).json(
             new ApiResponse(500, null, "Internal Server Error")
         );
-    }
-});
-
-export const getSubjects = asyncHandler(async (req, res) => {
-    try {
-        const subjects = await Subject.find();
-        return res.status(200).json(new ApiResponse(true, subjects, "Subjects retrieved successfully"));
-    } catch (error) {
-        console.error("Error retrieving subjects:", error.message);
-        return res.status(500).json(new ApiResponse(false, null, "Internal Server Error"));
     }
 });
 

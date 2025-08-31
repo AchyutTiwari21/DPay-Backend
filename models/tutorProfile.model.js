@@ -40,7 +40,7 @@ const tutorProfileSchema = new Schema({
   },
   ratingAvg: { 
     type: Number, 
-    default: 0 
+    default: 5 
   },
 }, {timestamps: true});
 
