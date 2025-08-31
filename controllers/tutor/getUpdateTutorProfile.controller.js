@@ -5,7 +5,7 @@ export const getTutorProfile = asyncHandler(async (req, res) => {
     const user = req.user;
 
     try {
-        const profile = await TutorProfile.findOne({ user: user._id }).populate("user", "name email profileImg");
+        const profile = await TutorProfile.findOne({ user: user._id }).populate("user", "name email").populate("subjects", "name category");
 
         if (!profile) {
             return res.status(404).json(new ApiResponse(false, null, "Tutor profile not found"));

@@ -7,22 +7,17 @@ const availabilitySchema = new Schema({
     ref: "TutorProfile", 
     required: true 
   },
-  dayOfWeek: { 
-    type: String, 
+  date: { 
+    type: Date, 
     required: true 
   },
-  startTime: { 
-    type: String, 
-    required: true 
-  }, // HH:mm
-  endTime: { 
-    type: String, 
-    required: true 
-  },
+  timeslots: [{ 
+    type: String // "HH:mm"
+  }],
   isRecurring: { 
     type: Boolean, 
-    default: true 
-  },
+    default: false 
+  }
 }, {timestamps: true});
 
 const Availability = mongoose.model("Availability", availabilitySchema);
