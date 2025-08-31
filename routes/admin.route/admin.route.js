@@ -3,7 +3,12 @@ import {
     getAllTeacherRequests, 
     updateTeacherRequest,
     addTutor,
-    addSubject
+    getTutors,
+    getTutor,
+    removeTutor,
+    addSubject,
+    getSubjects,
+    removeSubject
 } from "../../controllers/admin/index.js";
 import { verifyJWT, verifyAdmin } from "../../middlewares/index.js";
 
@@ -15,6 +20,16 @@ router.route("/teacher-request/:id").put(verifyJWT, verifyAdmin,  updateTeacherR
 
 router.route("/add-tutor").post(verifyJWT, verifyAdmin, addTutor);
 
+router.route("/get-tutors").get(verifyJWT, verifyAdmin, getTutors);
+
+router.route("/get-tutor/:userId").get(verifyJWT, verifyAdmin, getTutor);
+
+router.route("/remove-tutor/:userId").delete(verifyJWT, verifyAdmin, removeTutor);
+
+router.route("/get-subjects").get(verifyJWT, verifyAdmin, getSubjects);
+
 router.route("/add-subject").post(verifyJWT, verifyAdmin, addSubject);
+
+router.route("/remove-subject/:subjectId").delete(verifyJWT, verifyAdmin, removeSubject);   
 
 export default router;

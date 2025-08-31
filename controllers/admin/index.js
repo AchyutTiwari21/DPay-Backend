@@ -4,12 +4,22 @@ import {
 } from "./teacherRequests.controller.js";
 import { 
     addTutor,
-    addSubject 
+    getTutors,
+    getTutor,
+    removeTutor,
+    addSubject,
+    getSubjects,
+    removeSubject
 } from "./addTutor.controller.js";
 
 export {
     getAllTeacherRequests,
     updateTeacherRequest,
     addTutor,
-    addSubject
+    getTutors,
+    getTutor,
+    removeTutor,
+    addSubject,
+    getSubjects,
+    removeSubject
 };

@@ -51,6 +51,8 @@ export const updateTeacherRequest = asyncHandler(async (req, res) => {
             `);
         }
 
+        await ApplyTeacherRequest.findByIdAndDelete(id);
+
         return res.status(200).json(
             new ApiResponse(true, null, "Teacher request updated successfully")
         );
