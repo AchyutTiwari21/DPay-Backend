@@ -60,7 +60,12 @@ export const getTutors = asyncHandler(async (req, res) => {
         const regex = new RegExp(search, "i"); // partial + case-insensitive
 
         // 1️⃣ Find subject IDs that match search
-        const subjectIds = await Subject.find({ name: regex }).distinct("_id");
+        const subjectIds = await Subject.find({
+            $or: [
+                { name: { $regex: search, $options: "i" } },
+                { category: { $regex: search, $options: "i" } }
+            ]
+        }).distinct("_id");
 
         // 2️⃣ Build OR conditions
         query.$or = [

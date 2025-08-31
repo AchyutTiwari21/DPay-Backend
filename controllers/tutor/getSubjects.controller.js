@@ -2,9 +2,20 @@ import { Subject } from "../../models/index.js";
 import { asyncHandler, ApiResponse } from "../../utils/index.js";
 
 export const getSubjects = asyncHandler(async (req, res) => {
-    const { cursor, direction = "forward", limit = 20 } = req.query;
+    const { cursor, direction = "forward", limit = 20, search } = req.query;
     let query = {};
     let sort = { _id: 1 }; // default ascending (forward)
+
+    // 🔹 Handle search
+    if (search) {
+        const regex = new RegExp(search, "i"); // partial + case-insensitive
+
+        // 2️⃣ Build OR conditions
+        query.$or = [
+            { name: regex },
+            { category: regex }
+        ];
+    }
 
     // If cursor exists, modify query based on direction
     if (cursor) {
