@@ -2,6 +2,16 @@ import { TutorProfile, User, Subject } from "../../models/index.js";
 import { ApiResponse, asyncHandler } from "../../utils/index.js";
 import { mailSender } from "../../utils/mailSender.js";
 
+async function getUserIdsByName(regex) {
+    const users = await User.find({ name: regex }).distinct("_id");
+    return users.length > 0 ? { $in: users } : null;
+}
+
+async function getUserIdsByEmail(regex) {
+    const users = await User.find({ email: regex }).distinct("_id");
+    return users.length > 0 ? { $in: users } : null;
+}
+
 export const addTutor = asyncHandler(async (req, res) => {
     const { email } = req.body;
 
@@ -41,33 +51,50 @@ export const addTutor = asyncHandler(async (req, res) => {
 });
 
 export const getTutors = asyncHandler(async (req, res) => {
-    const { cursor, direction = "forward", limit = 5 } = req.query;
+    const { cursor, direction = "forward", limit = 10, search } = req.query;
     let query = {};
     let sort = { _id: 1 }; // default ascending (forward)
 
-    // If cursor exists, modify query based on direction
+    // 🔹 Handle search
+    if (search) {
+        const regex = new RegExp(search, "i"); // partial + case-insensitive
+
+        // 1️⃣ Find subject IDs that match search
+        const subjectIds = await Subject.find({ name: regex }).distinct("_id");
+
+        // 2️⃣ Build OR conditions
+        query.$or = [
+            { user: await getUserIdsByName(regex) }, // tutor's name
+            { user: await getUserIdsByEmail(regex) }, // tutor's email
+            { subjects: { $in: subjectIds } }, // subjects linked
+            { title: regex },             // tutor's title
+            { skills: regex },            // tutor's skills
+            { languages: regex },         // tutor's languages
+        ];
+    }
+
+    // 🔹 Pagination handling
     if (cursor) {
         if (direction === "forward") {
-            query._id = { $gt: cursor };
-            sort = { _id: 1 }; 
+            query._id = { ...query._id, $gt: new mongoose.Types.ObjectId(cursor) };
+            sort = { _id: 1 };
         } else if (direction === "backward") {
-            query._id = { $lt: cursor };
-            sort = { _id: -1 }; // fetch in reverse
+            query._id = { ...query._id, $lt: new mongoose.Types.ObjectId(cursor) };
+            sort = { _id: -1 };
         }
     }
 
     try {
         let tutors = await TutorProfile.find(query)
             .populate("user", "name email")
+            .populate("subjects", "name") // include subject names
             .sort(sort)
             .limit(Number(limit));
 
-        // If backward, reverse results to maintain ascending order for UI
         if (direction === "backward") {
             tutors = tutors.reverse();
         }
 
-        // Cursors
         const nextCursor = tutors.length > 0 ? tutors[tutors.length - 1]._id : null;
         const prevCursor = tutors.length > 0 ? tutors[0]._id : null;
 
