@@ -22,8 +22,8 @@ const tutorProfileSchema = new Schema({
     type: String
   },
   lessonsCount: { 
-    type: Number, 
-    default: 0 
+    type: String, 
+    default: "0" 
   },
   skills: [{ 
     type: String 
@@ -39,16 +39,20 @@ const tutorProfileSchema = new Schema({
     ref: "Subject"
   }],
   pricePerHour: { 
-    type: Number
+    type: String
   },
   rating: { 
-    type: Number, 
-    default: 5 
+    type: String, 
+    default: "5"
   },
   verified: {
     type: Boolean,
     default: true
-  }
+  },
+  availability: [{
+    type: Schema.Types.ObjectId,
+    ref: "Availability"
+  }]
 }, {timestamps: true});
 
 const TutorProfile = mongoose.model("TutorProfile", tutorProfileSchema);

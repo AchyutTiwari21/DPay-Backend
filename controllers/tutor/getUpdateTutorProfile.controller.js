@@ -1,11 +1,11 @@
-import { TutorProfile, Subject } from "../../models/index.js";
+import { TutorProfile } from "../../models/index.js";
 import { ApiResponse, asyncHandler } from "../../utils/index.js";
 
 export const getTutorProfile = asyncHandler(async (req, res) => {
     const user = req.user;
 
     try {
-        const profile = await TutorProfile.findOne({ user: user._id }).populate("user", "name email").populate("subjects", "name category");
+        const profile = await TutorProfile.findOne({ user: user._id }).populate("user", "name email").populate("subjects", "name category").populate("availability");
 
         if (!profile) {
             return res.status(404).json(new ApiResponse(false, null, "Tutor profile not found"));
