@@ -127,13 +127,26 @@ const applyTeachSchema = z.object({
 const tutorQuerySchema = z.object({
   cursor: z.string().optional(),
   direction: z.enum(["forward", "backward"]).default("forward"),
-  limit: z.string().regex(/^\d+$/).transform(Number).default(5).refine(val => val > 0 && val <= 20, {
-      message: "Limit must be between 1 and 20"
-  }),
+  limit: z
+    .string()
+    .regex(/^\d+$/)
+    .transform(Number)
+    .default("7") // match your default
+    .refine(val => val > 0 && val <= 20, {
+      message: "Limit must be between 1 and 20",
+    }),
   search: z.string().optional(),
   language: z.string().optional(),
-  priceMin: z.string().regex(/^\d+$/).transform(Number).default("0"),
-  priceMax: z.string().regex(/^\d+$/).transform(Number).default("9999")
+  minPrice: z
+    .string()
+    .regex(/^\d+$/)
+    .transform(Number)
+    .default("0"),
+  maxPrice: z
+    .string()
+    .regex(/^\d+$/)
+    .transform(Number)
+    .default("9999"),
 });
 
 export {

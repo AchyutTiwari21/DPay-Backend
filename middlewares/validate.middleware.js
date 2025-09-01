@@ -46,8 +46,8 @@ export const validateQuery = (schema) => (req, res, next) => {
     );
   }
 
-  // Overwrite req.query with parsed & transformed values
-  req.query = result.data;
+  // ✅ Safely overwrite keys instead of replacing the object
+  Object.assign(req.query, result.data);
 
   next();
 };

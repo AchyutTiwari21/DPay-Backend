@@ -14,6 +14,6 @@ const router = Router();
 
 router.route("/apply-teach").post(validateSchema(applyTeachSchema), verifyJWT, applyTeach);
 
-router.route("/get-teachers").get(validateSchema(z.void()), validateQuery(tutorQuerySchema), getTutors);
+router.route("/get-tutors").get(validateSchema(z.void()), validateQuery(tutorQuerySchema), getTutors);
 
 export default router;
