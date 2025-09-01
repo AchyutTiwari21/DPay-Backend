@@ -10,7 +10,10 @@ const tutorProfileSchema = new Schema({
   about: { 
     type: String 
   },
-  modeOfClass: {
+  qualifications: [{
+    type: String
+  }],
+  mode: {
     type: String,
     enum: ["online", "offline", "hybrid"],
     default: "offline"
@@ -18,7 +21,7 @@ const tutorProfileSchema = new Schema({
   experience: {
     type: String
   },
-  totalClasses: { 
+  lessonsCount: { 
     type: Number, 
     default: 0 
   },
@@ -35,13 +38,17 @@ const tutorProfileSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "Subject"
   }],
-  hourlyRate: { 
+  pricePerHour: { 
     type: Number
   },
-  ratingAvg: { 
+  rating: { 
     type: Number, 
     default: 5 
   },
+  verified: {
+    type: Boolean,
+    default: true
+  }
 }, {timestamps: true});
 
 const TutorProfile = mongoose.model("TutorProfile", tutorProfileSchema);

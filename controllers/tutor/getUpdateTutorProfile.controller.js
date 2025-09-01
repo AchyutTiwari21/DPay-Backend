@@ -21,14 +21,12 @@ export const getTutorProfile = asyncHandler(async (req, res) => {
 export const updateTutorProfile = asyncHandler(async (req, res) => {
     const user = req.user;
 
-    const { about, modeOfClass, experience, skills, languages, title, subjects, hourlyRate } = req.body;
+    const { about, mode, qualifications, experience, lessonsCount, skills, languages, title, subjects, pricePerHour } = req.body;
 
     try {
-        const subjectIds = await Subject.find({ name: { $in: subjects } }).distinct("_id");
-
         const updatedProfile = await TutorProfile.findOneAndUpdate(
             { user: user._id },
-            { about, modeOfClass, experience, skills, languages, title, subjects: subjectIds, hourlyRate },
+            { about, mode, qualifications, experience, lessonsCount, skills, languages, title, subjects, pricePerHour },
             { new: true }
         );
 
