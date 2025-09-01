@@ -124,6 +124,18 @@ const applyTeachSchema = z.object({
     resume: z.string().min(5).max(500)
 }).strict();
 
+const tutorQuerySchema = z.object({
+  cursor: z.string().optional(),
+  direction: z.enum(["forward", "backward"]).default("forward"),
+  limit: z.string().regex(/^\d+$/).transform(Number).default(5).refine(val => val > 0 && val <= 20, {
+      message: "Limit must be between 1 and 20"
+  }),
+  search: z.string().optional(),
+  language: z.string().optional(),
+  priceMin: z.string().regex(/^\d+$/).transform(Number).default("0"),
+  priceMax: z.string().regex(/^\d+$/).transform(Number).default("9999")
+});
+
 export {
     signupSchema,
     signinSchema,
@@ -133,5 +145,6 @@ export {
     refreshTokenSchema,
     signoutSchema,
     getUserDataSchema,
-    applyTeachSchema
+    applyTeachSchema,
+    tutorQuerySchema
 }

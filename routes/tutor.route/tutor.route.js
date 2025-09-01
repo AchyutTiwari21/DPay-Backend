@@ -12,9 +12,10 @@ import {
     tutorSchema,
     addAvailabilitySchema,
     updateAvailabilitySchema,
-    deleteAvailabilitySchema
+    deleteAvailabilitySchema,
+    getSubjectsQuerySchema
 } from "../../zod/tutorSchema.js";
-import { verifyJWT, verifyTutor, validateSchema } from "../../middlewares/index.js";
+import { verifyJWT, verifyTutor, validateSchema, validateQuery } from "../../middlewares/index.js";
 
 const router = Router();
 
@@ -22,7 +23,7 @@ router.route("/update-profile").put(verifyJWT, verifyTutor, validateSchema(tutor
 
 router.route("/profile").get(verifyJWT, verifyTutor, validateSchema(z.void()), getTutorProfile);
 
-router.route("/subjects").get(verifyJWT, verifyTutor, validateSchema(z.void()), getSubjects);
+router.route("/subjects").get(verifyJWT, verifyTutor, validateQuery(getSubjectsQuerySchema), validateSchema(z.void()), getSubjects);
 
 router.route("/add-availability").post(verifyJWT, verifyTutor, validateSchema(addAvailabilitySchema), addAvailability);
 

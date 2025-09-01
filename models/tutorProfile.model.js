@@ -22,8 +22,8 @@ const tutorProfileSchema = new Schema({
     type: String
   },
   lessonsCount: { 
-    type: String, 
-    default: "0" 
+    type: Number, 
+    default: 0 
   },
   skills: [{ 
     type: String 
@@ -39,11 +39,14 @@ const tutorProfileSchema = new Schema({
     ref: "Subject"
   }],
   pricePerHour: { 
-    type: String
+    type: Number,
+    min: 1
   },
   rating: { 
-    type: String, 
-    default: "5"
+    type: Number, 
+    default: 5,
+    min: 1,
+    max: 5
   },
   verified: {
     type: Boolean,

@@ -5,12 +5,12 @@ const tutorSchema = z.object({
     mode: z.enum(["online", "offline", "hybrid"]).nullish(),
     qualifications: z.array(z.string().min(1).max(50)).min(1).max(20).nullish(),
     experience: z.string().min(0).max(30).nullish(),
-    lessonsCount: z.string().min(0).max(20).nullish(),
+    lessonsCount: z.number().min(0).max(100000).nullish(),
     skills: z.array(z.string().min(1).max(50)).min(1).max(20).nullish(),
     languages: z.array(z.string().min(1).max(50)).min(1).max(5).nullish(),
     title: z.string().min(2).max(100).nullish(),
     subjects: z.array(z.string().min(2).max(50)).min(1).max(10).nullish(),
-    pricePerHour: z.string().min(0).max(100).nullish(),
+    pricePerHour: z.number().min(0).max(10000).nullish(),
 }).strict();
 
 const addAvailabilitySchema = z.object({
@@ -28,9 +28,24 @@ const deleteAvailabilitySchema = z.object({
     availabilityId: z.string().min(24).max(24)
 });
 
+const getSubjectsQuerySchema = z.object({
+  cursor: z.string().optional(),
+  direction: z.enum(["forward", "backward"]).default("forward"),
+  limit: z
+    .string()
+    .regex(/^\d+$/) // only digits allowed
+    .transform(Number)
+    .default("20")
+    .refine(val => val > 0 && val <= 100, {
+       message: "Limit must be between 1 and 100"
+    }),
+  search: z.string().optional()
+});
+
 export {
     tutorSchema,
     addAvailabilitySchema,
     updateAvailabilitySchema,
-    deleteAvailabilitySchema
+    deleteAvailabilitySchema,
+    getSubjectsQuerySchema
 };
