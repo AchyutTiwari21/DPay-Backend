@@ -12,11 +12,11 @@ const lessonSchema = new Schema({
     ref: "TutorProfile", 
     required: true 
   },
-  subject: { 
+  subject: [{ 
     type: Schema.Types.ObjectId, 
     ref: "Subject", 
     required: true 
-  },
+  }],
   date: { 
     type: Date, 
     required: true 
@@ -40,12 +40,13 @@ const lessonSchema = new Schema({
   },
   payment: { 
     type: Schema.Types.ObjectId, 
-    ref: "Payment" 
+    ref: "Payment",
+    required: true 
   },
-  review: { 
+  review: [{ 
     type: Schema.Types.ObjectId, 
     ref: "Review" 
-  },
+  }],
 }, {timestamps: true});
 
 const Lesson = mongoose.model("Lesson", lessonSchema);

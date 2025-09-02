@@ -7,12 +7,14 @@ const studentProfileSchema = new Schema({
     ref: "User", 
     required: true 
   },
-  goals: { 
-    type: String 
-  },
-  preferredSubjects: [{ 
-    type: String 
+  lessons: [{
+    type: Schema.Types.ObjectId,
+    ref: "Lesson"
   }],
+  review: [{
+    type: Schema.Types.ObjectId,
+    ref: "Review"
+  }]
 }, {timestamps: true});
 
 const StudentProfile = mongoose.model("StudentProfile", studentProfileSchema);

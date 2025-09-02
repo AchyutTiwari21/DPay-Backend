@@ -26,10 +26,6 @@ const reviewSchema = new Schema({
   comment: { 
     type: String 
   },
-  createdAt: { 
-    type: Date, 
-    default: Date.now 
-  },
 }, {timestamps: true});
 
 const Review = mongoose.model("Review", reviewSchema);
