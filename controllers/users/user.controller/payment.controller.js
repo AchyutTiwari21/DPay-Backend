@@ -1,6 +1,7 @@
 import { asyncHandler, ApiResponse } from "../../../utils/index.js";
 import { TutorProfile, Payment } from "../../../models/index.js";
 import Razorpay from "razorpay";
+import crypto from "crypto";
 import { sessionAmount } from "../../../constants.js";
 
 const razorpay = new Razorpay({
@@ -45,27 +46,40 @@ export const createOrder = asyncHandler(async (req, res) => {
   }
 });
 
-export const markPaymentFailed = asyncHandler(async (req, res) => {
-  const { orderId, paymentId, } = req.body;
-
+export const verifyOrder = asyncHandler(async (req, res) => {
   try {
-    // Find and update the payment record
-    const payment = await Payment.findOneAndUpdate(
-      { razorpay_order_id: orderId },
-      {
-        status: "FAILED",
-        razorpay_payment_id: paymentId
-      },
-      { new: true }
-    );
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+    const key_secret = process.env.RAZORPAY_KEY_SECRET;
   
-    if (!payment) {
-      return res.status(404).json(new ApiResponse(404, null, "Payment record not found"));
+    const hmac = crypto.createHmac("sha256", key_secret);
+    hmac.update(razorpay_order_id + "|" + razorpay_payment_id);
+    const generated_signature = hmac.digest("hex");
+  
+    if (generated_signature === razorpay_signature) {
+      return res.status(200).json(
+        new ApiResponse(
+          200,
+          null,
+          "Payment verification successful"
+        )
+      );
+    } else {
+      return res.status(400).json(
+        new ApiResponse(
+          400, 
+          null, 
+          "Payment verification failed"
+        )
+      );
     }
-  
-    return res.status(200).json(new ApiResponse(200, payment, "Payment marked as FAILED"));
   } catch (error) {
-    console.error("Error marking payment as failed: ", error);
-    res.status(500).json(new ApiResponse(500, null, "Internal Server Error"));
+    console.log("Error: ", error.message);  
+    return res.status(500).json(
+      new ApiResponse(
+        500,
+        null,
+        "Internal server error"
+      )
+    );
   }
 });

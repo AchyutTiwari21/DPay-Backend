@@ -153,20 +153,6 @@ const createOrderSchema = z.object({
     tutorId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid MongoDB ObjectId"),
 });
 
-const paymentFailSchema = z.object({
-    orderId: z
-    .string()
-    .min(10, "Order ID is required")
-    .max(40, "Order ID too long")
-    .regex(/^order_/, "Invalid order ID format"),
-
-    paymentId: z
-    .string()
-    .min(10, "Payment ID is required")
-    .max(40, "Payment ID too long")
-    .regex(/^pay_/, "Invalid payment ID format"),
-});
-
 const verifyOrderSchema = z.object({
   razorpay_order_id: z
     .string()
@@ -198,6 +184,5 @@ export {
     applyTeachSchema,
     tutorQuerySchema,
     createOrderSchema,
-    paymentFailSchema,
     verifyOrderSchema
 }

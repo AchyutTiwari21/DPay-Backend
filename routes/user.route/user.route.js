@@ -4,13 +4,13 @@ import {
     applyTeach,
     getTutors,
     createOrder,
-    markPaymentFailed
+    verifyOrder
 } from "../../controllers/users/user.controller/index.js";
 import { 
     applyTeachSchema,
     tutorQuerySchema,
     createOrderSchema,
-    paymentFailSchema
+    verifyOrderSchema
 } from "../../zod/userSchema.js";
 import { verifyJWT, validateSchema, validateQuery } from "../../middlewares/index.js";
 
@@ -22,6 +22,6 @@ router.route("/get-tutors").get(validateSchema(z.void()), validateQuery(tutorQue
 
 router.route("/create-order").post(validateSchema(createOrderSchema), verifyJWT, createOrder);
 
-router.route("/payment/failed").post(validateSchema(paymentFailSchema), verifyJWT, markPaymentFailed);
+router.route("/verify-order").post(validateSchema(verifyOrderSchema), verifyJWT, verifyOrder);
 
 export default router;
