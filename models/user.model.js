@@ -12,6 +12,11 @@ const userSchema = new mongoose.Schema({
     required: true, 
     unique: true 
   },
+  phone: {
+    type: String,
+    required: true,
+    unique: true
+  },
   password: { 
     type: String,
   },
@@ -29,7 +34,7 @@ const userSchema = new mongoose.Schema({
   },
   authType: {
     type: String,
-    enum: ["LOCAL", "GOOGLE", "FACEBOOK", "APPLE"],
+    enum: ["LOCAL", "GOOGLE"],
     default: "LOCAL",
     required: true
   },

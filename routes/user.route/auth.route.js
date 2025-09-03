@@ -21,12 +21,22 @@ import {
     changePasswordSchema,
     getUserDataSchema,
 } from "../../zod/userSchema.js";
+import rateLimit from "express-rate-limit";
+
+const registerLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 3, // limit each IP to 3 requests
+  message: {
+    status: 429,
+    message: "Too many registration attempts. Please try again after 5 minutes."
+  },
+});
 
 const router = Router();
 
 router.route("/send-otp").post(validateSchema(otpSchema), sendOTP);
 
-router.route("/signup").post(validateSchema(signupSchema), registerUser);
+router.route("/signup").post(registerLimiter, validateSchema(signupSchema), registerUser);
 
 router.route("/login").post(validateSchema(signinSchema), loginUser);
 
@@ -36,7 +46,7 @@ router.route("/refresh-accessToken").post(validateSchema(refreshTokenSchema), re
 
 router.route("/send-refresh-otp").post(validateSchema(otpSchema), sendRefreshOTP);
 
-router.route("/check-otp").post(validateSchema(checkOTPSchema), checkOTP);
+router.route("/check-otp").post(registerLimiter, validateSchema(checkOTPSchema), checkOTP);
 
 router.route("/change-password").put(validateSchema(changePasswordSchema), verifyJWT, changePassword);
 
