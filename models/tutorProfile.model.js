@@ -55,6 +55,10 @@ const tutorProfileSchema = new Schema({
   availability: [{
     type: Schema.Types.ObjectId,
     ref: "Availability"
+  }],
+  reviews: [{
+    type: Schema.Types.ObjectId,
+    ref: "Review"
   }]
 }, {timestamps: true});
 

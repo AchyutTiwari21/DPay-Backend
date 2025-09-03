@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 const lessonSchema = new Schema({
   student: { 
     type: Schema.Types.ObjectId, 
-    ref: "StudentProfile", 
+    ref: "User", 
     required: true 
   },
   tutor: { 
@@ -21,32 +21,23 @@ const lessonSchema = new Schema({
     type: Date, 
     required: true 
   },
-  startTime: { 
-    type: String, 
-    required: true 
-  },
-  endTime: { 
+  time: { 
     type: String, 
     required: true 
   },
   status: {
     type: String,
-    enum: ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"],
+    enum: ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED", "EXPIRED"],
     default: "PENDING",
   },
-  price: { 
+  pricePerHour: { 
     type: Number, 
     required: true 
   },
   payment: { 
     type: Schema.Types.ObjectId, 
-    ref: "Payment",
-    required: true 
+    ref: "Payment"
   },
-  review: [{ 
-    type: Schema.Types.ObjectId, 
-    ref: "Review" 
-  }],
 }, {timestamps: true});
 
 const Lesson = mongoose.model("Lesson", lessonSchema);

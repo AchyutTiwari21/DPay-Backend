@@ -1,5 +1,5 @@
 import { asyncHandler, ApiResponse } from "../../../utils/index.js";
-import { TutorProfile, Payment } from "../../../models/index.js";
+import { Lesson, TutorProfile, Payment } from "../../../models/index.js";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 import { sessionAmount } from "../../../constants.js";
@@ -10,13 +10,26 @@ const razorpay = new Razorpay({
 });
 
 export const createOrder = asyncHandler(async (req, res) => {
-  const { tutorId } = req.body;
+  const { tutorId, subjectIds, date, time } = req.body;
 
   try {
     const tutor = await TutorProfile.findById(tutorId);
     if (!tutor) {
       return res.status(404).json(new ApiResponse(404, null, "Tutor not found"));
     } 
+
+    const lesson = await Lesson.create({
+      student: req.user._id,
+      tutor: tutor._id,
+      subject: subjectIds,
+      date,
+      time,
+      status: "PENDING",
+      pricePerHour: tutor.pricePerHour,
+    });
+    if(!lesson) {
+      return res.status(500).json(new ApiResponse(500, null, "Failed to create lesson"));
+    }
 
     const options = {
       amount: sessionAmount * 100, // Convert to paise
@@ -29,7 +42,8 @@ export const createOrder = asyncHandler(async (req, res) => {
     console.log("Order created: ", order);
 
     await Payment.create({
-      student: req.user.id,
+      lesson: lesson._id,
+      student: req.user._id,
       tutor: tutor._id,
       razorpay_order_id: order.id,
       amount: sessionAmount,
@@ -38,7 +52,7 @@ export const createOrder = asyncHandler(async (req, res) => {
       status: "PENDING",
     });
 
-    return res.status(200).json(new ApiResponse(200, { orderId: order.id}, "Order created successfully"));
+    return res.status(200).json(new ApiResponse(200, { orderId: order.id }, "Order created successfully"));
 
   } catch (error) {
     console.error("Payment Error: ", error);
@@ -60,7 +74,7 @@ export const verifyOrder = asyncHandler(async (req, res) => {
         new ApiResponse(
           200,
           null,
-          "Payment verification successful"
+          "Payment successful"
         )
       );
     } else {
@@ -68,7 +82,7 @@ export const verifyOrder = asyncHandler(async (req, res) => {
         new ApiResponse(
           400, 
           null, 
-          "Payment verification failed"
+          "Payment failed"
         )
       );
     }

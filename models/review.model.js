@@ -2,11 +2,6 @@ import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const reviewSchema = new Schema({
-  lesson: { 
-    type: Schema.Types.ObjectId, 
-    ref: "Lesson", 
-    required: true 
-  },
   student: { 
     type: Schema.Types.ObjectId, 
     ref: "StudentProfile", 
