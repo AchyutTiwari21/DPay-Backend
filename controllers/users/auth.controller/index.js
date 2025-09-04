@@ -4,6 +4,7 @@ import { loginUser, logoutUser } from "./loginUser.controller.js";
 import { refreshAccessToken } from "./refreshAccessToken.controller.js";
 import { changePassword } from "./changePassword.controller.js";
 import { getCurrentUser } from "./getCurrentUser.controller.js";
+import { googleCallback } from "./googleCallback.controller.js";
 
 export {
     sendOTP,
@@ -15,4 +16,5 @@ export {
     refreshAccessToken,
     changePassword,
     getCurrentUser,
+    googleCallback
 }

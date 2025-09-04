@@ -1,4 +1,5 @@
 import { Router } from "express";
+import "../../utils/passport.js";
 import { 
     sendOTP,
     sendRefreshOTP,
@@ -8,7 +9,8 @@ import {
     logoutUser,
     refreshAccessToken,
     changePassword,
-    getCurrentUser
+    getCurrentUser,
+    googleCallback
 } from "../../controllers/users/auth.controller/index.js";
 import { verifyJWT, validateSchema } from "../../middlewares/index.js";
 import { 
@@ -22,6 +24,8 @@ import {
     getUserDataSchema,
 } from "../../zod/userSchema.js";
 import rateLimit from "express-rate-limit";
+import passport from "passport";
+import { frontendUrl } from "../../constants.js";
 
 const registerLimiter = rateLimit({
   windowMs: 5 * 60 * 1000, // 5 minutes
@@ -51,5 +55,16 @@ router.route("/check-otp").post(registerLimiter, validateSchema(checkOTPSchema),
 router.route("/change-password").put(validateSchema(changePasswordSchema), verifyJWT, changePassword);
 
 router.route("/me").get(validateSchema(getUserDataSchema), verifyJWT, getCurrentUser);
+
+router.route("/google-oauth").get(passport.authenticate("google", { scope: ["email", "profile"] }));
+
+router.get(
+  "/googleCallback",
+  passport.authenticate("google", { 
+    failureRedirect: `${frontendUrl}/login?error=oauth_failed`, 
+    session: false 
+  }),
+  googleCallback
+);
 
 export default router;

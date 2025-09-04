@@ -149,7 +149,10 @@ export const checkOTP = asyncHandler(async (req, res) => {
 
     return res
     .status(200)
-    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("accessToken", accessToken, { 
+      ...cookieOptions, 
+      maxAge: 15 * 60 * 1000 // 15 minutes
+    })
     .json(
       new ApiResponse(
         200,
