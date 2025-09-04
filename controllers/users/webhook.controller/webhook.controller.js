@@ -4,24 +4,24 @@ import { Lesson, Payment, StudentProfile } from "../../../models/index.js";
 
 export const webhookHandler = asyncHandler(async (req, res) => {
   try {
-    res.json({ status: "ok" });
     const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
 
-    // Verify signature
+    // Verify signature first
     const shasum = crypto.createHmac("sha256", secret);
     shasum.update(JSON.stringify(req.body));
     const digest = shasum.digest("hex");
 
     const razorpaySignature = req.headers["x-razorpay-signature"];
-
     if (digest !== razorpaySignature) {
-      console.log("Request Invalid!");
-      return;
+      console.log("❌ Invalid signature");
+      return res.status(400).json({ status: "failure", message: "Invalid signature" });
     }
 
-    const event = req.body.event;
+    // ✅ Immediately acknowledge webhook
+    res.json({ status: "ok" });
 
-    console.log("Webhook body: ", req.body);
+    // Continue processing in background (don’t block response)
+    const event = req.body.event;
 
     if (event === "payment.captured") {
       const payment = req.body.payload.payment.entity;
@@ -33,43 +33,35 @@ export const webhookHandler = asyncHandler(async (req, res) => {
           status: "PAID",
           paidAt: new Date(),
           method: payment.method,
-        }
+        },
+        { new: true }
       );
 
-      if(!paymentData) {
-        console.log("Payment not found");
+      if (!paymentData) {
+        console.error("⚠️ Payment record not found for order:", payment.order_id);
         return;
       }
 
-      await Lesson.findByIdAndUpdate(
-        paymentData.lesson,
-        { 
-          $set: { 
-            status: "CONFIRMED",
-            payment: paymentData._id
-          } 
-        }  
-      );
+      await Lesson.findByIdAndUpdate(paymentData.lesson, {
+        $set: { status: "CONFIRMED", payment: paymentData._id }
+      });
 
       const studentProfile = await StudentProfile.findOne({ user: paymentData.student });
 
-      if(studentProfile) {
+      if (studentProfile) {
         studentProfile.lessons.push(paymentData.lesson);
         await studentProfile.save({ validateBeforeSave: false });
       } else {
-        const newStudentProfile = new StudentProfile({
+        await StudentProfile.create({
           user: paymentData.student,
           lessons: [paymentData.lesson]
         });
-        await newStudentProfile.save({ validateBeforeSave: false });
-      }  
+      }
 
-      console.log("Payment successful:", paymentData.id);
-      return;
+      console.log("✅ Payment successful:", paymentData.razorpay_payment_id);
+    }
 
-    } 
-    
-    else if(event === "payment.failed") {
+    else if (event === "payment.failed") {
       const payment = req.body.payload.payment.entity;
 
       await Payment.findOneAndUpdate(
@@ -83,8 +75,9 @@ export const webhookHandler = asyncHandler(async (req, res) => {
 
       console.log("❌ Payment failed:", payment.id);
     }
+
   } catch (err) {
     console.error("Webhook Error:", err.message);
-    res.status(500).json({ status: "error", message: err.message });
+    // Don’t send a second res.json here since we already acknowledged
   }
 });
