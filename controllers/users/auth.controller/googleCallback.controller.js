@@ -3,7 +3,7 @@ import { cookieOptions, frontendUrl } from "../../../constants.js";
 
 export const googleCallback  = asyncHandler(async (req, res) => {
     if (!req.user) {
-      return res.redirect(`${frontendUrl}/login?error=oauth_failed`);
+      return res.redirect(`${frontendUrl}`);
     }
 
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(req.user.id);

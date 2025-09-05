@@ -61,7 +61,7 @@ router.route("/google-oauth").get(passport.authenticate("google", { scope: ["ema
 router.get(
   "/googleCallback",
   passport.authenticate("google", { 
-    failureRedirect: `${frontendUrl}/login?error=oauth_failed`, 
+    failureRedirect: `${frontendUrl}`, 
     session: false 
   }),
   googleCallback
