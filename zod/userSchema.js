@@ -8,7 +8,6 @@ const signupSchema = z.object({
     name: z.string().min(1).max(50).nullish(),
     email: z.string().min(5).max(50).email(),
     password: z.string().min(5).max(50),
-    role: z.enum(["STUDENT", "TUTOR"]).nullish(),
     otp: z.string().min(6).max(6)
 }).superRefine(({password}, checkPassComplexity) => {
     const containsUpperCase = (ch) => /[A-Z]/.test(ch);

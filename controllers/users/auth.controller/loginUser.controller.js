@@ -34,14 +34,15 @@ export const loginUser = asyncHandler( (async (req, res) => {
                 new ApiResponse(
                     401,
                     null,
-                    "Email or Password is incorrect"
+                    "Email or Password is Incorrect",
+                    "Email or Password is Incorrect"
                 )
             );
         }
 
         const {accessToken, refreshToken} = await generateAccessAndRefreshTokens(user._id);
 
-        const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
+        const loggedInUser = await User.findById(user._id).select("-password -refreshToken -googleId -__v -createdAt -updatedAt");
     
         return res
         .status(200)
@@ -68,6 +69,7 @@ export const loginUser = asyncHandler( (async (req, res) => {
             new ApiResponse(
                 500,
                 null,
+                "Internal Server Error",
                 "Internal Server Error"
             )
         );
@@ -75,21 +77,32 @@ export const loginUser = asyncHandler( (async (req, res) => {
 }));
 
 export const logoutUser = asyncHandler(async(req, res) => {
-    await User.findByIdAndUpdate(
-        req.user._id,
-        {
-            $unset: {
-                refreshToken: 1 // this removes the field from documnent
+    try {
+        await User.findByIdAndUpdate(
+            req.user._id,
+            {
+                $unset: {
+                    refreshToken: 1 // this removes the field from documnent
+                }
+            },
+            {
+                new: true
             }
-        },
-        {
-            new: true
-        }
-    );
-
-    return res
-    .status(200)
-    .clearCookie("accessToken", cookieOptions)
-    .clearCookie("refreshToken", cookieOptions)
-    .json(new ApiResponse(200, null, "User logged Out"));
+        );
+    
+        return res
+        .status(200)
+        .clearCookie("accessToken", cookieOptions)
+        .clearCookie("refreshToken", cookieOptions)
+        .json(new ApiResponse(200, null, "User logged Out"));
+    } catch (error) {
+        console.error("Error logging out user:", error.message);
+        return res.status(500).json(
+            new ApiResponse(
+                500,
+                null,
+                "Internal Server Error"
+            )
+        );
+    }
 });

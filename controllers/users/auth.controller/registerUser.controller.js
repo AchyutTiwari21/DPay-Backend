@@ -2,12 +2,9 @@ import { User, OTP } from "../../../models/index.js";
 import { asyncHandler, ApiResponse } from "../../../utils/index.js";
 
 export const registerUser = asyncHandler(async (req, res) => {
-    console.log('Request reached! ', req.body);
-
     const { name, email, password, otp }  = req.body;
 
     try {
-
       // Check if user already exists
       const existingUser = await User.findOne({
           email
@@ -17,7 +14,7 @@ export const registerUser = asyncHandler(async (req, res) => {
           new ApiResponse(
             400,
             null,
-            'User already exists'
+            'User already exists with this email.'
           )
         );
       }

@@ -18,7 +18,7 @@ export const sendOTP = asyncHandler(async (req, res) => {
         new ApiResponse(
           401,
           null,
-          'User is already registered'
+          'User is already registered with this email.'
         )
       );
     }
