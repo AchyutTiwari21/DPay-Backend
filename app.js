@@ -22,6 +22,10 @@ app.use(express.urlencoded({extended: true, limit: "1mb"}));
 app.use(express.static("public"));
 app.use(cookieParser());
 
+app.get('/keep-alive', (req, res) => {
+  return res.status(200).send('OK');
+});
+
 import authRouter from "./routes/user.route/auth.route.js"
 import userRouter from "./routes/user.route/user.route.js";
 import adminRouter from "./routes/admin.route/admin.route.js";
