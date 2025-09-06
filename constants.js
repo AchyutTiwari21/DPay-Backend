@@ -8,6 +8,6 @@ export const cookieOptions = {
 
 export let sessionAmount = 2000;
 
-export const googleOAuthRedirectUrl = "http://localhost:8000/api/auth/googleCallback";
+export const googleOAuthRedirectUrl = `${process.env.BACKEND_URL}/api/auth/googleCallback`;
 
-export const frontendUrl = "http://localhost:5173";
+export const frontendUrl = process.env.CORS_ORIGIN;
