@@ -22,6 +22,6 @@ router.route("/get-tutors").get(validateSchema(z.void()), validateQuery(tutorQue
 
 router.route("/create-order").post(validateSchema(createOrderSchema), verifyJWT, createOrder);
 
-router.route("/verify-order").post(validateSchema(verifyOrderSchema), verifyJWT, verifyOrder);
+router.route("/verify-payment").post(validateSchema(verifyOrderSchema), verifyJWT, verifyOrder);
 
 export default router;

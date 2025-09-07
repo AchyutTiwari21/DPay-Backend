@@ -37,8 +37,6 @@ export const createOrder = asyncHandler(async (req, res) => {
 
     const order = await razorpay.orders.create(options);
 
-    console.log("Order created: ", order);
-
     await Payment.create({
       lesson: lesson._id,
       student: req.user._id,
