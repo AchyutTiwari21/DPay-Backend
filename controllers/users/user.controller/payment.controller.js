@@ -10,7 +10,7 @@ const razorpay = new Razorpay({
 });
 
 export const createOrder = asyncHandler(async (req, res) => {
-  const { tutorId, subjectIds, date, time } = req.body;
+  const { tutorId, date, time } = req.body;
 
   try {
     const tutor = await TutorProfile.findById(tutorId);
@@ -21,11 +21,9 @@ export const createOrder = asyncHandler(async (req, res) => {
     const lesson = await Lesson.create({
       student: req.user._id,
       tutor: tutor._id,
-      subject: subjectIds,
-      date,
-      time,
+      date: new Date(date),
+      time: time,
       status: "PENDING",
-      pricePerHour: tutor.pricePerHour,
     });
     if(!lesson) {
       return res.status(500).json(new ApiResponse(500, null, "Failed to create lesson"));

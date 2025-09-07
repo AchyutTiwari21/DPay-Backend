@@ -10,13 +10,13 @@ const tutorProfileSchema = new Schema({
   about: { 
     type: String 
   },
-  qualifications: [{
+  qualifications: {
     type: String
-  }],
+  },
   mode: {
     type: String,
-    enum: ["online", "offline", "hybrid"],
-    default: "offline"
+    enum: ["Online", "Offline", "Hybrid"],
+    default: "Offline"
   },
   experience: {
     type: String

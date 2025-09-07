@@ -12,11 +12,6 @@ const lessonSchema = new Schema({
     ref: "TutorProfile", 
     required: true 
   },
-  subject: [{ 
-    type: Schema.Types.ObjectId, 
-    ref: "Subject", 
-    required: true 
-  }],
   date: { 
     type: Date, 
     required: true 
@@ -29,10 +24,6 @@ const lessonSchema = new Schema({
     type: String,
     enum: ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED", "EXPIRED"],
     default: "PENDING",
-  },
-  pricePerHour: { 
-    type: Number, 
-    required: true 
   },
   payment: { 
     type: Schema.Types.ObjectId, 
