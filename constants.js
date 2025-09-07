@@ -2,7 +2,7 @@ export const DB_NAME = "dpay";
 
 export const cookieOptions = {
     httpOnly: true,
-    sameSite: 'strict',
+    sameSite: 'none',
     secure: true
 };
 
