@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { asyncHandler } from "../../../utils/index.js";
-import { Lesson, Payment, StudentProfile } from "../../../models/index.js";
+import { Lesson, Payment, StudentProfile, User } from "../../../models/index.js";
 
 export const webhookHandler = asyncHandler(async (req, res) => {
   try {
@@ -56,6 +56,10 @@ export const webhookHandler = asyncHandler(async (req, res) => {
           user: paymentData.student,
           lessons: [paymentData.lesson]
         });
+        await User.findByIdAndUpdate(
+          paymentData.student,
+          { $set: { role: "STUDENT" } }
+        );
       }
 
       console.log("✅ Payment successful:", paymentData.razorpay_payment_id);

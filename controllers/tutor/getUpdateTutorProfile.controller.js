@@ -21,15 +21,15 @@ export const getTutorProfile = asyncHandler(async (req, res) => {
 export const updateTutorProfile = asyncHandler(async (req, res) => {
     const user = req.user;
 
-    const { about, mode, qualifications, experience, lessonsCount, skills, languages, title, subjects, pricePerHour } = req.body;
+    const { about, mode, education, experience, classesTaken, skills, languages, title, subjects, pricePerHour } = req.body;
 
     try {
-        const lessonsCountNum = Number(lessonsCount);
+        const classesTakenNum = Number(classesTaken);
         const pricePerHourNum = Number(pricePerHour);
 
         const updatedProfile = await TutorProfile.findOneAndUpdate(
             { user: user._id },
-            { about, mode, qualifications, experience, lessonsCount: lessonsCountNum, skills, languages, title, subjects, pricePerHour: pricePerHourNum },
+            { about, mode, education, experience, classesTaken: classesTakenNum, skills, languages, title, subjects, pricePerHour: pricePerHourNum },
             { new: true }
         );
 

@@ -1,5 +1,6 @@
 import { TutorProfile, User, Subject } from "../../../models/index.js";
 import { ApiResponse, asyncHandler } from "../../../utils/index.js";
+import mongoose from "mongoose";
 
 export const getTutors = asyncHandler(async (req, res) => {
     const { cursor, direction = "forward", limit = 7, search, language, minPrice, maxPrice } = req.query;
@@ -45,19 +46,31 @@ export const getTutors = asyncHandler(async (req, res) => {
             // 1️⃣ Get matching subject IDs
             const subjectIds = await Subject.find({ name: regex }).distinct("_id");
 
-            // 2️⃣ Add computed "score" field
             pipeline.push({
                 $addFields: {
                     score: {
                         $add: [
                             { $cond: [{ $regexMatch: { input: "$title", regex } }, 1, 0] },
-                            { $cond: [{ $gt: [{ $size: { $filter: { input: "$skills", as: "s", cond: { $regexMatch: { input: "$$s", regex } } } } }, 0] }, 3, 0] },
-                            { $cond: [{ $gt: [{ $size: { $filter: { input: "$languages", as: "l", cond: { $regexMatch: { input: "$$l", regex } } } } }, 0] }, 1, 0] },
-                            { $cond: [{ $in: ["$subjects", subjectIds] }, 4, 0] }
+                            { $cond: [
+                                { $gt: [{ $size: { $filter: { input: "$skills", as: "s", cond: { $regexMatch: { input: "$$s", regex } } } } }, 0] },
+                                3,
+                                0
+                            ] },
+                            { $cond: [
+                                { $gt: [{ $size: { $filter: { input: "$languages", as: "l", cond: { $regexMatch: { input: "$$l", regex } } } } }, 0] },
+                                1,
+                                0
+                            ] },
+                            { $cond: [
+                                { $gt: [{ $size: { $setIntersection: ["$subjects", subjectIds] } }, 0] },
+                                4,
+                                0
+                            ] }
                         ]
                     }
                 }
             });
+
 
             // 3️⃣ Keep only tutors with score > 0
             pipeline.push({
@@ -71,23 +84,69 @@ export const getTutors = asyncHandler(async (req, res) => {
         // 🔹 Limit
         pipeline.push({ $limit: Number(limit) });
 
-        // 🔹 Lookup for user and subjects
+        // 🔹 Lookup for user, subjects and availability
         pipeline.push(
+            // ... (your match, pagination, scoring etc. go here first)
+
+            // 🔹 Lookup for user (only name + avatar)
             {
                 $lookup: {
                     from: "users",
                     localField: "user",
                     foreignField: "_id",
-                    as: "user"
+                    as: "user",
+                    pipeline: [
+                        { $project: { _id: 0, name: 1, avatar: 1 } }
+                    ]
                 }
             },
             { $unwind: "$user" },
+
+            // 🔹 Lookup for subjects (only name)
             {
                 $lookup: {
                     from: "subjects",
                     localField: "subjects",
                     foreignField: "_id",
-                    as: "subjects"
+                    as: "subjects",
+                    pipeline: [
+                        { $project: { _id: 0, name: 1 } }
+                    ]
+                }
+            },
+
+            // 🔹 Lookup for availability (day + timeslots only)
+            {
+                $lookup: {
+                    from: "availabilities",
+                    localField: "availability",
+                    foreignField: "_id",
+                    as: "availability",
+                    pipeline: [
+                        { $project: { _id: 0, day: 1, timeslots: 1 } }
+                    ]
+                }
+            },
+
+            // 🔹 Shape the final tutor object
+            {
+                $project: {
+                    _id: 1,
+                    name: "$user.name",
+                    avatar: "$user.avatar",
+                    title: 1,
+                    subjects: "$subjects.name", // convert subject docs → array of names
+                    skills: 1,
+                    languages: 1,
+                    pricePerHour: 1,
+                    rating: 1,
+                    verified: 1,
+                    mode: 1,
+                    experience: 1,
+                    classesTaken: 1, // aka "classesTaken"
+                    availability: 1,
+                    about: 1,
+                    education: 1 // (or rename to education on frontend)
                 }
             }
         );

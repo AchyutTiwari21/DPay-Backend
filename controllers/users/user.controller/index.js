@@ -1,5 +1,5 @@
 import { applyTeach } from "./applyToTeach.controller.js";
-import { getTutors } from "./fetchTutors.conroller.js";
+import { getTutors } from "./fetchTutors.controller.js";
 import { createOrder, verifyOrder } from "./payment.controller.js";
 
 export {

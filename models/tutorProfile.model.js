@@ -10,18 +10,20 @@ const tutorProfileSchema = new Schema({
   about: { 
     type: String 
   },
-  qualifications: {
+  education: [{
+    type: String
+  }],
+  title: {
     type: String
   },
-  mode: {
+  mode: [{
     type: String,
-    enum: ["Online", "Offline", "Hybrid"],
-    default: "Offline"
-  },
+    enum: ["Online", "Offline"]
+  }],
   experience: {
     type: String
   },
-  lessonsCount: { 
+  classesTaken: { 
     type: Number, 
     default: 0 
   },
@@ -50,7 +52,7 @@ const tutorProfileSchema = new Schema({
   },
   verified: {
     type: Boolean,
-    default: true
+    default: false
   },
   availability: [{
     type: Schema.Types.ObjectId,
