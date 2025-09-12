@@ -1,6 +1,5 @@
 import { TutorProfile, User, Subject } from "../../../models/index.js";
 import { ApiResponse, asyncHandler } from "../../../utils/index.js";
-import mongoose from "mongoose";
 
 export const getTutors = asyncHandler(async (req, res) => {
     const { page = 1, limit = 7, search, language, minPrice, maxPrice } = req.query;
