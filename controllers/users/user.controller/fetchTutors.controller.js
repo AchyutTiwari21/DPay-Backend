@@ -3,21 +3,10 @@ import { ApiResponse, asyncHandler } from "../../../utils/index.js";
 import mongoose from "mongoose";
 
 export const getTutors = asyncHandler(async (req, res) => {
-    const { cursor, direction = "forward", limit = 7, search, language, minPrice, maxPrice } = req.query;
+    const { page = 1, limit = 7, search, language, minPrice, maxPrice } = req.query;
 
     try {
         let pipeline = [];
-
-        // 🔹 If cursor exists (pagination)
-        if (cursor) {
-            pipeline.push({
-                $match: {
-                    _id: {
-                        [direction === "forward" ? "$gt" : "$lt"]: new mongoose.Types.ObjectId(cursor)
-                    }
-                }
-            });
-        }
 
         // 🔹 Language filter
         if (language && language !== "Any") {
@@ -40,6 +29,7 @@ export const getTutors = asyncHandler(async (req, res) => {
             });
         }
 
+        // 🔹 Search filter (with scoring)
         if (search) {
             const regex = new RegExp(search, "i");
 
@@ -71,24 +61,20 @@ export const getTutors = asyncHandler(async (req, res) => {
                 }
             });
 
-
             // 3️⃣ Keep only tutors with score > 0
             pipeline.push({
                 $match: { score: { $gt: 0 } }
             });
+
+            // Sort by score first
+            pipeline.push({ $sort: { score: -1, _id: 1 } });
+        } else {
+            // Default sort when no search term
+            pipeline.push({ $sort: { _id: 1 } });
         }
-
-        // 🔹 Sorting
-        pipeline.push({ $sort: { score: -1, _id: direction === "forward" ? 1 : -1 } });
-
-        // 🔹 Limit
-        pipeline.push({ $limit: Number(limit) });
 
         // 🔹 Lookup for user, subjects and availability
         pipeline.push(
-            // ... (your match, pagination, scoring etc. go here first)
-
-            // 🔹 Lookup for user (only name + avatar)
             {
                 $lookup: {
                     from: "users",
@@ -101,8 +87,6 @@ export const getTutors = asyncHandler(async (req, res) => {
                 }
             },
             { $unwind: "$user" },
-
-            // 🔹 Lookup for subjects (only name)
             {
                 $lookup: {
                     from: "subjects",
@@ -114,8 +98,6 @@ export const getTutors = asyncHandler(async (req, res) => {
                     ]
                 }
             },
-
-            // 🔹 Lookup for availability (day + timeslots only)
             {
                 $lookup: {
                     from: "availabilities",
@@ -127,15 +109,13 @@ export const getTutors = asyncHandler(async (req, res) => {
                     ]
                 }
             },
-
-            // 🔹 Shape the final tutor object
             {
                 $project: {
                     _id: 1,
                     name: "$user.name",
                     avatar: "$user.avatar",
                     title: 1,
-                    subjects: "$subjects.name", // convert subject docs → array of names
+                    subjects: "$subjects.name",
                     skills: 1,
                     languages: 1,
                     pricePerHour: 1,
@@ -143,27 +123,32 @@ export const getTutors = asyncHandler(async (req, res) => {
                     verified: 1,
                     mode: 1,
                     experience: 1,
-                    classesTaken: 1, // aka "classesTaken"
+                    classesTaken: 1,
                     availability: 1,
                     about: 1,
-                    education: 1 // (or rename to education on frontend)
+                    education: 1
                 }
             }
         );
 
+        // 🔹 Pagination (skip + limit)
+        const pageNumber = Number(page) || 1;
+        const perPage = Number(limit) || 7;
+        const skip = (pageNumber - 1) * perPage;
+
+        pipeline.push({ $skip: skip });
+        pipeline.push({ $limit: perPage });
+
+        // Run query
         let tutors = await TutorProfile.aggregate(pipeline);
 
-        // 🔹 If backward, reverse results for UI consistency
-        if (direction === "backward") {
-            tutors = tutors.reverse();
-        }
-
-        const nextCursor = tutors.length > 0 ? tutors[tutors.length - 1]._id : null;
-        const prevCursor = tutors.length > 0 ? tutors[0]._id : null;
+        // Count total docs (for frontend page calculation)
+        const totalTutors = await TutorProfile.countDocuments();
+        const totalPages = Math.ceil(totalTutors / perPage);
 
         return res.status(200).json(new ApiResponse(
             true,
-            { tutors, prevCursor, nextCursor },
+            { tutors, totalTutors, totalPages, currentPage: pageNumber },
             "Tutors retrieved successfully"
         ));
     } catch (error) {

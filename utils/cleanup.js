@@ -3,7 +3,7 @@ import { Lesson, Payment } from "../models/index.js";
 
 export const startCleanupJob = () => {
   // Run every 5 minutes
-  cron.schedule("*/1 * * * *", async () => {
+  cron.schedule("0 6 * * *", async () => {
     try {
       const cutoff = new Date(Date.now() - 15 * 60 * 1000); // 15 min ago
 

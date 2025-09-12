@@ -124,8 +124,12 @@ const applyTeachSchema = z.object({
 }).strict();
 
 const tutorQuerySchema = z.object({
-  cursor: z.string().optional(),
-  direction: z.enum(["forward", "backward"]).default("forward"),
+  page: z
+     .string()
+     .min("1")
+     .max("4")
+     .transform(Number)
+     .default("1"),
   limit: z
     .string()
     .regex(/^\d+$/)
