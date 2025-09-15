@@ -7,15 +7,6 @@ export const getTutors = asyncHandler(async (req, res) => {
     try {
         let pipeline = [];
 
-        // 🔹 Language filter
-        if (language && language !== "Any") {
-            pipeline.push({
-                $match: {
-                    languages: { $regex: new RegExp(language, "i") }
-                }
-            });
-        }
-
         // 🔹 Price Range filter
         if (minPrice && maxPrice) {
             pipeline.push({
@@ -40,25 +31,65 @@ export const getTutors = asyncHandler(async (req, res) => {
                     score: {
                         $add: [
                             { $cond: [{ $regexMatch: { input: "$title", regex } }, 1, 0] },
-                            { $cond: [
-                                { $gt: [{ $size: { $filter: { input: "$skills", as: "s", cond: { $regexMatch: { input: "$$s", regex } } } } }, 0] },
-                                3,
+                            {
+                                $cond: [
+                                    {
+                                        $gt: [
+                                            {
+                                                $size: {
+                                                    $filter: {
+                                                        input: "$skills",
+                                                        as: "s",
+                                                        cond: { $regexMatch: { input: "$$s", regex } }
+                                                    }
+                                                }
+                                            },
+                                            0
+                                        ]
+                                    },
+                                    3,
+                                    0
+                                ]
+                            },
+                            // 🔹 Replace search-language check with language query parameter
+                            {
+                            $cond: [
+                                {
+                                    $gt: [
+                                        {
+                                            $size: {
+                                                $filter: {
+                                                input: "$languages",
+                                                as: "l",
+                                                cond: language && language !== "any"
+                                                    ? { $regexMatch: { input: "$$l", regex: new RegExp(language, "i") } } // ✅ use query param
+                                                    : false
+                                                }
+                                            }
+                                        },
+                                        0
+                                    ]
+                                },
+                                2,
                                 0
-                            ] },
-                            { $cond: [
-                                { $gt: [{ $size: { $filter: { input: "$languages", as: "l", cond: { $regexMatch: { input: "$$l", regex } } } } }, 0] },
-                                1,
-                                0
-                            ] },
-                            { $cond: [
-                                { $gt: [{ $size: { $setIntersection: ["$subjects", subjectIds] } }, 0] },
+                            ]
+                            },
+                            {
+                            $cond: [
+                                {
+                                    $gt: [
+                                        { $size: { $setIntersection: ["$subjects", subjectIds] } },
+                                        0
+                                    ]
+                                },
                                 4,
                                 0
-                            ] }
+                            ]
+                            }
                         ]
                     }
                 }
-            });
+                });
 
             // 3️⃣ Keep only tutors with score > 0
             pipeline.push({
