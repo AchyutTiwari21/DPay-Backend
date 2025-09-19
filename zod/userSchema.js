@@ -117,7 +117,7 @@ const getUserDataSchema = z.void();
 
 const applyTeachSchema = z.object({
     demoVideo: z.string().min(5).max(500).nullish(),
-    subjectsToTeach: z.array(z.string().min(2).max(100)).min(1).max(50),
+    subjects: z.array(z.string().min(2).max(100)).min(1).max(50),
     qualifications: z.array(z.string().min(2).max(100)).min(1).max(50),
     experience: z.string().min(1).max(500),
     resume: z.string().min(5).max(500)
@@ -150,6 +150,26 @@ const tutorQuerySchema = z.object({
     .regex(/^\d+$/)
     .transform(Number)
     .default("9999"),
+});
+
+const subjectQuerySchema = z.object({
+  cursor: z
+    .string()
+    .regex(/^[a-f\d]{24}$/i, "Invalid MongoDB ObjectId")
+    .optional(),
+  direction: z.enum(["forward", "backward"]).default("forward"),
+  limit: z
+    .string()
+    .transform((val) => parseInt(val, 10))
+    .refine((val) => !isNaN(val) && val > 0, {
+      message: "limit must be a positive number",
+    })
+    .refine(val => val > 0 && val <= 40, {
+       message: "Limit must be between 1 and 100"
+    })
+    .default("20")
+    .transform((val) => Number(val)),
+  search: z.string().min(0).max(50).optional(),
 });
 
 const createOrderSchema = z.object({
@@ -188,6 +208,7 @@ export {
     getUserDataSchema,
     applyTeachSchema,
     tutorQuerySchema,
+    subjectQuerySchema,
     createOrderSchema,
     verifyOrderSchema
 }

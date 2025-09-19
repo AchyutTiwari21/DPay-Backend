@@ -22,7 +22,7 @@ export const loginUser = asyncHandler( (async (req, res) => {
                 new ApiResponse(
                     401,
                     null,
-                    "Email is incorrect or user is not registered."
+                    "Email is incorrect or User is not registered."
                 )
             );
         }

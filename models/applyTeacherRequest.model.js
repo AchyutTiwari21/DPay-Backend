@@ -15,7 +15,7 @@ const applyTeacherRequestSchema = new Schema({
     demoVideo: {
         type: String
     },
-    subjectsToTeach: [{
+    subjects: [{
         type: String,
         required: true
     }],

@@ -16,13 +16,13 @@ export const applyTeach = asyncHandler(async (req, res) => {
         );
     }
 
-    const { demoVideo, subjectsToTeach, qualifications, experience, resume } = req.body;
+    const { demoVideo, subjects, qualifications, experience, resume } = req.body;
 
     try {
         const newApplication = await ApplyTeacherRequest.create({
             user: user._id,
             demoVideo,
-            subjectsToTeach,
+            subjects,
             qualifications,
             experience,
             resume
@@ -32,7 +32,7 @@ export const applyTeach = asyncHandler(async (req, res) => {
             `<p>A new teacher application has been submitted.</p>
             <p><strong>User:</strong> ${user.name} (${user.email})</p>
             <p><strong>Demo Video:</strong> ${demoVideo}</p>
-            <p><strong>Subjects to Teach:</strong> ${subjectsToTeach}</p>
+            <p><strong>Subjects to Teach:</strong> ${subjects}</p>
             <p><strong>Qualifications:</strong> ${qualifications}</p>
             <p><strong>Experience:</strong> ${experience}</p>
             <p><strong>Resume:</strong> ${resume}</p>`

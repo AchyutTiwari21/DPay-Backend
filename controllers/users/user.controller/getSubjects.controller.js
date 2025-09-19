@@ -1,5 +1,5 @@
-import { Subject } from "../../models/index.js";
-import { asyncHandler, ApiResponse } from "../../utils/index.js";
+import { Subject } from "../../../models/index.js";
+import { asyncHandler, ApiResponse } from "../../../utils/index.js";
 
 export const getSubjects = asyncHandler(async (req, res) => {
     const { cursor, direction = "forward", limit = 20, search } = req.query;
@@ -8,7 +8,7 @@ export const getSubjects = asyncHandler(async (req, res) => {
 
     // 🔹 Handle search
     if (search) {
-        const regex = new RegExp(search, "i"); // partial + case-insensitive
+        const regex = new RegExp("^" + search, "i"); // matches only from beginning (case-insensitive)
 
         // 2️⃣ Build OR conditions
         query.$or = [

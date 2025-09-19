@@ -4,11 +4,13 @@ import {
     applyTeach,
     getTutors,
     createOrder,
-    verifyOrder
+    verifyOrder,
+    getSubjects
 } from "../../controllers/users/user.controller/index.js";
 import { 
     applyTeachSchema,
     tutorQuerySchema,
+    subjectQuerySchema,
     createOrderSchema,
     verifyOrderSchema
 } from "../../zod/userSchema.js";
@@ -17,6 +19,8 @@ import { verifyJWT, validateSchema, validateQuery } from "../../middlewares/inde
 const router = Router();
 
 router.route("/apply-teach").post(validateSchema(applyTeachSchema), verifyJWT, applyTeach);
+
+router.route("/get-subjects").get(validateSchema(z.void()), validateQuery(subjectQuerySchema), verifyJWT, getSubjects);
 
 router.route("/get-tutors").get(validateSchema(z.void()), validateQuery(tutorQuerySchema), getTutors);
 
