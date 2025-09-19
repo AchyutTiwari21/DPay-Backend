@@ -6,11 +6,14 @@ export const getSubjects = asyncHandler(async (req, res) => {
     let query = {};
     let sort = { _id: 1 }; // default ascending (forward)
 
+    // Utility to escape regex special characters
+    const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
     // 🔹 Handle search
     if (search) {
-        const regex = new RegExp("^" + search, "i"); // matches only from beginning (case-insensitive)
+        const safeSearch = escapeRegex(search);  // escape special chars
+        const regex = new RegExp("^" + safeSearch, "i"); // now safe
 
-        // 2️⃣ Build OR conditions
         query.$or = [
             { name: regex },
             { category: regex }
