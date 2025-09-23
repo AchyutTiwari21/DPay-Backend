@@ -1,5 +1,5 @@
 import { asyncHandler, ApiResponse } from "../../../utils/index.js";
-import { Lesson, TutorProfile, Payment } from "../../../models/index.js";
+import { Lesson, TutorProfile, Payment, Subject } from "../../../models/index.js";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 import { sessionAmount } from "../../../constants.js";
@@ -10,7 +10,7 @@ const razorpay = new Razorpay({
 });
 
 export const createOrder = asyncHandler(async (req, res) => {
-  const { tutorId, date, time } = req.body;
+  const { tutorId, date, time, subject } = req.body;
 
   try {
     const tutor = await TutorProfile.findById(tutorId);
@@ -18,9 +18,15 @@ export const createOrder = asyncHandler(async (req, res) => {
       return res.status(404).json(new ApiResponse(404, null, "Tutor not found"));
     } 
 
+    const subjectData = await Subject.findOne({ name: subject });
+    if(!subjectData) {
+      return res.status(404).json(new ApiResponse(404, null, "Subject not found"));
+    }
+
     const lesson = await Lesson.create({
       student: req.user._id,
       tutor: tutor._id,
+      subject: subjectData._id,
       date: new Date(date),
       time: time,
       status: "PENDING",

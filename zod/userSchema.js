@@ -176,6 +176,7 @@ const createOrderSchema = z.object({
     tutorId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid MongoDB ObjectId"),
     date: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/, "Date must be in YYYY-MM-DD format"),
     time: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Time must be in HH:mm format (24h)"),
+    subject: z.string().min(1).max(100),
 }).strict();
 
 const verifyOrderSchema = z.object({
