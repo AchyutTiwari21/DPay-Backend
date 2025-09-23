@@ -12,7 +12,7 @@ import {
 } from "./addTutor.controller.js";
 import { getDashboardStats } from "./getDashboardStats.controller.js";
 import { getDashboardGrowth } from "./getDashboardGrowth.controller.js";
-import { getLatestStudents } from "./getDashboardData.controller.js";
+import { getLatestStudents, getLatestPendingTutorApplications } from "./getDashboardData.controller.js";
 
 export {
     getAllTeacherRequests,
@@ -25,5 +25,6 @@ export {
     removeSubject,
     getDashboardStats,
     getDashboardGrowth,
-    getLatestStudents
+    getLatestStudents,
+    getLatestPendingTutorApplications
 };
