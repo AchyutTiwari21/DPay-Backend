@@ -9,7 +9,8 @@ import {
     addSubject,
     removeSubject,
     getDashboardStats,
-    getDashboardGrowth
+    getDashboardGrowth,
+    getLatestStudents
 } from "../../controllers/admin/index.js";
 import { verifyJWT, verifyAdmin } from "../../middlewares/index.js";
 
@@ -34,5 +35,7 @@ router.route("/remove-subject/:subjectId").delete(verifyJWT, verifyAdmin, remove
 router.route("/dashboard-stats").get(verifyJWT, verifyAdmin, getDashboardStats);
 
 router.route("/dashboard-growth").get(verifyJWT, verifyAdmin, getDashboardGrowth);
+
+router.route("/latest-students").get(verifyJWT, verifyAdmin, getLatestStudents);
 
 export default router;
