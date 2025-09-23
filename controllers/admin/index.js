@@ -11,6 +11,7 @@ import {
     removeSubject
 } from "./addTutor.controller.js";
 import { getDashboardStats } from "./getDashboardStats.controller.js";
+import { getDashboardGrowth } from "./getDashboardGrowth.controller.js";
 
 export {
     getAllTeacherRequests,
@@ -21,5 +22,6 @@ export {
     removeTutor,
     addSubject,
     removeSubject,
-    getDashboardStats
+    getDashboardStats,
+    getDashboardGrowth
 };
