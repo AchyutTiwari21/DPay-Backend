@@ -12,6 +12,11 @@ const lessonSchema = new Schema({
     ref: "TutorProfile", 
     required: true 
   },
+  subject: {
+    type: Schema.Types.ObjectId, 
+    ref: "Subject",
+    required: true
+  },
   date: { 
     type: Date, 
     required: true 

@@ -11,7 +11,8 @@ import {
     getDashboardStats,
     getDashboardGrowth,
     getLatestStudents,
-    getLatestPendingTutorApplications
+    getLatestPendingTutorApplications,
+    getUpcomingDemos
 } from "../../controllers/admin/index.js";
 import { verifyJWT, verifyAdmin } from "../../middlewares/index.js";
 
@@ -40,5 +41,7 @@ router.route("/dashboard-growth").get(verifyJWT, verifyAdmin, getDashboardGrowth
 router.route("/latest-students").get(verifyJWT, verifyAdmin, getLatestStudents);
 
 router.route("/latest-applications").get(verifyJWT, verifyAdmin, getLatestPendingTutorApplications);
+
+router.route("/upcoming-demos").get(verifyJWT, verifyAdmin, getUpcomingDemos);
 
 export default router;
