@@ -24,7 +24,10 @@ export const getTutors = asyncHandler(async (req, res) => {
             const regex = new RegExp(search, "i");
 
             // 1️⃣ Get matching subject IDs
-            const subjectIds = await Subject.find({ name: regex }).distinct("_id");
+            const subjectIds = await Subject.find({ $or: [
+                { name: regex },
+                { category: regex }
+            ] }).distinct("_id");
 
             pipeline.push({
                 $addFields: {

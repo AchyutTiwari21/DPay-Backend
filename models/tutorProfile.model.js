@@ -7,6 +7,12 @@ const tutorProfileSchema = new Schema({
     ref: "User", 
     required: true 
   },
+  address: {
+    type: String
+  },
+  phone: {
+    type: String
+  },
   about: { 
     type: String 
   },
@@ -44,6 +50,14 @@ const tutorProfileSchema = new Schema({
     type: Number,
     min: 1
   },
+  demoLessons: [{
+    type: Schema.Types.ObjectId,
+    ref: "Lesson"
+  }],
+  tutions: [{
+    type: Schema.Types.ObjectId,
+    ref: "Tution"
+  }],
   rating: { 
     type: Number, 
     default: 5,
@@ -61,7 +75,7 @@ const tutorProfileSchema = new Schema({
   reviews: [{
     type: Schema.Types.ObjectId,
     ref: "Review"
-  }]
+  }],
 }, {timestamps: true});
 
 const TutorProfile = mongoose.model("TutorProfile", tutorProfileSchema);

@@ -29,6 +29,9 @@ const lessonSchema = new Schema({
     type: Schema.Types.ObjectId, 
     ref: "Payment"
   },
+  successful: {
+    type: Boolean
+  }
 }, {timestamps: true});
 
 const Lesson = mongoose.model("Lesson", lessonSchema);
