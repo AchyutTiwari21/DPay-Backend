@@ -10,6 +10,7 @@ import {
     addSubject,
     removeSubject
 } from "./addTutor.controller.js";
+import { getDashboardStats } from "./getDashboardStats.controller.js";
 
 export {
     getAllTeacherRequests,
@@ -19,5 +20,6 @@ export {
     getTutor,
     removeTutor,
     addSubject,
-    removeSubject
+    removeSubject,
+    getDashboardStats
 };

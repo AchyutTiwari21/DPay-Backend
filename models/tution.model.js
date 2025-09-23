@@ -12,11 +12,11 @@ const tutionSchema = new Schema({
     ref: "TutorProfile", 
     required: true 
   },
-  fromDate: { 
+  startDate: { 
     type: Date, 
     required: true 
   },
-  toDate: {
+  endDate: {
     type: Date,
     required: true
   },
