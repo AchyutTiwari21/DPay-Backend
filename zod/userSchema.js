@@ -60,8 +60,6 @@ const signinSchema = z.object({
 
 const signoutSchema = z.void();
 
-const refreshTokenSchema = z.void();
-
 const checkOTPSchema = z.object({
     email: z.string().min(5).max(50).email(),
     otp: z.string().min(6).max(6)
@@ -204,7 +202,6 @@ export {
     otpSchema,
     changePasswordSchema,
     checkOTPSchema,
-    refreshTokenSchema,
     signoutSchema,
     getUserDataSchema,
     applyTeachSchema,

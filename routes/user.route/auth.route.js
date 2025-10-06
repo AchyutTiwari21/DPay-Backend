@@ -17,8 +17,7 @@ import {
     signupSchema, 
     signinSchema, 
     otpSchema, 
-    signoutSchema, 
-    refreshTokenSchema,
+    signoutSchema,
     checkOTPSchema, 
     changePasswordSchema,
     getUserDataSchema,
@@ -46,7 +45,7 @@ router.route("/login").post(validateSchema(signinSchema), loginUser);
 
 router.route("/logout").post(validateSchema(signoutSchema), verifyJWT, logoutUser);
 
-router.route("/refresh-accessToken").get(validateSchema(refreshTokenSchema), refreshAccessToken);
+router.route("/refresh-accessToken").post(refreshAccessToken);
 
 router.route("/send-refresh-otp").post(validateSchema(otpSchema), sendRefreshOTP);
 
