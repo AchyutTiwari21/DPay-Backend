@@ -12,22 +12,23 @@ export const getUpcomingDemos = async (req, res) => {
     .sort({ date: 1 }) // soonest first
     .limit(3)
     .populate([
-      { path: "student", select: "name" },
+      { 
+        path: "student", 
+        select: "name"  // Only if student has a user ref
+      },
       { 
         path: "tutor", 
-        populate: [
-          { path: "user", select: "name" }, // Get tutor's name from User
-        ]
+        populate: { path: "user", select: "name" } // Only if tutor has a user ref
       },
-      { path: "subject", select: "name" } // Get subject name
+      { path: "subject", select: "name" }
     ]);
 
     // Format for frontend
     const demos = lessons.map((lesson) => ({
       id: lesson._id,
-      subject: lesson.subject.name,
-      tutor: lesson.tutor.user.name,
-      student: lesson.student.name,
+      subject: lesson.subject?.name,
+      tutor: lesson.tutor?.user?.name,
+      student: lesson.student?.name,
       date: `${lesson.date.toISOString().slice(0, 10)} ${lesson.time}`
     }));
 
