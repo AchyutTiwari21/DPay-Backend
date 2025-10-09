@@ -1,4 +1,4 @@
-import { ApplyTeacherRequest } from "../../../models/index.js";
+import { ApplyTeacherRequest, Subject } from "../../../models/index.js";
 import { asyncHandler, ApiResponse } from "../../../utils/index.js";
 import { mailSender } from "../../../utils/mailSender.js";
 
@@ -19,11 +19,13 @@ export const applyTeach = asyncHandler(async (req, res) => {
     const { demoVideo, subjects, qualifications, experience, resume } = req.body;
 
     try {
-        const newApplication = await ApplyTeacherRequest.create({
+        const subjectIds = await Subject.find({ name: { $in: subjects } }).select('_id');
+
+        await ApplyTeacherRequest.create({
             user: user._id,
             demoVideo,
-            subjects,
-            qualifications,
+            subjects: subjectIds,
+            qualifications, 
             experience,
             resume
         });

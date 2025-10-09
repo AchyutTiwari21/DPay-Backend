@@ -16,7 +16,8 @@ const applyTeacherRequestSchema = new Schema({
         type: String
     },
     subjects: [{
-        type: String,
+        type: Schema.Types.ObjectId,
+        ref: "Subject",
         required: true
     }],
     qualifications: [{

@@ -17,6 +17,9 @@ export const updateTeacherRequest = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
+    console.log("Request ID: ", id);
+    console.log("Status: ", status);
+
     try {
         const updatedRequest = await ApplyTeacherRequest.findByIdAndUpdate(
             id,
@@ -29,11 +32,15 @@ export const updateTeacherRequest = asyncHandler(async (req, res) => {
                 new ApiResponse(false, null, "Teacher request not found")
             );
         }
+        
+        let message = "";
 
         if(status == "ACCEPTED") {
             await TutorProfile.create({
                 user: updatedRequest.user._id,
+                subjects: updatedRequest.subjects,
                 experience: updatedRequest.experience,
+                education: updatedRequest.qualifications,
             });
 
             const user = await User.findByIdAndUpdate(updatedRequest.user._id, { $set: { role: "TUTOR" } });
@@ -43,18 +50,20 @@ export const updateTeacherRequest = asyncHandler(async (req, res) => {
                 <p>Congratulations! Your application to become a tutor has been accepted.</p>
                 <p>We are excited to have you on board.</p>
             `);
+
+            message = "Teacher request accepted and Tutor Profile created";
         } else if(status == "REJECTED") {
             await mailSender(updatedRequest.user.email, "Application Update", `
                 <p>Dear ${updatedRequest.user.name},</p>
                 <p>We regret to inform you that your application to become a tutor has been rejected.</p>
                 <p>Thank you for your interest, and we encourage you to apply again in the future.</p>
             `);
+
+            message = "Teacher request rejected";
         }
 
-        await ApplyTeacherRequest.findByIdAndDelete(id);
-
         return res.status(200).json(
-            new ApiResponse(true, null, "Teacher request updated successfully")
+            new ApiResponse(true, null, message)
         );
     } catch (error) {
         console.log("Error updating teacher request:", error.message);
