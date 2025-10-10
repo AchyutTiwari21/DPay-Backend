@@ -7,7 +7,7 @@ const studentProfileSchema = new Schema({
     ref: "User", 
     required: true 
   },
-  lessons: [{
+  demoLessons: [{
     type: Schema.Types.ObjectId,
     ref: "Lesson"
   }],
@@ -25,6 +25,32 @@ const studentProfileSchema = new Schema({
   },
   phone: {
     type: String
+  },
+  bankDetails: {
+    accountNumber: {
+      type: String,
+      required: true
+    },
+    bankName: {
+      type: String,
+      required: true
+    },
+    ifscCode: {
+      type: String,
+      required: true
+    }
+  },
+  documents: [{
+    type: String
+  }],
+  paymentHistory: [{
+    type: Schema.Types.ObjectId,
+    ref: "Payment"
+  }],
+  status: {
+    type: String,
+    enum: ["Active", "Inactive", "Pending"],
+    default: "Pending"
   },
   rating: {
     type: Number,
