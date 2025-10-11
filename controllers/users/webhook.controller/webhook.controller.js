@@ -49,12 +49,12 @@ export const webhookHandler = asyncHandler(async (req, res) => {
       const studentProfile = await StudentProfile.findOne({ user: paymentData.student });
 
       if (studentProfile) {
-        studentProfile.lessons.push(paymentData.lesson);
+        studentProfile.demoLessons.push(paymentData.lesson);
         await studentProfile.save({ validateBeforeSave: false });
       } else {
         await StudentProfile.create({
           user: paymentData.student,
-          lessons: [paymentData.lesson]
+          demoLessons: [paymentData.lesson]
         });
         await User.findByIdAndUpdate(
           paymentData.student,
