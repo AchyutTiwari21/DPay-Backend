@@ -1,7 +1,5 @@
-import { en } from 'zod/v4/locales';
 import StudentProfile from '../../models/studentProfile.model.js';
 import { ApiResponse, asyncHandler } from '../../utils/index.js';
-import { pipeline } from 'nodemailer/lib/xoauth2/index.js';
 
 const maskAccount = (acct = '') => {
   if (!acct) return acct;
@@ -147,7 +145,6 @@ export const getStudents = asyncHandler(async (req, res) => {
             { $addFields: { tutorName: '$tutorInfo.name' } },
             { 
               $project: {
-                tutorInfo: 0,
                 title: 1,
                 tutorName: 1,
                 startDate: 1,
@@ -296,8 +293,7 @@ export const getStudents = asyncHandler(async (req, res) => {
         },
         documents: Array.isArray(profile.documents) ? profile.documents : [],
         enrollments,
-        payments,
-        referralCoins: typeof profile.referralCoins === 'number' ? profile.referralCoins : 0
+        payments
       };
     });
 
