@@ -307,3 +307,35 @@ export const getStudents = asyncHandler(async (req, res) => {
     return res.status(500).json(new ApiResponse(false, null, 'Internal Server Error'));
   }
 });
+
+// New: returns labels and data arrays for student growth (last 12 months)
+export const getStudentGrowth = asyncHandler(async (req, res) => {
+  try {
+    // Helper to get short month name
+    const getMonthShortName = (monthIndex) => [
+      'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'
+    ][monthIndex];
+
+    const now = new Date();
+    const labels = [];
+    const data = [];
+
+    // last 12 months, oldest first
+    for (let i = 11; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const nextMonth = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+
+      const count = await StudentProfile.countDocuments({
+        createdAt: { $gte: date, $lt: nextMonth }
+      });
+
+      labels.push(getMonthShortName(date.getMonth()));
+      data.push(count);
+    }
+
+    return res.status(200).json({ labels, data });
+  } catch (err) {
+    console.error('getStudentGrowth error:', err);
+    return res.status(500).json({ error: 'Failed to fetch student growth data' });
+  }
+});

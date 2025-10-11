@@ -13,7 +13,8 @@ import {
     getLatestStudents,
     getLatestPendingTutorApplications,
     getUpcomingDemos,
-    getStudents
+    getStudents,
+    getStudentGrowth
 } from "../../controllers/admin/index.js";
 import { verifyJWT, verifyAdmin } from "../../middlewares/index.js";
 
@@ -46,5 +47,7 @@ router.route("/latest-applications").get(verifyJWT, verifyAdmin, getLatestPendin
 router.route("/upcoming-demos").get(verifyJWT, verifyAdmin, getUpcomingDemos);
 
 router.route("/get-students").get(verifyJWT, verifyAdmin, getStudents);
+
+router.route("/get-student-growth").get(verifyJWT, verifyAdmin, getStudentGrowth);
 
 export default router;
