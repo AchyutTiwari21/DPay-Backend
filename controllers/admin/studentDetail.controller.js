@@ -1,5 +1,7 @@
+import { en } from 'zod/v4/locales';
 import StudentProfile from '../../models/studentProfile.model.js';
 import { ApiResponse, asyncHandler } from '../../utils/index.js';
+import { pipeline } from 'nodemailer/lib/xoauth2/index.js';
 
 const maskAccount = (acct = '') => {
   if (!acct) return acct;
@@ -93,7 +95,7 @@ export const getStudentDetail = async (req, res) => {
 };
 
 export const getStudents = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 10, search } = req.query;
+  const { page = 1, limit = 10, search, status } = req.query;
 
   try {
     const pageNumber = Number(page) || 1;
@@ -120,18 +122,41 @@ export const getStudents = asyncHandler(async (req, res) => {
           localField: 'tutions',
           foreignField: '_id',
           as: 'tutions',
-          pipeline: [{ $project: { title: 1, course: 1, startDate: 1, status: 1, tutorName: 1, tutor: 1, createdAt: 1 } }]
-        }
-      },
-
-      // populate demoLessons
-      {
-        $lookup: {
-          from: 'lessons',
-          localField: 'demoLessons',
-          foreignField: '_id',
-          as: 'demoLessons',
-          pipeline: [{ $project: { title: 1, name: 1, startDate: 1, status: 1, createdAt: 1 } }]
+          pipeline: [
+            {
+              $lookup: {
+                from: 'tutorprofiles', // Mongoose default collection name for TutorProfile
+                localField: 'tutor',
+                foreignField: '_id',
+                as: 'tutorInfo',
+                pipeline: [
+                  {
+                    $lookup: {
+                      from: 'users',
+                      localField: 'user',
+                      foreignField: '_id',
+                      as: 'tutorUserInfo'
+                    }
+                  },
+                  { $unwind: { path: '$tutorUserInfo', preserveNullAndEmptyArrays: true } },
+                  { $project: { name: '$tutorUserInfo.name' } }
+                ]
+              }
+            },
+            { $unwind: { path: '$tutorInfo', preserveNullAndEmptyArrays: true } },
+            { $addFields: { tutorName: '$tutorInfo.name' } },
+            { 
+              $project: {
+                tutorInfo: 0,
+                title: 1,
+                tutorName: 1,
+                startDate: 1,
+                endDate: 1,
+                status: 1,
+                createdAt: 1
+              }
+            }
+          ]
         }
       },
 
@@ -142,7 +167,7 @@ export const getStudents = asyncHandler(async (req, res) => {
           localField: 'paymentHistory',
           foreignField: '_id',
           as: 'paymentHistory',
-          pipeline: [{ $project: { amount: 1, date: 1, status: 1, paymentId: 1, createdAt: 1 } }]
+          pipeline: [{ $project: { amount: 1, paidAt: 1, status: 1, razorpay_payment_id: 1, createdAt: 1 } }]
         }
       },
 
@@ -156,11 +181,9 @@ export const getStudents = asyncHandler(async (req, res) => {
           documents: 1,
           coins: 1,
           walletBalance: 1,
-          referralCoins: 1,
           status: 1,
           createdAt: 1,
           tutions: 1,
-          demoLessons: 1,
           paymentHistory: 1
         }
       }
@@ -181,6 +204,13 @@ export const getStudents = asyncHandler(async (req, res) => {
       });
     }
 
+    // If status query provided and not 'all', filter by status (case-insensitive)
+    if (status && status.toString().toLowerCase() !== 'all') {
+      // Accept values like 'active'|'Active'|'pending' etc.
+      const statusRegex = new RegExp(`^${status}$`, 'i');
+      pipeline.push({ $match: { status: statusRegex } });
+    }
+
     // default sort by createdAt desc (newest first)
     pipeline.push({ $sort: { createdAt: -1, _id: 1 } });
 
@@ -190,6 +220,23 @@ export const getStudents = asyncHandler(async (req, res) => {
     const totalStudents = countResult[0]?.total ? Number(countResult[0].total) : 0;
     const totalPages = Math.ceil(totalStudents / perPage);
 
+    // Aggregate status counts for matching set (Active / Pending)
+    const statusPipeline = [...pipeline, {
+      $group: {
+        _id: '$status',
+        count: { $sum: 1 }
+      }
+    }];
+
+    const statusAgg = await StudentProfile.aggregate(statusPipeline);
+    let activeStudents = 0;
+    let pendingVerification = 0;
+    statusAgg.forEach(s => {
+      const key = (s._id || '').toString().toLowerCase();
+      if (key === 'active') activeStudents = s.count;
+      if (key === 'pending') pendingVerification = s.count;
+    });
+
     // add pagination
     pipeline.push({ $skip: skip });
     pipeline.push({ $limit: perPage });
@@ -197,9 +244,12 @@ export const getStudents = asyncHandler(async (req, res) => {
     // run aggregation to get page of profiles
     const profiles = await StudentProfile.aggregate(pipeline);
 
+    console.log("Student: ", profiles);
+    
+
     // map results to frontend shape (matches mock at Student.jsx line ~46)
     const students = profiles.map(profile => {
-      const status = (profile.status || '').toString().toLowerCase();
+      const statusVal = (profile.status || '').toString().toLowerCase();
       const enrollmentsSource = Array.isArray(profile.tutions) && profile.tutions.length ? profile.tutions : profile.demoLessons || [];
 
       const enrollments = (Array.isArray(enrollmentsSource) ? enrollmentsSource : []).map(e => ({
@@ -235,7 +285,7 @@ export const getStudents = asyncHandler(async (req, res) => {
         phone: profile.phone || '',
         subjects,
         assignedTutor,
-        status: status || 'pending',
+        status: statusVal || 'pending',
         coins: typeof profile.coins === 'number' ? profile.coins : (profile.walletBalance || 0),
         registrationDate: profile.createdAt ? new Date(profile.createdAt).toISOString().split('T')[0] : null,
         address: profile.address || '',
@@ -253,7 +303,7 @@ export const getStudents = asyncHandler(async (req, res) => {
 
     return res.status(200).json(new ApiResponse(
       true,
-      { students, totalStudents, totalPages, currentPage: pageNumber },
+      { students, totalStudents, totalPages, currentPage: pageNumber, activeStudents, pendingVerification },
       'Students retrieved successfully'
     ));
   } catch (error) {
@@ -261,5 +311,3 @@ export const getStudents = asyncHandler(async (req, res) => {
     return res.status(500).json(new ApiResponse(false, null, 'Internal Server Error'));
   }
 });
-
-export default getStudentDetail;

@@ -2,15 +2,19 @@ import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const tutionSchema = new Schema({
-  student: { 
-    type: Schema.Types.ObjectId, 
-    ref: "StudentProfile", 
-    required: true 
-  },
   tutor: { 
     type: Schema.Types.ObjectId, 
     ref: "TutorProfile", 
     required: true 
+  },
+  students: [{ 
+    type: Schema.Types.ObjectId, 
+    ref: "StudentProfile", 
+    required: true 
+  }],
+  title: {
+    type: String,
+    required: true
   },
   startDate: { 
     type: Date, 
