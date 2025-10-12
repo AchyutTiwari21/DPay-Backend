@@ -50,11 +50,13 @@ export const webhookHandler = asyncHandler(async (req, res) => {
 
       if (studentProfile) {
         studentProfile.demoLessons.push(paymentData.lesson);
+        studentProfile.paymentHistory.push(paymentData._id);
         await studentProfile.save({ validateBeforeSave: false });
       } else {
         await StudentProfile.create({
           user: paymentData.student,
-          demoLessons: [paymentData.lesson]
+          demoLessons: [paymentData.lesson],
+          paymentHistory: [paymentData._id]
         });
         await User.findByIdAndUpdate(
           paymentData.student,
@@ -68,7 +70,7 @@ export const webhookHandler = asyncHandler(async (req, res) => {
     else if (event === "payment.failed") {
       const payment = req.body.payload.payment.entity;
 
-      await Payment.findOneAndUpdate(
+      const paymentData = await Payment.findOneAndUpdate(
         { razorpay_order_id: payment.order_id },
         {
           razorpay_payment_id: payment.id,
@@ -76,6 +78,13 @@ export const webhookHandler = asyncHandler(async (req, res) => {
           method: payment.method,
         }
       );
+
+      const studentProfile = await StudentProfile.findOne({ user: paymentData.student });
+
+      if (studentProfile) {
+        studentProfile.paymentHistory.push(paymentData._id);
+        await studentProfile.save({ validateBeforeSave: false });
+      }
 
       console.log("❌ Payment failed:", payment.id);
     }
