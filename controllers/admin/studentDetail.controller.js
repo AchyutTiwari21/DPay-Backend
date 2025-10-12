@@ -240,10 +240,7 @@ export const getStudents = asyncHandler(async (req, res) => {
 
     // run aggregation to get page of profiles
     const profiles = await StudentProfile.aggregate(pipeline);
-
-    console.log("Student: ", profiles);
     
-
     // map results to frontend shape (matches mock at Student.jsx line ~46)
     const students = profiles.map(profile => {
       const statusVal = (profile.status || '').toString().toLowerCase();
@@ -337,5 +334,27 @@ export const getStudentGrowth = asyncHandler(async (req, res) => {
   } catch (err) {
     console.error('getStudentGrowth error:', err);
     return res.status(500).json({ error: 'Failed to fetch student growth data' });
+  }
+});
+
+export const updateStudentStatus = asyncHandler(async (req, res) => {
+  const { studentId } = req.params;
+  const { status } = req.body;
+
+  // Validate status
+  if (!status || !['active', 'inactive', 'pending'].includes(status)) {
+    return res.status(400).json({ error: 'Invalid status' });
+  }
+
+  try {
+    const updatedStudent = await StudentProfile.findByIdAndUpdate(studentId, { status }, { new: true });
+    if (!updatedStudent) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    return res.status(200).json({ message: 'Student status updated successfully', student: updatedStudent });
+  } catch (error) {
+    console.error('updateStudentStatus error:', error);
+    return res.status(500).json({ error: 'Failed to update student status' });
   }
 });
