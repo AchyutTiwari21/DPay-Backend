@@ -84,6 +84,15 @@ export const webhookHandler = asyncHandler(async (req, res) => {
       if (studentProfile) {
         studentProfile.paymentHistory.push(paymentData._id);
         await studentProfile.save({ validateBeforeSave: false });
+      } else {
+        await StudentProfile.create({
+          user: paymentData.student,
+          paymentHistory: [paymentData._id]
+        });
+        await User.findByIdAndUpdate(
+          paymentData.student,
+          { $set: { role: "STUDENT" } }
+        );
       }
 
       console.log("❌ Payment failed:", payment.id);

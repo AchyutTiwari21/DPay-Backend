@@ -58,6 +58,10 @@ const tutorProfileSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "Tution"
   }],
+  paymentStatus: {
+    type: String,
+    enum: ["Paid", "Pending", "Failed"]
+  },
   rating: { 
     type: Number, 
     default: 5,
