@@ -2,15 +2,15 @@ import { TutorProfile, User, Subject } from "../../models/index.js";
 import { ApiResponse, asyncHandler } from "../../utils/index.js";
 import { mailSender } from "../../utils/mailSender.js";
 
-async function getUserIdsByName(regex) {
-    const users = await User.find({ name: regex }).distinct("_id");
-    return users.length > 0 ? { $in: users } : null;
-}
+// async function getUserIdsByName(regex) {
+//     const users = await User.find({ name: regex }).distinct("_id");
+//     return users.length > 0 ? { $in: users } : null;
+// }
 
-async function getUserIdsByEmail(regex) {
-    const users = await User.find({ email: regex }).distinct("_id");
-    return users.length > 0 ? { $in: users } : null;
-}
+// async function getUserIdsByEmail(regex) {
+//     const users = await User.find({ email: regex }).distinct("_id");
+//     return users.length > 0 ? { $in: users } : null;
+// }
 
 export const addTutor = asyncHandler(async (req, res) => {
     const { email } = req.body;
@@ -51,67 +51,211 @@ export const addTutor = asyncHandler(async (req, res) => {
 });
 
 export const getTutors = asyncHandler(async (req, res) => {
-    const { cursor, direction = "forward", limit = 10, search } = req.query;
-    let query = {};
-    let sort = { _id: 1 }; // default ascending (forward)
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      search,
+      status,         // e.g. "Active" or "Active,Pending"
+      paymentStatus,  // e.g. "Paid" or "Paid,Pending"
+      subjects,       // e.g. "Math,Physics"
+      isVerified      // "true" | "false"
+    } = req.query;
 
-    // 🔹 Handle search
+    const pageNumber = Number(page) || 1;
+    const perPage = Number(limit) || 10;
+    const skip = (pageNumber - 1) * perPage;
+
+    const pipeline = [
+      // populate user basics
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'user',
+          foreignField: '_id',
+          as: 'user',
+          pipeline: [{ $project: { name: 1, email: 1, _id: 1 } }]
+        }
+      },
+      { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+
+      // populate subjects (get subject names)
+      {
+        $lookup: {
+          from: 'subjects',
+          localField: 'subjects',
+          foreignField: '_id',
+          as: 'subjects',
+          pipeline: [{ $project: { name: 1, category: 1 } }]
+        }
+      },
+
+      // populate paymentHistory
+      {
+        $lookup: {
+          from: 'payments',
+          localField: 'paymentHistory',
+          foreignField: '_id',
+          as: 'paymentHistory',
+          pipeline: [{ $project: { amount: 1, paidAt: 1, status: 1, razorpay_payment_id: 1, createdAt: 1, paymentId: 1 } }]
+        }
+      },
+
+      // project fields we'll use
+      {
+        $project: {
+          user: 1,
+          phone: 1,
+          address: 1,
+          experience: 1,
+          rating: 1,
+          verified: 1,
+          registrationDate: 1,
+          registrationFees: 1,
+          paymentStatus: 1,
+          paymentHistory: 1,
+          subjects: 1,
+          createdAt: 1,
+          status: 1
+        }
+      }
+    ];
+
+    // search support (name/email/phone/subject name/address)
     if (search) {
-        const regex = new RegExp(search, "i"); // partial + case-insensitive
-
-        // 1️⃣ Find subject IDs that match search
-        const subjectIds = await Subject.find({
-            $or: [
-                { name: { $regex: search, $options: "i" } },
-                { category: { $regex: search, $options: "i" } }
-            ]
-        }).distinct("_id");
-
-        // 2️⃣ Build OR conditions
-        query.$or = [
-            { user: await getUserIdsByName(regex) }, // tutor's name
-            { user: await getUserIdsByEmail(regex) }, // tutor's email
-            { subjects: { $in: subjectIds } }, // subjects linked
-            { title: regex },             // tutor's title
-            { skills: regex },            // tutor's skills
-            { languages: regex },         // tutor's languages
-        ];
-    }
-
-    // 🔹 Pagination handling
-    if (cursor) {
-        if (direction === "forward") {
-            query._id = { ...query._id, $gt: new mongoose.Types.ObjectId(cursor) };
-            sort = { _id: 1 };
-        } else if (direction === "backward") {
-            query._id = { ...query._id, $lt: new mongoose.Types.ObjectId(cursor) };
-            sort = { _id: -1 };
+      const regex = new RegExp(search, 'i');
+      pipeline.push({
+        $match: {
+          $or: [
+            { 'user.name': regex },
+            { 'user.email': regex },
+            { phone: regex },
+            { address: regex },
+            { 'subjects.name': regex },
+            { 'subjects.category': regex }
+          ]
         }
+      });
     }
 
-    try {
-        let tutors = await TutorProfile.find(query)
-            .populate("user", "name email")
-            .populate("subjects", "name") // include subject names
-            .sort(sort)
-            .limit(Number(limit));
+    // Build filter match from query params
+    const filterMatch = {};
 
-        if (direction === "backward") {
-            tutors = tutors.reverse();
+    if (status && String(status).toLowerCase() !== 'all') {
+      // allow comma separated list
+      const statuses = String(status).split(',').map(s => s.trim()).filter(Boolean);
+      if (statuses.length === 1) {
+        filterMatch.status = statuses[0];
+      } else if (statuses.length > 1) {
+        filterMatch.status = { $in: statuses };
+      }
+    }
+
+    if (paymentStatus && String(paymentStatus).toLowerCase() !== 'all') {
+      const payments = String(paymentStatus).split(',').map(s => s.trim()).filter(Boolean);
+      if (payments.length === 1) {
+        filterMatch.paymentStatus = payments[0];
+      } else if (payments.length > 1) {
+        filterMatch.paymentStatus = { $in: payments };
+      }
+    }
+
+    if (subjects) {
+      // frontend sends subject names; support comma separated
+      const subjList = String(subjects).split(',').map(s => s.trim()).filter(Boolean);
+      if (subjList.length === 1) {
+        filterMatch['subjects.name'] = subjList[0];
+      } else if (subjList.length > 1) {
+        filterMatch['subjects.name'] = { $in: subjList };
+      }
+    }
+
+    if (typeof isVerified !== 'undefined' && isVerified !== '') {
+      const val = String(isVerified).toLowerCase();
+      if (val === 'true' || val === '1') filterMatch.verified = true;
+      else if (val === 'false' || val === '0') filterMatch.verified = false;
+    }
+
+    // apply filters if any
+    if (Object.keys(filterMatch).length > 0) {
+      pipeline.push({ $match: filterMatch });
+    }
+
+    // compute totals & counts from the filtered set (before pagination)
+    const countsPipeline = [...pipeline,
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          activeCount: { $sum: { $cond: [{ $eq: ['$status', 'Active'] }, 1, 0] } },
+          pendingCount: { $sum: { $cond: [{ $eq: ['$verified', false] }, 1, 0] } },
+          topRatedCount: { $sum: { $cond: [{ $gte: ['$rating', 4.5] }, 1, 0] } }
         }
+      }
+    ];
 
-        const nextCursor = tutors.length > 0 ? tutors[tutors.length - 1]._id : null;
-        const prevCursor = tutors.length > 0 ? tutors[0]._id : null;
+    const countsResult = await TutorProfile.aggregate(countsPipeline);
+    const counts = countsResult[0] || { total: 0, activeCount: 0, pendingCount: 0, topRatedCount: 0 };
 
-        return res.status(200).json(new ApiResponse(
-            true,
-            { tutors, prevCursor, nextCursor },
-            "Tutors retrieved successfully"
-        ));
-    } catch (error) {
-        console.error("Error retrieving tutors:", error.message);
-        return res.status(500).json(new ApiResponse(false, null, "Internal Server Error"));
-    }
+    const totalTutors = await TutorProfile.countDocuments();
+    const totalPages = Math.ceil(totalTutors / perPage);
+    const activeTutors = Number(counts.activeCount || 0);
+    const pendingTutors = Number(counts.pendingCount || 0);
+    const topRatedTutors = Number(counts.topRatedCount || 0);
+
+    // default sort - newest first
+    pipeline.push({ $sort: { createdAt: -1, _id: 1 } });
+
+    // pagination
+    pipeline.push({ $skip: skip }, { $limit: perPage });
+
+    const profiles = await TutorProfile.aggregate(pipeline);
+
+    // map to frontend mock shape used in Tutor.jsx
+    const tutors = profiles.map(p => {
+      return {
+        id: p._id,
+        name: p.user?.name || '',
+        email: p.user?.email || '',
+        phone: p.phone || '',
+        subjects: Array.isArray(p.subjects) ? p.subjects.map(s => s.name || String(s)) : [],
+        experience: Number(p.experience) || 0,
+        location: p.address || '',
+        rating: (typeof p.rating !== 'undefined') ? String(Number(p.rating).toFixed(1)) : '5.0',
+        status: p.status,
+        paymentStatus: p.paymentStatus || 'Pending',
+        isVerified: !!p.verified,
+        registrationDate: p.registrationDate
+          ? new Date(p.registrationDate).toISOString().split('T')[0]
+          : (p.createdAt ? new Date(p.createdAt).toISOString().split('T')[0] : null),
+        registrationFee: p.registrationFees || 0,
+        paymentHistory: Array.isArray(p.paymentHistory) ? p.paymentHistory.map(pay => ({
+          id: pay.paymentId || pay._id || '',
+          date: pay.paidAt ? new Date(pay.paidAt).toISOString().split('T')[0] : (pay.createdAt ? new Date(pay.createdAt).toISOString().split('T')[0] : null),
+          amount: pay.amount || 0,
+          status: pay.status || '',
+          transactionId: pay.razorpay_payment_id || ''
+        })) : []
+      };
+    });
+
+    return res.status(200).json(new ApiResponse(
+      true,
+      {
+        tutors,
+        totalTutors,
+        totalPages,
+        currentPage: pageNumber,
+        activeTutors,
+        pendingTutors,
+        topRatedTutors
+      },
+      'Tutors retrieved successfully'
+    ));
+  } catch (err) {
+    console.error('getTutors error:', err);
+    return res.status(500).json(new ApiResponse(false, null, 'Internal Server Error'));
+  }
 });
 
 export const getTutor = asyncHandler(async (req, res) => {

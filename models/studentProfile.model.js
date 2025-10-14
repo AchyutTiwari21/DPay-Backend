@@ -53,8 +53,8 @@ const studentProfileSchema = new Schema({
   },
   status: {
     type: String,
-    enum: ["active", "inactive", "pending"],
-    default: "pending"
+    enum: ["active", "inactive"],
+    default: "active"
   },
   rating: {
     type: Number,

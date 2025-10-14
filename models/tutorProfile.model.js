@@ -62,11 +62,29 @@ const tutorProfileSchema = new Schema({
     type: String,
     enum: ["Paid", "Pending", "Failed"]
   },
+  paymentHistory: [{
+    type: Schema.Types.ObjectId,
+    ref: "Payment"
+  }],
+  registrationDate: {
+    type: Date,
+    default: Date.now
+  },
+  registrationFees: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
   rating: { 
     type: Number, 
     default: 5,
     min: 1,
     max: 5
+  },
+  status: {
+    type: String,
+    enum: ["Active", "Suspended", "Rejected"],
+    default: "Active"
   },
   verified: {
     type: Boolean,
