@@ -307,6 +307,27 @@ export const removeTutor = asyncHandler(async (req, res) => {
     }
 });
 
+export const verifyTutor = asyncHandler(async (req, res) => {
+    const { tutorId } = req.params;
+
+    try {
+        const tutor = await TutorProfile.findByIdAndUpdate(
+            tutorId,
+            { verified: true, status: "Active" },
+            { new: true }
+        );
+
+        if (!tutor) {
+            return res.status(404).json(new ApiResponse(false, null, "Tutor not found"));
+        }
+
+        return res.status(200).json(new ApiResponse(true, null, "Tutor verified successfully"));
+    } catch (error) {
+        console.error("Error verifying tutor:", error.message);
+        return res.status(500).json(new ApiResponse(false, null, "Internal Server Error"));
+    }
+});
+
 export const addSubject = asyncHandler(async (req, res) => {
     const { name, category } = req.body;
 

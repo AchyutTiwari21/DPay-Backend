@@ -27,7 +27,7 @@ const tutorProfileSchema = new Schema({
     enum: ["Online", "Offline"]
   }],
   experience: {
-    type: String
+    type: Number
   },
   classesTaken: { 
     type: Number, 

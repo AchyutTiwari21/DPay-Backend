@@ -8,7 +8,8 @@ import {
     getTutor,
     removeTutor,
     addSubject,
-    removeSubject
+    removeSubject,
+    verifyTutor
 } from "./addTutor.controller.js";
 import { getDashboardStats } from "./getDashboardStats.controller.js";
 import { getDashboardGrowth } from "./getDashboardGrowth.controller.js";
@@ -23,6 +24,7 @@ export {
     getTutors,
     getTutor,
     removeTutor,
+    verifyTutor,
     addSubject,
     removeSubject,
     getDashboardStats,

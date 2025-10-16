@@ -6,6 +6,7 @@ import {
     getTutors,
     getTutor,
     removeTutor,
+    verifyTutor,
     addSubject,
     removeSubject,
     getDashboardStats,
@@ -52,5 +53,7 @@ router.route("/get-students").get(verifyJWT, verifyAdmin, getStudents);
 router.route("/get-student-growth").get(verifyJWT, verifyAdmin, getStudentGrowth);
 
 router.route("/update-student/:studentId").put(verifyJWT, verifyAdmin, updateStudentStatus);
+
+router.route("/verify-tutor/:tutorId").put(verifyJWT, verifyAdmin, verifyTutor);
 
 export default router;
