@@ -1,4 +1,4 @@
-import { TutorProfile, User, Subject } from "../../models/index.js";
+import { TutorProfile, User, Subject, Availability } from "../../models/index.js";
 import { ApiResponse, asyncHandler } from "../../utils/index.js";
 import { mailSender } from "../../utils/mailSender.js";
 
@@ -284,23 +284,25 @@ export const getTutor = asyncHandler(async (req, res) => {
 });
 
 export const removeTutor = asyncHandler(async (req, res) => {
-    const { userId } = req.params;
+    const { tutorId } = req.query;
 
     try {
-        const tutor = await TutorProfile.findOneAndDelete({ user: userId });
+        await Availability.deleteMany({ tutor: tutorId });
+        const tutor = await TutorProfile.findById(tutorId);
 
         if (!tutor) {
-            return res.status(404).json(new ApiResponse(false, null, "Tutor not found"));
+            return res.status(404).json(new ApiResponse(false, null, "Tutor not found!"));
         }
 
-        const user = await User.findByIdAndUpdate(userId, { $set: { role: "USER" } });
+        await TutorProfile.findByIdAndDelete(tutorId);
+        const user = await User.findByIdAndUpdate(tutor.user, { $set: { role: "USER" } });
 
         await mailSender(user.email, "You have been removed as a tutor", `
             <p>Dear ${user.name},</p>
             <p>You have been removed as a tutor.</p>
         `);
 
-        return res.status(200).json(new ApiResponse(true, null, "Tutor removed successfully"));
+        return res.status(200).json(new ApiResponse(true, null, "Tutor removed successfully!"));
     } catch (error) {
         console.error("Error removing tutor:", error.message);
         return res.status(500).json(new ApiResponse(false, null, "Internal Server Error"));

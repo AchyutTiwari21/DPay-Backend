@@ -56,4 +56,6 @@ router.route("/update-student/:studentId").put(verifyJWT, verifyAdmin, updateStu
 
 router.route("/verify-tutor/:tutorId").put(verifyJWT, verifyAdmin, verifyTutor);
 
+router.route("/remove-tutor").delete(verifyJWT, verifyAdmin, removeTutor);
+
 export default router;

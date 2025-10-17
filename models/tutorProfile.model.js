@@ -83,7 +83,7 @@ const tutorProfileSchema = new Schema({
   },
   status: {
     type: String,
-    enum: ["Active", "Suspended", "Rejected"],
+    enum: ["Active", "Inactive"],
     default: "Active"
   },
   verified: {
