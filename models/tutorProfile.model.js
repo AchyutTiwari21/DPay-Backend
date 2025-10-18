@@ -72,7 +72,7 @@ const tutorProfileSchema = new Schema({
   },
   registrationFees: {
     type: Number,
-    default: 0,
+    default: 5000,
     min: 0
   },
   rating: { 

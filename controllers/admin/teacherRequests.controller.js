@@ -4,12 +4,128 @@ import { mailSender } from "../../utils/mailSender.js";
 
 export const getAllTeacherRequests = asyncHandler(async (req, res) => {
     try {
-        const requests = await ApplyTeacherRequest.find().populate("user", "name email profileImg");
-        res.status(200).json(
-            new ApiResponse(true, requests, "Teacher requests fetched successfully")
+        const {
+            page = 1,
+            limit = 10,
+            search,
+            status,
+            subjects
+        } = req.query;
+
+        const pageNumber = Number(page) || 1;
+        const perPage = Number(limit) || 10;
+        const skip = (pageNumber - 1) * perPage;
+
+        const pipeline = [
+            // populate user details
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'user',
+                    foreignField: '_id',
+                    as: 'user',
+                    pipeline: [{ $project: { name: 1, email: 1, _id: 1 } }]
+                }
+            },
+            { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+
+            // populate subjects
+            {
+                $lookup: {
+                    from: 'subjects',
+                    localField: 'subjects',
+                    foreignField: '_id',
+                    as: 'subjects',
+                    pipeline: [{ $project: { name: 1, category: 1 } }]
+                }
+            },
+
+            // project needed fields
+            {
+                $project: {
+                    user: 1,
+                    address: 1,
+                    phone: 1,
+                    subjects: 1,
+                    status: 1,
+                    createdAt: 1,
+                    experience: 1,
+                    qualifications: 1
+                }
+            }
+        ];
+
+        // search functionality
+        if (search) {
+            const regex = new RegExp(search, 'i');
+            pipeline.push({
+                $match: {
+                    $or: [
+                        { 'user.name': regex },
+                        { 'user.email': regex },
+                        { 'subjects.name': regex },
+                        { 'subjects.category': regex },
+                        { 'address': regex },
+                        { 'phone': regex },
+                        { 'experience': regex },
+                        { 'qualifications': regex }
+                    ]
+                }
+            });
+        }
+
+        // status filter
+        if (status && String(status).toLowerCase() !== 'all') {
+            const statuses = String(status).split(',').map(s => s.trim()).filter(Boolean);
+            pipeline.push({
+                $match: {
+                    status: { $in: statuses }
+                }
+            });
+        }
+
+        // subjects filter
+        if (subjects) {
+            const subjList = String(subjects).split(',').map(s => s.trim()).filter(Boolean);
+            pipeline.push({
+                $match: {
+                    'subjects.name': { $in: subjList }
+                }
+            });
+        }
+
+        // Get total count before pagination
+        const countPipeline = [...pipeline];
+        const countResult = await ApplyTeacherRequest.aggregate(countPipeline);
+        const totalRequests = countResult.length;
+        const totalPages = Math.ceil(totalRequests / perPage);
+
+        // Add sorting and pagination
+        pipeline.push(
+            { $sort: { createdAt: -1, _id: 1 } },
+            { $skip: skip },
+            { $limit: perPage }
+        );
+
+        const requests = await ApplyTeacherRequest.aggregate(pipeline);
+
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                {
+                    requests,
+                    totalRequests,
+                    totalPages,
+                    currentPage: pageNumber
+                },
+                "Tutor requests retrieved successfully."
+            )
         );
     } catch (error) {
-        res.status(500).json(new ApiResponse(false, null, "Error fetching teacher requests", error.message));
+        console.error("Error retrieving tutor requests:", error);
+        return res.status(500).json(
+            new ApiResponse(500, null, "Error retrieving tutor requests")
+        );
     }
 });
 

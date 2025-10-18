@@ -37,5 +37,5 @@ export {
     getStudents,
     getStudentGrowth,
     updateStudentStatus,
-    createPaymentRequest
+    createPaymentRequest,
 };

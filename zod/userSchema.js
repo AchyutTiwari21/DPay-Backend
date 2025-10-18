@@ -114,6 +114,8 @@ const changePasswordSchema = z.object({
 const getUserDataSchema = z.void();
 
 const applyTeachSchema = z.object({
+    address: z.string().min(5).max(200),
+    phone: z.string().min(7).max(15),
     demoVideo: z.string().min(5).max(500).nullish(),
     subjects: z.array(z.string().min(2).max(100)).min(1).max(50),
     qualifications: z.array(z.string().min(2).max(100)).min(1).max(50),

@@ -33,7 +33,9 @@ router.route("/get-tutors").get(verifyJWT, verifyAdmin, getTutors);
 
 router.route("/get-tutor/:userId").get(verifyJWT, verifyAdmin, getTutor);
 
-router.route("/remove-tutor/:userId").delete(verifyJWT, verifyAdmin, removeTutor);
+router.route("/remove-tutor/:tutorId").delete(verifyJWT, verifyAdmin, removeTutor);
+
+router.route("/verify-tutor/:tutorId").put(verifyJWT, verifyAdmin, verifyTutor);
 
 router.route("/add-subject").post(verifyJWT, verifyAdmin, addSubject);
 
@@ -54,10 +56,6 @@ router.route("/get-students").get(verifyJWT, verifyAdmin, getStudents);
 router.route("/get-student-growth").get(verifyJWT, verifyAdmin, getStudentGrowth);
 
 router.route("/update-student/:studentId").put(verifyJWT, verifyAdmin, updateStudentStatus);
-
-router.route("/verify-tutor/:tutorId").put(verifyJWT, verifyAdmin, verifyTutor);
-
-router.route("/remove-tutor").delete(verifyJWT, verifyAdmin, removeTutor);
 
 router.route("/create-payment-request").post(verifyJWT, verifyAdmin, createPaymentRequest);
 

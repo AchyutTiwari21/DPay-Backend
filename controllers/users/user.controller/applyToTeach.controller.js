@@ -16,17 +16,21 @@ export const applyTeach = asyncHandler(async (req, res) => {
         );
     }
 
-    const { demoVideo, subjects, qualifications, experience, resume } = req.body;
+    const { address, phone, demoVideo, subjects, qualifications, experience, resume } = req.body;
 
     try {
         const subjectIds = await Subject.find({ name: { $in: subjects } }).select('_id');
 
+        const numExperience = Number(experience);
+
         await ApplyTeacherRequest.create({
             user: user._id,
+            address,
+            phone,
             demoVideo,
             subjects: subjectIds,
             qualifications, 
-            experience,
+            experience: numExperience,
             resume
         });
 

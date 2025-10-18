@@ -2,16 +2,6 @@ import { TutorProfile, User, Subject, Availability } from "../../models/index.js
 import { ApiResponse, asyncHandler } from "../../utils/index.js";
 import { mailSender } from "../../utils/mailSender.js";
 
-// async function getUserIdsByName(regex) {
-//     const users = await User.find({ name: regex }).distinct("_id");
-//     return users.length > 0 ? { $in: users } : null;
-// }
-
-// async function getUserIdsByEmail(regex) {
-//     const users = await User.find({ email: regex }).distinct("_id");
-//     return users.length > 0 ? { $in: users } : null;
-// }
-
 export const addTutor = asyncHandler(async (req, res) => {
     const { email } = req.body;
 
@@ -142,32 +132,18 @@ export const getTutors = asyncHandler(async (req, res) => {
     const filterMatch = {};
 
     if (status && String(status).toLowerCase() !== 'all') {
-      // allow comma separated list
       const statuses = String(status).split(',').map(s => s.trim()).filter(Boolean);
-      if (statuses.length === 1) {
-        filterMatch.status = statuses[0];
-      } else if (statuses.length > 1) {
-        filterMatch.status = { $in: statuses };
-      }
+      filterMatch.status = { $in: statuses }; // Ensure we match any of the statuses
     }
 
     if (paymentStatus && String(paymentStatus).toLowerCase() !== 'all') {
       const payments = String(paymentStatus).split(',').map(s => s.trim()).filter(Boolean);
-      if (payments.length === 1) {
-        filterMatch.paymentStatus = payments[0];
-      } else if (payments.length > 1) {
-        filterMatch.paymentStatus = { $in: payments };
-      }
+      filterMatch.paymentStatus = { $in: payments }; // Ensure we match any of the payment statuses
     }
 
     if (subjects) {
-      // frontend sends subject names; support comma separated
       const subjList = String(subjects).split(',').map(s => s.trim()).filter(Boolean);
-      if (subjList.length === 1) {
-        filterMatch['subjects.name'] = subjList[0];
-      } else if (subjList.length > 1) {
-        filterMatch['subjects.name'] = { $in: subjList };
-      }
+      filterMatch['subjects.name'] = { $in: subjList }; // Match any of the subject names
     }
 
     if (typeof isVerified !== 'undefined' && isVerified !== '') {
@@ -284,7 +260,7 @@ export const getTutor = asyncHandler(async (req, res) => {
 });
 
 export const removeTutor = asyncHandler(async (req, res) => {
-    const { tutorId } = req.query;
+    const { tutorId } = req.params;
 
     try {
         await Availability.deleteMany({ tutor: tutorId });

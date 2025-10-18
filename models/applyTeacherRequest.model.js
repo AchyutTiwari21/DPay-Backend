@@ -7,6 +7,14 @@ const applyTeacherRequestSchema = new Schema({
         ref: "User",
         required: true
     },
+    address: {
+        type: String,
+        required: true
+    },
+    phone: {
+        type: String,
+        required: true
+    },
     status: {
         type: String,
         enum: ["PENDING", "ACCEPTED", "REJECTED"],
@@ -25,13 +33,13 @@ const applyTeacherRequestSchema = new Schema({
         required: true
     }],
     experience: {
-        type: String,
+        type: Number,
         required: true
     },
     resume: {
         type: String,
         required: true
-    }
+    },
 }, {timestamps: true});
 
 const ApplyTeacherRequest = mongoose.model("ApplyTeacherRequest", applyTeacherRequestSchema);
