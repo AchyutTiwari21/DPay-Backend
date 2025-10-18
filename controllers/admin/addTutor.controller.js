@@ -41,12 +41,12 @@ export const addTutor = asyncHandler(async (req, res) => {
         `);
 
         return res.status(201).json(
-            new ApiResponse(true, null, "Tutor added successfully")
+            new ApiResponse(201, null, "Tutor added successfully")
         );
     } catch (error) {
         console.log("Error adding tutor:", error.message);
 
-        return res.status(500).json(new ApiResponse(false, null, "Error adding tutor", error.message));
+        return res.status(500).json(new ApiResponse(500, null, "Error adding tutor", error.message));
     }
 });
 
@@ -240,7 +240,7 @@ export const getTutors = asyncHandler(async (req, res) => {
     });
 
     return res.status(200).json(new ApiResponse(
-      true,
+      200,
       {
         tutors,
         totalTutors,
@@ -254,7 +254,7 @@ export const getTutors = asyncHandler(async (req, res) => {
     ));
   } catch (err) {
     console.error('getTutors error:', err);
-    return res.status(500).json(new ApiResponse(false, null, 'Internal Server Error'));
+    return res.status(500).json(new ApiResponse(500, null, 'Internal Server Error'));
   }
 });
 
@@ -273,13 +273,13 @@ export const getTutor = asyncHandler(async (req, res) => {
         }
 
         return res.status(200).json(new ApiResponse(
-            true, 
+            200, 
             tutor, 
             "Tutor retrieved successfully"
         ));
     } catch (error) {
         console.error("Error retrieving tutor:", error.message);
-        return res.status(500).json(new ApiResponse(false, null, "Internal Server Error"));
+        return res.status(500).json(new ApiResponse(500, null, "Internal Server Error"));
     }
 });
 
@@ -302,10 +302,10 @@ export const removeTutor = asyncHandler(async (req, res) => {
             <p>You have been removed as a tutor.</p>
         `);
 
-        return res.status(200).json(new ApiResponse(true, null, "Tutor removed successfully!"));
+        return res.status(200).json(new ApiResponse(200, null, "Tutor removed successfully!"));
     } catch (error) {
         console.error("Error removing tutor:", error.message);
-        return res.status(500).json(new ApiResponse(false, null, "Internal Server Error"));
+        return res.status(500).json(new ApiResponse(500, null, "Internal Server Error"));
     }
 });
 
@@ -323,10 +323,10 @@ export const verifyTutor = asyncHandler(async (req, res) => {
             return res.status(404).json(new ApiResponse(false, null, "Tutor not found"));
         }
 
-        return res.status(200).json(new ApiResponse(true, null, "Tutor verified successfully"));
+        return res.status(200).json(new ApiResponse(200, null, "Tutor verified successfully"));
     } catch (error) {
         console.error("Error verifying tutor:", error.message);
-        return res.status(500).json(new ApiResponse(false, null, "Internal Server Error"));
+        return res.status(500).json(new ApiResponse(500, null, "Internal Server Error"));
     }
 });
 
@@ -356,9 +356,9 @@ export const removeSubject = asyncHandler(async (req, res) => {
             return res.status(404).json(new ApiResponse(false, null, "Subject not found"));
         }
 
-        return res.status(200).json(new ApiResponse(true, null, "Subject removed successfully"));
+        return res.status(200).json(new ApiResponse(200, null, "Subject removed successfully"));
     } catch (error) {
         console.error("Error removing subject:", error.message);
-        return res.status(500).json(new ApiResponse(false, null, "Internal Server Error"));
+        return res.status(500).json(new ApiResponse(500, null, "Internal Server Error"));
     }
 });

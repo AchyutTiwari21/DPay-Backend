@@ -16,7 +16,8 @@ import {
     getUpcomingDemos,
     getStudents,
     getStudentGrowth,
-    updateStudentStatus
+    updateStudentStatus,
+    createPaymentRequest
 } from "../../controllers/admin/index.js";
 import { verifyJWT, verifyAdmin } from "../../middlewares/index.js";
 
@@ -57,5 +58,7 @@ router.route("/update-student/:studentId").put(verifyJWT, verifyAdmin, updateStu
 router.route("/verify-tutor/:tutorId").put(verifyJWT, verifyAdmin, verifyTutor);
 
 router.route("/remove-tutor").delete(verifyJWT, verifyAdmin, removeTutor);
+
+router.route("/create-payment-request").post(verifyJWT, verifyAdmin, createPaymentRequest);
 
 export default router;

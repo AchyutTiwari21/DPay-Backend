@@ -180,12 +180,12 @@ export const getTutors = asyncHandler(async (req, res) => {
         const totalPages = Math.ceil(totalTutors / perPage);
 
         return res.status(200).json(new ApiResponse(
-            true,
+            200,
             { tutors, totalTutors, totalPages, currentPage: pageNumber },
             "Tutors retrieved successfully"
         ));
     } catch (error) {
         console.error("Error retrieving tutors:", error.message);
-        return res.status(500).json(new ApiResponse(false, null, "Internal Server Error"));
+        return res.status(500).json(new ApiResponse(500, null, "Internal Server Error"));
     }
 });
