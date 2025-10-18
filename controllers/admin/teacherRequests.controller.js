@@ -100,6 +100,39 @@ export const getAllTeacherRequests = asyncHandler(async (req, res) => {
         const totalRequests = countResult.length;
         const totalPages = Math.ceil(totalRequests / perPage);
 
+        // Get counts for different statuses
+        const statusCounts = await ApplyTeacherRequest.aggregate([
+            ...pipeline.slice(0, -3), // Remove sort, skip and limit
+            {
+                $group: {
+                    _id: null,
+                    totalRequests: { $sum: 1 },
+                    pendingRequests: {
+                        $sum: {
+                            $cond: [{ $eq: ["$status", "PENDING"] }, 1, 0]
+                        }
+                    },
+                    acceptedRequests: {
+                        $sum: {
+                            $cond: [{ $eq: ["$status", "ACCEPTED"] }, 1, 0]
+                        }
+                    },
+                    rejectedRequests: {
+                        $sum: {
+                            $cond: [{ $eq: ["$status", "REJECTED"] }, 1, 0]
+                        }
+                    }
+                }
+            }
+        ]);
+
+        const counts = statusCounts[0] || {
+            totalRequests: 0,
+            pendingRequests: 0,
+            acceptedRequests: 0,
+            rejectedRequests: 0
+        };
+
         // Add sorting and pagination
         pipeline.push(
             { $sort: { createdAt: -1, _id: 1 } },
@@ -114,7 +147,10 @@ export const getAllTeacherRequests = asyncHandler(async (req, res) => {
                 200,
                 {
                     requests,
-                    totalRequests,
+                    totalRequests: counts.totalRequests,
+                    pendingRequests: counts.pendingRequests,
+                    acceptedRequests: counts.acceptedRequests,
+                    rejectedRequests: counts.rejectedRequests,
                     totalPages,
                     currentPage: pageNumber
                 },
