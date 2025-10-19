@@ -50,7 +50,9 @@ export const getAllTeacherRequests = asyncHandler(async (req, res) => {
                     status: 1,
                     createdAt: 1,
                     experience: 1,
-                    qualifications: 1
+                    qualifications: 1,
+                    resume: 1,
+                    demoVideo: 1
                 }
             }
         ];
@@ -169,9 +171,6 @@ export const updateTeacherRequest = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    console.log("Request ID: ", id);
-    console.log("Status: ", status);
-
     try {
         const updatedRequest = await ApplyTeacherRequest.findByIdAndUpdate(
             id,
@@ -190,6 +189,8 @@ export const updateTeacherRequest = asyncHandler(async (req, res) => {
         if(status == "ACCEPTED") {
             await TutorProfile.create({
                 user: updatedRequest.user._id,
+                address: updatedRequest.address,
+                phone: updatedRequest.phone,
                 subjects: updatedRequest.subjects,
                 experience: updatedRequest.experience,
                 education: updatedRequest.qualifications,
@@ -203,7 +204,7 @@ export const updateTeacherRequest = asyncHandler(async (req, res) => {
                 <p>We are excited to have you on board.</p>
             `);
 
-            message = "Teacher request accepted and Tutor Profile created";
+            message = "Teacher request accepted and Tutor Profile created.";
         } else if(status == "REJECTED") {
             await mailSender(updatedRequest.user.email, "Application Update", `
                 <p>Dear ${updatedRequest.user.name},</p>
@@ -211,15 +212,36 @@ export const updateTeacherRequest = asyncHandler(async (req, res) => {
                 <p>Thank you for your interest, and we encourage you to apply again in the future.</p>
             `);
 
-            message = "Teacher request rejected";
+            message = "Teacher request rejected.";
         }
 
         return res.status(200).json(
-            new ApiResponse(true, null, message)
+            new ApiResponse(200, null, message)
         );
     } catch (error) {
         console.log("Error updating teacher request:", error.message);
 
-        return res.status(500).json(new ApiResponse(false, null, "Error updating teacher request", error.message));
+        return res.status(500).json(new ApiResponse(500, null, "Error updating teacher request", error.message));
+    }
+});
+
+export const removeTeacherRequest = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const deletedRequest = await ApplyTeacherRequest.findByIdAndDelete(id);
+        if (!deletedRequest) {
+            return res.status(404).json(
+                new ApiResponse(false, null, "Teacher request not found")
+            );
+        }
+        return res.status(200).json(
+            new ApiResponse(true, null, "Teacher request deleted successfully")
+        );
+    } catch (error) {
+        console.log("Error deleting teacher request:", error.message);
+        return res.status(500).json(
+            new ApiResponse(false, null, "Error deleting teacher request", error.message)
+        );
     }
 });

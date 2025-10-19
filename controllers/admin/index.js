@@ -1,6 +1,7 @@
 import { 
     getAllTeacherRequests, 
-    updateTeacherRequest 
+    updateTeacherRequest,
+    removeTeacherRequest 
 } from "./teacherRequests.controller.js";
 import { 
     addTutor,
@@ -21,6 +22,7 @@ import { createPaymentRequest } from "./tutorPaymentRequest.controller.js";
 export {
     getAllTeacherRequests,
     updateTeacherRequest,
+    removeTeacherRequest,
     addTutor,
     getTutors,
     getTutor,

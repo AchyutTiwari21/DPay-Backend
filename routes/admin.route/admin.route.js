@@ -2,6 +2,7 @@ import { Router } from "express";
 import { 
     getAllTeacherRequests, 
     updateTeacherRequest,
+    removeTeacherRequest,
     addTutor,
     getTutors,
     getTutor,
@@ -25,7 +26,9 @@ const router = Router();
 
 router.route("/teacher-requests").get(verifyJWT, verifyAdmin, getAllTeacherRequests);
 
-router.route("/teacher-request/:id").put(verifyJWT, verifyAdmin,  updateTeacherRequest);
+router.route("/update-teacher-request/:id").put(verifyJWT, verifyAdmin,  updateTeacherRequest);
+
+router.route("/remove-teacher-request/:id").delete(verifyJWT, verifyAdmin,  removeTeacherRequest);
 
 router.route("/add-tutor").post(verifyJWT, verifyAdmin, addTutor);
 

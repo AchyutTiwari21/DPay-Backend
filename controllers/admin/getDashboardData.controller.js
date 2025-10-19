@@ -29,13 +29,14 @@ export const getLatestPendingTutorApplications = async (req, res) => {
     const applications = await ApplyTeacherRequest.find({ status: "PENDING" })
       .sort({ createdAt: -1 })
       .limit(3)
-      .populate("user", "name");
+      .populate("user", "name")
+      .populate("subjects", "name");
 
     // Format as required by frontend (see AdminHome.jsx line 28)
     const formatted = applications.map((app) => ({
       id: app._id.toString(),
       name: app.user?.name || "Unknown",
-      subject: app.subjects?.[0] || "N/A",
+      subject: app.subjects?.[0].name || "N/A",
       status: "Pending",
     }));
 
