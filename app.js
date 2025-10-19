@@ -26,7 +26,7 @@ app.get('/keep-alive', (req, res) => {
   return res.status(200).send('OK');
 });
 
-import authRouter from "./routes/user.route/auth.route.js"
+import authRouter from "./routes/user.route/auth.route.js";
 import userRouter from "./routes/user.route/user.route.js";
 import adminRouter from "./routes/admin.route/admin.route.js";
 import tutorRouter from "./routes/tutor.route/tutor.route.js";
