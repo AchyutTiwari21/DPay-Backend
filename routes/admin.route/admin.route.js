@@ -15,6 +15,7 @@ import {
     getLatestStudents,
     getLatestPendingTutorApplications,
     getUpcomingDemos,
+    bookingStats,
     getStudents,
     getStudentGrowth,
     updateStudentStatus,
@@ -61,5 +62,7 @@ router.route("/get-student-growth").get(verifyJWT, verifyAdmin, getStudentGrowth
 router.route("/update-student/:studentId").put(verifyJWT, verifyAdmin, updateStudentStatus);
 
 router.route("/create-payment-request").post(verifyJWT, verifyAdmin, createPaymentRequest);
+
+router.route("/booking-stats").get(verifyJWT, verifyAdmin, bookingStats);
 
 export default router;

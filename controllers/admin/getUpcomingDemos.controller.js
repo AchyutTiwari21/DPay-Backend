@@ -38,3 +38,42 @@ export const getUpcomingDemos = async (req, res) => {
     return res.status(500).json({ error: "Failed to fetch upcoming demos" });
   }
 };
+
+export const bookingStats = async (req, res) => {
+  try {
+    const now = new Date();
+
+    // Get all metrics in parallel using Promise.all
+    const [total, upcomingDemos, completed, cancelled] = await Promise.all([
+      // Total bookings
+      Lesson.countDocuments({}),
+
+      // Upcoming demos
+      Lesson.countDocuments({
+        date: { $gte: now }
+      }),
+
+      // Completed sessions
+      Lesson.countDocuments({
+        status: 'COMPLETED'
+      }),
+
+      // Cancelled sessions  
+      Lesson.countDocuments({
+        status: 'CANCELLED'
+      })
+    ]);
+
+    // Return metrics in the same format as frontend
+    return res.json({
+      total,
+      upcomingDemos,
+      completed,
+      cancelled
+    });
+
+  } catch (err) {
+    console.log("Error fetching booking stats:", err.message);
+    return res.status(500).json({ error: "Failed to fetch booking statistics" });
+  }
+};
