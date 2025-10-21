@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { asyncHandler } from "../../../utils/index.js";
-import { Lesson, Payment, StudentProfile, User } from "../../../models/index.js";
+import { Lesson, Payment, StudentProfile, User, Availability } from "../../../models/index.js";
 
 export const webhookHandler = asyncHandler(async (req, res) => {
   try {
@@ -42,9 +42,22 @@ export const webhookHandler = asyncHandler(async (req, res) => {
         return;
       }
 
-      await Lesson.findByIdAndUpdate(paymentData.lesson, {
+      const lessonData = await Lesson.findByIdAndUpdate(paymentData.lesson, {
         $set: { status: "CONFIRMED", payment: paymentData._id }
       });
+
+      const bookingDate = lessonData.date;
+      const dayName = bookingDate.toLocaleDateString("en-US", { weekday: "short" });
+
+      await Availability.findOneAndUpdate(
+        {
+          tutor: lessonData.tutor,
+          day: dayName,
+        },
+        {
+          $pull: { timeslots: lessonData.time }
+        }
+      );
 
       const studentProfile = await StudentProfile.findOne({ user: paymentData.student });
 

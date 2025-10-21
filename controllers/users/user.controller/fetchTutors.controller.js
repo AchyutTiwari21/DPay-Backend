@@ -139,7 +139,7 @@ export const getTutors = asyncHandler(async (req, res) => {
                     foreignField: "_id",
                     as: "availability",
                     pipeline: [
-                        { $project: { _id: 1, day: 1, timeslots: 1 } }
+                        { $project: { _id: 0, day: 1, timeslots: 1 } }
                     ]
                 }
             },
