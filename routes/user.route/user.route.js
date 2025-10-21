@@ -3,6 +3,7 @@ import { z } from "zod";
 import {
     applyTeach,
     getTutors,
+    getTutorById,
     createOrder,
     verifyOrder,
     getSubjects
@@ -23,6 +24,8 @@ router.route("/apply-teach").post(validateSchema(applyTeachSchema), verifyJWT, a
 router.route("/get-subjects").get(validateSchema(z.void()), validateQuery(subjectQuerySchema), getSubjects);
 
 router.route("/get-tutors").get(validateSchema(z.void()), validateQuery(tutorQuerySchema), getTutors);
+
+router.route("/get-tutor/:id").get(validateSchema(z.void()), getTutorById);
 
 router.route("/create-order").post(validateSchema(createOrderSchema), verifyJWT, createOrder);
 

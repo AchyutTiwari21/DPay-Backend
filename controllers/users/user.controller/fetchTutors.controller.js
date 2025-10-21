@@ -1,5 +1,6 @@
-import { TutorProfile, User, Subject } from "../../../models/index.js";
+import { TutorProfile, Subject } from "../../../models/index.js";
 import { ApiResponse, asyncHandler } from "../../../utils/index.js";
+import mongoose from "mongoose";
 
 export const getTutors = asyncHandler(async (req, res) => {
     const { page = 1, limit = 7, search, language, minPrice, maxPrice } = req.query;
@@ -138,7 +139,7 @@ export const getTutors = asyncHandler(async (req, res) => {
                     foreignField: "_id",
                     as: "availability",
                     pipeline: [
-                        { $project: { _id: 0, day: 1, timeslots: 1 } }
+                        { $project: { _id: 1, day: 1, timeslots: 1 } }
                     ]
                 }
             },
@@ -186,6 +187,90 @@ export const getTutors = asyncHandler(async (req, res) => {
         ));
     } catch (error) {
         console.error("Error retrieving tutors:", error.message);
+        return res.status(500).json(new ApiResponse(500, null, "Internal Server Error"));
+    }
+});
+
+export const getTutorById = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const pipeline = [
+            // Match the specific tutor with new keyword
+            { $match: { _id: new mongoose.Types.ObjectId(id) } },
+
+            // Same lookups as getTutors
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "user",
+                    foreignField: "_id",
+                    as: "user",
+                    pipeline: [
+                        { $project: { _id: 0, name: 1, avatar: 1 } }
+                    ]
+                }
+            },
+            { $unwind: "$user" },
+            {
+                $lookup: {
+                    from: "subjects",
+                    localField: "subjects",
+                    foreignField: "_id",
+                    as: "subjects",
+                    pipeline: [
+                        { $project: { _id: 0, name: 1 } }
+                    ]
+                }
+            },
+            {
+                $lookup: {
+                    from: "availabilities",
+                    localField: "availability",
+                    foreignField: "_id",
+                    as: "availability",
+                    pipeline: [
+                        { $project: { _id: 1, day: 1, timeslots: 1 } }
+                    ]
+                }
+            },
+
+            // Project fields in the same format
+            {
+                $project: {
+                    _id: 1,
+                    name: "$user.name",
+                    avatar: "$user.avatar",
+                    title: 1,
+                    subjects: "$subjects.name",
+                    skills: 1,
+                    languages: 1,
+                    pricePerHour: 1,
+                    rating: 1,
+                    verified: 1,
+                    mode: 1,
+                    experience: 1,
+                    classesTaken: 1,
+                    availability: 1,
+                    about: 1,
+                    education: 1
+                }
+            }
+        ];
+
+        const [tutor] = await TutorProfile.aggregate(pipeline);
+
+        if (!tutor) {
+            return res.status(404).json(new ApiResponse(404, null, "Tutor not found"));
+        }
+
+        return res.status(200).json(new ApiResponse(
+            200,
+            tutor,
+            "Tutor retrieved successfully"
+        ));
+    } catch (error) {
+        console.error("Error retrieving tutor:", error.message);
         return res.status(500).json(new ApiResponse(500, null, "Internal Server Error"));
     }
 });
