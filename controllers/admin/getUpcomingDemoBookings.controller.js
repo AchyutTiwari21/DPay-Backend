@@ -141,7 +141,6 @@ export const getUpcomingDemoBookings = asyncHandler(async (req, res) => {
             }
         });
 
-        // Execute main query and stats queries in parallel
         const [bookings, statsResults] = await Promise.all([
             // Main bookings query
             Lesson.aggregate([...pipeline, { $skip: skip }, { $limit: perPage }]),
@@ -149,6 +148,9 @@ export const getUpcomingDemoBookings = asyncHandler(async (req, res) => {
             // Stats queries using Promise.all
             Promise.all([
                 // Total bookings count using the same pipeline before pagination
+                Lesson.aggregate([...pipeline, { $count: "total" }]),
+
+                // Total bookings
                 Lesson.countDocuments(),
 
                 // Upcoming demos count
@@ -168,13 +170,15 @@ export const getUpcomingDemoBookings = asyncHandler(async (req, res) => {
             ])
         ]);
 
-        // Extract total from aggregation result
-        const total = statsResults[0][0]?.total || 0;
-        
-        const [totalCount, upcomingDemos, completed, cancelled] = statsResults;
+        // Destructure and handle the aggregation count properly
+        const [totalAgg, totalCount, upcomingDemos, completed, cancelled] = statsResults;
 
+        // If totalAgg is empty, that means there were no matches
+        const total = totalAgg.length > 0 ? totalAgg[0].total : 0;
+        
         // Calculate pagination metadata
         const totalPages = Math.ceil(total / perPage);
+
 
         return res.status(200).json(new ApiResponse(
             200,
@@ -183,7 +187,8 @@ export const getUpcomingDemoBookings = asyncHandler(async (req, res) => {
                 totalPages,
                 currentPage: pageNumber,
                 stats: {
-                    total: totalCount,
+                    totalDemos: totalCount,
+                    total: total,
                     upcomingDemos: upcomingDemos,
                     completed: completed,
                     cancelled: cancelled
