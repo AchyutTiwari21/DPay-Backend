@@ -33,9 +33,6 @@ const lessonSchema = new Schema({
   payment: { 
     type: Schema.Types.ObjectId, 
     ref: "Payment"
-  },
-  successful: {
-    type: Boolean
   }
 }, {timestamps: true});
 

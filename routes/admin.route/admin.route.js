@@ -15,11 +15,11 @@ import {
     getLatestStudents,
     getLatestPendingTutorApplications,
     getUpcomingDemos,
-    bookingStats,
     getStudents,
     getStudentGrowth,
     updateStudentStatus,
-    createPaymentRequest
+    createPaymentRequest,
+    getUpcomingDemoBookings
 } from "../../controllers/admin/index.js";
 import { verifyJWT, verifyAdmin } from "../../middlewares/index.js";
 
@@ -63,6 +63,6 @@ router.route("/update-student/:studentId").put(verifyJWT, verifyAdmin, updateStu
 
 router.route("/create-payment-request").post(verifyJWT, verifyAdmin, createPaymentRequest);
 
-router.route("/booking-stats").get(verifyJWT, verifyAdmin, bookingStats);
+router.route("/get-upcoming-demo-bookings").get(verifyJWT, verifyAdmin,getUpcomingDemoBookings);
 
 export default router;

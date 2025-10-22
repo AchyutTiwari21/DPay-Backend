@@ -15,9 +15,10 @@ import {
 import { getDashboardStats } from "./getDashboardStats.controller.js";
 import { getDashboardGrowth } from "./getDashboardGrowth.controller.js";
 import { getLatestStudents, getLatestPendingTutorApplications } from "./getDashboardData.controller.js";
-import { getUpcomingDemos, bookingStats } from "./getUpcomingDemos.controller.js";
+import { getUpcomingDemos } from "./getUpcomingDemos.controller.js";
 import { getStudentDetail, getStudents, getStudentGrowth, updateStudentStatus } from "./studentDetail.controller.js";
 import { createPaymentRequest } from "./tutorPaymentRequest.controller.js";
+import { getUpcomingDemoBookings } from "./getUpcomingDemoBookings.controller.js";
 
 export {
     getAllTeacherRequests,
@@ -35,10 +36,10 @@ export {
     getLatestStudents,
     getLatestPendingTutorApplications,
     getUpcomingDemos,
-    bookingStats,
     getStudentDetail,
     getStudents,
     getStudentGrowth,
     updateStudentStatus,
     createPaymentRequest,
+    getUpcomingDemoBookings
 };
