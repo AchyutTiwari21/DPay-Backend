@@ -1,6 +1,7 @@
 import { TutorProfile, User, Subject, Availability } from "../../models/index.js";
 import { ApiResponse, asyncHandler } from "../../utils/index.js";
 import { mailSender } from "../../utils/mailSender.js";
+import mongoose from "mongoose";
 
 export const addTutor = asyncHandler(async (req, res) => {
     const { email } = req.body;
@@ -235,22 +236,49 @@ export const getTutors = asyncHandler(async (req, res) => {
 });
 
 export const getTutor = asyncHandler(async (req, res) => {
-    const { userId } = req.params;
+    const { tutorId } = req.params;
 
+    console.log("TutorID: ", tutorId);
+    
     try {
-        const tutor = await TutorProfile.findOne({ user: userId }).populate("user", "name email").populate("subjects");
+        const pipeline = [
+            // Match the specific tutor with new keyword
+            { $match: { _id: new mongoose.Types.ObjectId(tutorId) } },
+
+            // Same lookups as getTutors
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "user",
+                    foreignField: "_id",
+                    as: "user",
+                    pipeline: [
+                        { $project: { _id: 0, name: 1, email: 1 } }
+                    ]
+                }
+            },
+            { $unwind: "$user" },
+            // Project fields in the same format
+            {
+                $project: {
+                    _id: 1,
+                    name: "$user.name",
+                    email: "$user.email",
+                    phone: 1,
+                    address: 1
+                }
+            }
+        ];
+
+        const [tutor] = await TutorProfile.aggregate(pipeline);
 
         if (!tutor) {
-            return res.status(404).json(new ApiResponse(
-                false, 
-                null, 
-                "Tutor not found"
-            ));
+            return res.status(404).json(new ApiResponse(404, null, "Tutor not found"));
         }
 
         return res.status(200).json(new ApiResponse(
-            200, 
-            tutor, 
+            200,
+            tutor,
             "Tutor retrieved successfully"
         ));
     } catch (error) {

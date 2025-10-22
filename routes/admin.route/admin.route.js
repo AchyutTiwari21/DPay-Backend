@@ -35,7 +35,7 @@ router.route("/add-tutor").post(verifyJWT, verifyAdmin, addTutor);
 
 router.route("/get-tutors").get(verifyJWT, verifyAdmin, getTutors);
 
-router.route("/get-tutor/:userId").get(verifyJWT, verifyAdmin, getTutor);
+router.route("/get-tutor/:tutorId").get(verifyJWT, verifyAdmin, getTutor);
 
 router.route("/remove-tutor/:tutorId").delete(verifyJWT, verifyAdmin, removeTutor);
 
@@ -63,6 +63,6 @@ router.route("/update-student/:studentId").put(verifyJWT, verifyAdmin, updateStu
 
 router.route("/create-payment-request").post(verifyJWT, verifyAdmin, createPaymentRequest);
 
-router.route("/get-upcoming-demo-bookings").get(verifyJWT, verifyAdmin,getUpcomingDemoBookings);
+router.route("/get-upcoming-demo-bookings").get(verifyJWT, verifyAdmin, getUpcomingDemoBookings);
 
 export default router;
