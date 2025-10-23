@@ -1,4 +1,4 @@
-import { StudentProfile, TutorProfile, Tution, Payment } from '../../models/index.js';
+import { StudentProfile, TutorProfile, Tution, LessonPayment } from '../../models/index.js';
 import { asyncHandler } from '../../utils/index.js';
 
 export const getDashboardStats = asyncHandler(async (req, res) => {
@@ -19,7 +19,7 @@ export const getDashboardStats = asyncHandler(async (req, res) => {
     const activeTutions = await Tution.countDocuments({ status: { $in: ["ONGOING", "CONFIRMED"] } });
 
     // Earnings This Month
-    const earningsThisMonthAgg = await Payment.aggregate([
+    const earningsThisMonthAgg = await LessonPayment.aggregate([
       {
         $match: {
           createdAt: { $gte: startOfThisMonth, $lt: now },

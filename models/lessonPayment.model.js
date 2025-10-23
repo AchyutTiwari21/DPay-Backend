@@ -1,22 +1,19 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
 
-const paymentSchema = new Schema({
+const LessonPaymentSchema = new Schema({
   lesson: {
     type: Schema.Types.ObjectId,
-    ref: "Lesson",
-    required: true
+    ref: "Lesson"
   },
 
   student: { 
     type: Schema.Types.ObjectId, 
-    ref: "User", 
-    required: true 
+    ref: "User"
   },
   tutor: {
     type: Schema.Types.ObjectId,
-    ref: "TutorProfile",
-    required: true
+    ref: "TutorProfile"
   },
 
   razorpay_order_id: { 
@@ -52,5 +49,5 @@ const paymentSchema = new Schema({
   paidAt: { type: Date },
 }, { timestamps: true });
 
-const Payment = mongoose.model("Payment", paymentSchema);
-export default Payment;
+const LessonPayment = mongoose.model("LessonPayment", LessonPaymentSchema);
+export default LessonPayment;

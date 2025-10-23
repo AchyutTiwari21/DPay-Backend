@@ -1,5 +1,5 @@
 import { asyncHandler, ApiResponse } from "../../../utils/index.js";
-import { Lesson, TutorProfile, Payment, Subject } from "../../../models/index.js";
+import { Lesson, TutorProfile, LessonPayment, Subject } from "../../../models/index.js";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 import { sessionAmount } from "../../../constants.js";
@@ -43,7 +43,7 @@ export const createOrder = asyncHandler(async (req, res) => {
 
     const order = await razorpay.orders.create(options);
 
-    await Payment.create({
+    await LessonPayment.create({
       lesson: lesson._id,
       student: req.user._id,
       tutor: tutor._id,

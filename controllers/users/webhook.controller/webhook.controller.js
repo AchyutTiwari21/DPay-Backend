@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { asyncHandler } from "../../../utils/index.js";
-import { Lesson, Payment, StudentProfile, User, Availability } from "../../../models/index.js";
+import { Lesson, LessonPayment, StudentProfile, User, Availability } from "../../../models/index.js";
 
 export const webhookHandler = asyncHandler(async (req, res) => {
   try {
@@ -26,7 +26,7 @@ export const webhookHandler = asyncHandler(async (req, res) => {
     if (event === "payment.captured") {
       const payment = req.body.payload.payment.entity;
 
-      const paymentData = await Payment.findOneAndUpdate(
+      const paymentData = await LessonPayment.findOneAndUpdate(
         { razorpay_order_id: payment.order_id },
         {
           razorpay_payment_id: payment.id,
@@ -83,7 +83,7 @@ export const webhookHandler = asyncHandler(async (req, res) => {
     else if (event === "payment.failed") {
       const payment = req.body.payload.payment.entity;
 
-      const paymentData = await Payment.findOneAndUpdate(
+      const paymentData = await LessonPayment.findOneAndUpdate(
         { razorpay_order_id: payment.order_id },
         {
           razorpay_payment_id: payment.id,
