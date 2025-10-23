@@ -18,7 +18,7 @@ import { getLatestStudents, getLatestPendingTutorApplications } from "./getDashb
 import { getUpcomingDemos } from "./getUpcomingDemos.controller.js";
 import { getStudent, getStudents, getStudentGrowth, updateStudentStatus } from "./studentDetail.controller.js";
 import { createPaymentRequest } from "./tutorPaymentRequest.controller.js";
-import { getUpcomingDemoBookings } from "./getUpcomingDemoBookings.controller.js";
+import { getUpcomingDemoBookings, removeBooking } from "./getUpcomingDemoBookings.controller.js";
 
 export {
     getAllTeacherRequests,
@@ -41,5 +41,6 @@ export {
     getStudentGrowth,
     updateStudentStatus,
     createPaymentRequest,
-    getUpcomingDemoBookings
+    getUpcomingDemoBookings,
+    removeBooking
 };

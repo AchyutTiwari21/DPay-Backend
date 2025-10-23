@@ -25,7 +25,7 @@ export const getUpcomingDemoBookings = asyncHandler(async (req, res) => {
         // Match stage for demo lessons
         pipeline.push({
             $match: {
-                status: { $in: ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"] }
+                status: { $in: ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED", "EXPIRED"] }
             }
         });
 
@@ -200,6 +200,45 @@ export const getUpcomingDemoBookings = asyncHandler(async (req, res) => {
 
     } catch (error) {
         console.error("Error retrieving demo bookings:", error.message);
+        return res.status(500).json(new ApiResponse(
+            500,
+            null,
+            "Internal Server Error"
+        ));
+    }
+});
+
+export const removeBooking = asyncHandler(async (req, res) => {
+    const { bookingId } = req.params;
+
+    try {
+        const booking = await Lesson.findById(bookingId);
+
+        if (!booking) {
+            return res.status(404).json(new ApiResponse(
+                404,
+                null,
+                "Booking not found"
+            ));
+        }
+
+        if(booking.status === "PENDING" || booking.status === "CONFIRMED") {
+            return res.status(400).json(new ApiResponse(
+                400,
+                null,
+                "Only COMPLETED or CANCELLED bookings can be deleted"
+            ));
+        }
+
+        await Lesson.findByIdAndDelete(bookingId);
+
+        return res.status(200).json(new ApiResponse(
+            200,
+            null,
+            "Booking deleted successfully"
+        ));
+    } catch (error) {
+        console.error("Error deleting booking:", error.message);
         return res.status(500).json(new ApiResponse(
             500,
             null,

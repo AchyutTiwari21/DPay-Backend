@@ -20,7 +20,8 @@ import {
     getStudentGrowth,
     updateStudentStatus,
     createPaymentRequest,
-    getUpcomingDemoBookings
+    getUpcomingDemoBookings,
+    removeBooking
 } from "../../controllers/admin/index.js";
 import { verifyJWT, verifyAdmin } from "../../middlewares/index.js";
 
@@ -67,5 +68,7 @@ router.route("/update-student/:studentId").put(verifyJWT, verifyAdmin, updateStu
 router.route("/create-payment-request").post(verifyJWT, verifyAdmin, createPaymentRequest);
 
 router.route("/get-upcoming-demo-bookings").get(verifyJWT, verifyAdmin, getUpcomingDemoBookings);
+
+router.route("/remove-booking/:bookingId").delete(verifyJWT, verifyAdmin, removeBooking);
 
 export default router;
