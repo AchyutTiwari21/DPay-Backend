@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { asyncHandler } from "../../../utils/index.js";
-import { Lesson, LessonPayment, StudentProfile, User, Availability } from "../../../models/index.js";
+import { Lesson, Payment, StudentProfile, User, Availability } from "../../../models/index.js";
 
 export const webhookHandler = asyncHandler(async (req, res) => {
   try {
@@ -26,13 +26,19 @@ export const webhookHandler = asyncHandler(async (req, res) => {
     if (event === "payment.captured") {
       const payment = req.body.payload.payment.entity;
 
-      const paymentData = await LessonPayment.findOneAndUpdate(
-        { razorpay_order_id: payment.order_id },
+      let paymentMethod = null;
+      if (payment.method === "netbanking") paymentMethod = "Net Banking";
+      else if (payment.method === "card") paymentMethod = "Card";
+      else if (payment.method === "wallet") paymentMethod = "Wallet";
+      else if (payment.method === "upi") paymentMethod = "UPI";
+
+      const paymentData = await Payment.findOneAndUpdate(
+        { orderId: payment.order_id },
         {
-          razorpay_payment_id: payment.id,
+          paymentId: payment.id,
           status: "PAID",
-          paidAt: new Date(),
-          method: payment.method,
+          method: paymentMethod,
+          date: new Date()
         },
         { new: true }
       );
@@ -59,7 +65,7 @@ export const webhookHandler = asyncHandler(async (req, res) => {
         }
       );
 
-      const studentProfile = await StudentProfile.findOne({ user: paymentData.student });
+      const studentProfile = await StudentProfile.findOne({ user: paymentData.payer });
 
       if (studentProfile) {
         studentProfile.demoLessons.push(paymentData.lesson);
@@ -67,43 +73,50 @@ export const webhookHandler = asyncHandler(async (req, res) => {
         await studentProfile.save({ validateBeforeSave: false });
       } else {
         await StudentProfile.create({
-          user: paymentData.student,
+          user: paymentData.payer,
           demoLessons: [paymentData.lesson],
           paymentHistory: [paymentData._id]
         });
         await User.findByIdAndUpdate(
-          paymentData.student,
+          paymentData.payer,
           { $set: { role: "STUDENT" } }
         );
       }
 
-      console.log("✅ Payment successful:", paymentData.razorpay_payment_id);
+      console.log("✅ Payment successful:", payment.id);
     }
 
     else if (event === "payment.failed") {
       const payment = req.body.payload.payment.entity;
 
-      const paymentData = await LessonPayment.findOneAndUpdate(
-        { razorpay_order_id: payment.order_id },
+      let paymentMethod = null;
+      if (payment.method === "netbanking") paymentMethod = "Net Banking";
+      else if (payment.method === "card") paymentMethod = "Card";
+      else if (payment.method === "wallet") paymentMethod = "Wallet";
+      else if (payment.method === "upi") paymentMethod = "UPI";
+
+      const paymentData = await Payment.findOneAndUpdate(
+        { orderId: payment.order_id },
         {
-          razorpay_payment_id: payment.id,
+          paymentId: payment.id,
           status: "FAILED",
-          method: payment.method,
-        }
+          method: paymentMethod,
+        },
+        { new: true }
       );
 
-      const studentProfile = await StudentProfile.findOne({ user: paymentData.student });
+      const studentProfile = await StudentProfile.findOne({ user: paymentData.payer });
 
       if (studentProfile) {
         studentProfile.paymentHistory.push(paymentData._id);
         await studentProfile.save({ validateBeforeSave: false });
       } else {
         await StudentProfile.create({
-          user: paymentData.student,
+          user: paymentData.payer,
           paymentHistory: [paymentData._id]
         });
         await User.findByIdAndUpdate(
-          paymentData.student,
+          paymentData.payer,
           { $set: { role: "STUDENT" } }
         );
       }

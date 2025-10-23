@@ -5,7 +5,7 @@ export { default as Subject } from "./subject.model.js";
 export { default as Availability } from "./availability.model.js";
 export { default as Lesson } from "./lesson.model.js";
 export { default as Review } from "./review.model.js";
-export { default as LessonPayment } from "./lessonPayment.model.js";
+export { default as Payment } from "./payment.model.js";
 export { default as OTP } from "./otp.model.js";
 export { default as ApplyTeacherRequest } from "./applyTeacherRequest.model.js";
 export { default as Tution } from "./tution.model.js";

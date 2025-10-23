@@ -1,5 +1,5 @@
 import { asyncHandler, ApiResponse } from "../../../utils/index.js";
-import { Lesson, TutorProfile, LessonPayment, Subject } from "../../../models/index.js";
+import { Lesson, TutorProfile, Payment, Subject } from "../../../models/index.js";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 import { sessionAmount } from "../../../constants.js";
@@ -43,15 +43,12 @@ export const createOrder = asyncHandler(async (req, res) => {
 
     const order = await razorpay.orders.create(options);
 
-    await LessonPayment.create({
-      lesson: lesson._id,
-      student: req.user._id,
-      tutor: tutor._id,
-      razorpay_order_id: order.id,
+    await Payment.create({
+      payer: req.user._id,
       amount: sessionAmount,
-      currency: "INR",
-      receipt: options.receipt,
-      status: "PENDING",
+      orderId: order.id,
+      type: "Demo Class Payment",
+      lesson: lesson._id
     });
 
     return res.status(200).json(new ApiResponse(200, { orderId: order.id }, "Order created successfully"));

@@ -133,7 +133,7 @@ export const getStudents = asyncHandler(async (req, res) => {
           localField: 'paymentHistory',
           foreignField: '_id',
           as: 'paymentHistory',
-          pipeline: [{ $project: { amount: 1, paidAt: 1, status: 1, razorpay_payment_id: 1, createdAt: 1 } }]
+          pipeline: [{ $project: { amount: 1, date: 1, status: 1, paymentId: 1, createdAt: 1 } }]
         }
       },
 

@@ -1,5 +1,5 @@
 import cron from "node-cron";
-import { Lesson, LessonPayment } from "../models/index.js";
+import { Lesson, Payment } from "../models/index.js";
 
 export const startCleanupJob = () => {
   cron.schedule("0 6 * * *", async () => {
@@ -11,7 +11,7 @@ export const startCleanupJob = () => {
         { $set: { status: "EXPIRED" } }
       );
 
-      await LessonPayment.updateMany(
+      await Payment.updateMany(
         { status: "PENDING", createdAt: { $lt: cutoff } },
         { $set: { status: "EXPIRED" } }
       );
