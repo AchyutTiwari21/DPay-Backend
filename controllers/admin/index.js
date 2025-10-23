@@ -19,6 +19,7 @@ import { getUpcomingDemos } from "./getUpcomingDemos.controller.js";
 import { getStudent, getStudents, getStudentGrowth, updateStudentStatus } from "./studentDetail.controller.js";
 import { createPaymentRequest } from "./tutorPaymentRequest.controller.js";
 import { getUpcomingDemoBookings, removeBooking } from "./getUpcomingDemoBookings.controller.js";
+import { getPayments } from "./payment.controller.js";
 
 export {
     getAllTeacherRequests,
@@ -42,5 +43,6 @@ export {
     updateStudentStatus,
     createPaymentRequest,
     getUpcomingDemoBookings,
-    removeBooking
+    removeBooking,
+    getPayments
 };
