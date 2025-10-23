@@ -54,7 +54,7 @@ export const getUpcomingDemoBookings = asyncHandler(async (req, res) => {
                     foreignField: "_id",
                     as: "studentDetails",
                     pipeline: [
-                        { $project: { name: 1, email: 1 } }
+                        { $project: { _id: 1, name: 1, email: 1 } }
                     ]
                 }
             },
@@ -131,6 +131,7 @@ export const getUpcomingDemoBookings = asyncHandler(async (req, res) => {
         pipeline.push({
             $project: {
                 id: "$_id",
+                studentId: "$studentDetails._id",
                 student: "$studentDetails.name",
                 tutorId: "$tutor",
                 tutor: "$tutorDetails.user.name",

@@ -237,9 +237,6 @@ export const getTutors = asyncHandler(async (req, res) => {
 
 export const getTutor = asyncHandler(async (req, res) => {
     const { tutorId } = req.params;
-
-    console.log("TutorID: ", tutorId);
-    
     try {
         const pipeline = [
             // Match the specific tutor with new keyword

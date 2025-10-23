@@ -1,5 +1,6 @@
 import StudentProfile from '../../models/studentProfile.model.js';
 import { ApiResponse, asyncHandler } from '../../utils/index.js';
+import mongoose from 'mongoose';
 
 const maskAccount = (acct = '') => {
   if (!acct) return acct;
@@ -8,89 +9,57 @@ const maskAccount = (acct = '') => {
   return '******' + last4;
 };
 
-export const getStudentDetail = async (req, res) => {
-  try {
-    const { id } = req.params;
+export const getStudent = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
 
-    // Try to find by profile id first, then by user id
-    let profile = await StudentProfile.findById(id)
-      .populate('user', 'name email')
-      .populate({
-        path: 'paymentHistory',
-        // populate fields if Payment model differs
-      })
-      .populate({
-        path: 'tutions',
-        // populate tutor/name fields if available
-      })
-      .populate({
-        path: 'demoLessons'
-      });
-
-    if (!profile) {
-      profile = await StudentProfile.findOne({ user: id })
-        .populate('user', 'name email')
-        .populate('paymentHistory')
-        .populate('tutions')
-        .populate('demoLessons');
-    }
-
-    if (!profile) {
-      return res.status(404).json({ success: false, message: 'Student profile not found' });
-    }
-
-    // Map backend model to frontend mock shape
-    const mapped = {
-      id: profile._id,
-      name: profile.user?.name || '',
-      email: profile.user?.email || '',
-      phone: profile.phone || '',
-      // Try to derive subjects from tutions/demoLessons if present
-      subjects: Array.isArray(profile.tutions) && profile.tutions.length
-        ? profile.tutions.map(t => t.subject || t.title || t.name).filter(Boolean)
-        : (Array.isArray(profile.demoLessons) && profile.demoLessons.length
-            ? profile.demoLessons.map(d => d.subject || d.title || d.name).filter(Boolean)
-            : []),
-      assignedTutor: (Array.isArray(profile.tutions) && profile.tutions[0] && (profile.tutions[0].tutorName || (profile.tutions[0].tutor && profile.tutions[0].tutor.name)))
-        || 'Unassigned',
-      status: (profile.status || '').toString().toLowerCase(), // Active -> active
-      coins: typeof profile.coins === 'number' ? profile.coins : (profile.walletBalance || 0),
-      registrationDate: profile.createdAt ? new Date(profile.createdAt).toISOString().split('T')[0] : null,
-      address: profile.address || '',
-      bankDetails: {
-        accountNumber: maskAccount(profile.bankDetails?.accountNumber),
-        bankName: profile.bankDetails?.bankName || '',
-        ifsc: profile.bankDetails?.ifscCode || profile.bankDetails?.ifsc || ''
-      },
-      documents: Array.isArray(profile.documents) ? profile.documents : [],
-      // enrollments - try to map from tutions/demoLessons
-      enrollments: Array.isArray(profile.tutions) && profile.tutions.length
-        ? profile.tutions.map(t => ({
-            course: t.title || t.course || t.name || 'Course',
-            startDate: t.startDate ? new Date(t.startDate).toISOString().split('T')[0] : (t.createdAt ? new Date(t.createdAt).toISOString().split('T')[0] : null),
-            status: (t.status || 'active').toString().toLowerCase()
-          }))
-        : (Array.isArray(profile.demoLessons) ? profile.demoLessons.map(d => ({
-            course: d.title || d.name || 'Demo Lesson',
-            startDate: d.startDate ? new Date(d.startDate).toISOString().split('T')[0] : (d.createdAt ? new Date(d.createdAt).toISOString().split('T')[0] : null),
-            status: (d.status || 'active').toString().toLowerCase()
-          })) : []),
-      // payments - map to { id, amount, date, status }
-      payments: Array.isArray(profile.paymentHistory) ? profile.paymentHistory.map(p => ({
-        id: p._id || p.paymentId || '',
-        amount: p.amount || 0,
-        date: p.date ? new Date(p.date).toISOString().split('T')[0] : (p.createdAt ? new Date(p.createdAt).toISOString().split('T')[0] : null),
-        status: (p.status || 'completed').toString().toLowerCase()
-      })) : [],
-      referralCoins: typeof profile.referralCoins === 'number' ? profile.referralCoins : 0
-    };
-
-    return res.status(200).json({ success: true, data: mapped });
-  } catch (err) {
-    console.error('getStudentDetail error:', err);
-    return res.status(500).json({ success: false, message: 'Server error' });
+  // validate id
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json(new ApiResponse(400, null, "Invalid student id"));
   }
-};
+
+  try {
+    const oid = new mongoose.Types.ObjectId(userId);
+
+    const pipeline = [
+      // match by profile _id OR by referenced user id (handles routes that pass either)
+      { $match: { $or: [{ _id: oid }, { user: oid }] } },
+
+      // populate user basics
+      {
+        $lookup: {
+          from: "users",
+          localField: "user",
+          foreignField: "_id",
+          as: "user",
+          pipeline: [{ $project: { _id: 0, name: 1, email: 1 } }]
+        }
+      },
+      { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
+
+      // project desired fields
+      {
+        $project: {
+          _id: 1,
+          name: "$user.name",
+          email: "$user.email",
+          phone: 1,
+          address: 1
+        }
+      }
+    ];
+
+    const [student] = await StudentProfile.aggregate(pipeline);
+
+    if (!student) {
+      return res.status(404).json(new ApiResponse(404, null, "Student not found"));
+    }
+
+    return res.status(200).json(new ApiResponse(200, student, "Student retrieved successfully"));
+  } catch (error) {
+    console.error("Error retrieving student:", error.message || error);
+    return res.status(500).json(new ApiResponse(500, null, "Internal Server Error"));
+  }
+});
 
 export const getStudents = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10, search, status } = req.query;

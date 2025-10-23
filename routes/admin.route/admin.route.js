@@ -16,6 +16,7 @@ import {
     getLatestPendingTutorApplications,
     getUpcomingDemos,
     getStudents,
+    getStudent,
     getStudentGrowth,
     updateStudentStatus,
     createPaymentRequest,
@@ -54,6 +55,8 @@ router.route("/latest-students").get(verifyJWT, verifyAdmin, getLatestStudents);
 router.route("/latest-applications").get(verifyJWT, verifyAdmin, getLatestPendingTutorApplications);
 
 router.route("/upcoming-demos").get(verifyJWT, verifyAdmin, getUpcomingDemos);
+
+router.route("/get-student/:userId").get(verifyJWT, verifyAdmin, getStudent);
 
 router.route("/get-students").get(verifyJWT, verifyAdmin, getStudents);
 
