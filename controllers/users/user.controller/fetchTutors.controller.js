@@ -8,6 +8,10 @@ export const getTutors = asyncHandler(async (req, res) => {
     try {
         let pipeline = [];
 
+        pipeline.push({
+            $match: { status: "Active", paymentStatus: "Paid" }
+        });
+
         // 🔹 Price Range filter
         if (minPrice && maxPrice) {
             pipeline.push({

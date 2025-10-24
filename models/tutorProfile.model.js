@@ -60,7 +60,8 @@ const tutorProfileSchema = new Schema({
   }],
   paymentStatus: {
     type: String,
-    enum: ["Paid", "Pending", "Failed"]
+    enum: ["Paid", "Pending", "Failed"],
+    default: "Pending"
   },
   paymentHistory: [{
     type: Schema.Types.ObjectId,
