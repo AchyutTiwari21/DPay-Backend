@@ -81,7 +81,47 @@ export const getPayments = asyncHandler(async (req, res) => {
                 from: "lessons",
                 localField: "lesson",
                 foreignField: "_id",
-                as: "bookingDetails"
+                as: "bookingDetails",
+                pipeline: [
+                    // populate subject
+                    {
+                        $lookup: {
+                            from: "subjects",
+                            localField: "subject",
+                            foreignField: "_id",
+                            as: "subject",
+                            pipeline: [{ $project: { name: 1 } }]
+                        }
+                    },
+                    { $unwind: { path: "$subject", preserveNullAndEmptyArrays: true } },
+
+                    // populate tutor -> user (to get tutor name)
+                    {
+                        $lookup: {
+                            from: "tutorprofiles",
+                            localField: "tutor",
+                            foreignField: "_id",
+                            as: "tutor",
+                            pipeline: [
+                                {
+                                    $lookup: {
+                                        from: "users",
+                                        localField: "user",
+                                        foreignField: "_id",
+                                        as: "user",
+                                        pipeline: [{ $project: { name: 1 } }]
+                                    }
+                                },
+                                { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
+                                { $project: { fullName: "$user.name" } }
+                            ]
+                        }
+                    },
+                    { $unwind: { path: "$tutor", preserveNullAndEmptyArrays: true } },
+
+                    // project the fields you will use later
+                    { $project: { _id: 1, date: 1, subjectName: "$subject.name", tutorName: "$tutor.fullName" } }
+                ]
             }
         });
 
@@ -89,6 +129,7 @@ export const getPayments = asyncHandler(async (req, res) => {
         pipeline.push({
             $project: {
                 id: "$_id",
+                paymentId: 1,
                 payerName: "$payerDetails.name",
                 role: "$payerDetails.role",
                 amount: 1,
@@ -99,10 +140,10 @@ export const getPayments = asyncHandler(async (req, res) => {
                 date: { $dateToString: { format: "%Y-%m-%d", date: "$date" } },
                 booking: {
                     $cond: {
-                        if: { $eq: ["$type", "Booking Payment"] },
+                        if: { $eq: ["$type", "Demo Class Payment"] },
                         then: {
                             bookingId: { $arrayElemAt: ["$bookingDetails._id", 0] },
-                            subject: { $arrayElemAt: ["$bookingDetails.subject", 0] },
+                            subject: { $arrayElemAt: ["$bookingDetails.subjectName", 0] },
                             sessionDate: {
                                 $dateToString: {
                                     format: "%Y-%m-%d",
@@ -133,7 +174,7 @@ export const getPayments = asyncHandler(async (req, res) => {
                         },
                         else: "$$REMOVE"
                     }
-                }
+                },
             }
         });
 
