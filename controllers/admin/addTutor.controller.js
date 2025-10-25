@@ -158,38 +158,46 @@ export const getTutors = asyncHandler(async (req, res) => {
       pipeline.push({ $match: filterMatch });
     }
 
-    // compute totals & counts from the filtered set (before pagination)
-    const countsPipeline = [...pipeline,
-      {
-        $group: {
-          _id: null,
-          total: { $sum: 1 },
-          activeCount: { $sum: { $cond: [{ $eq: ['$status', 'Active'] }, 1, 0] } },
-          pendingCount: { $sum: { $cond: [{ $eq: ['$verified', false] }, 1, 0] } },
-          topRatedCount: { $sum: { $cond: [{ $gte: ['$rating', 4.5] }, 1, 0] } }
-        }
-      }
-    ];
+    const [tutors, statsResults] = await Promise.all([
+      // Main tutors query with pagination
+      TutorProfile.aggregate([...pipeline, { $skip: skip }, { $limit: perPage }]),
 
-    const countsResult = await TutorProfile.aggregate(countsPipeline);
-    const counts = countsResult[0] || { total: 0, activeCount: 0, pendingCount: 0, topRatedCount: 0 };
+      // Stats queries using Promise.all
+      Promise.all([
+        // Total matching documents count using the pipeline
+        TutorProfile.aggregate([...pipeline, { $count: "total" }]),
 
-    const totalTutors = await TutorProfile.countDocuments();
-    const totalPages = Math.ceil(totalTutors / perPage);
-    const activeTutors = await TutorProfile.countDocuments({ status: 'Active' });
-    const pendingTutors = await TutorProfile.countDocuments({ verified: false });
-    const topRatedTutors = await TutorProfile.countDocuments({ rating: { $gte: 4.5 } });
+        // Total tutors count
+        TutorProfile.countDocuments(),
 
-    // default sort - newest first
-    pipeline.push({ $sort: { createdAt: -1, _id: 1 } });
+        // Active tutors count
+        TutorProfile.countDocuments({
+          status: 'Active'
+        }),
 
-    // pagination
-    pipeline.push({ $skip: skip }, { $limit: perPage });
+        // Pending verification count
+        TutorProfile.countDocuments({
+          verified: false
+        }),
 
-    const profiles = await TutorProfile.aggregate(pipeline);
+        // Top rated tutors count
+        TutorProfile.countDocuments({
+          rating: { $gte: 4.5 }
+        })
+      ])
+    ]);
+
+    // Destructure stats results
+    const [totalAgg, totalTutors, activeTutors, pendingTutors, topRatedTutors] = statsResults;
+
+    // If totalAgg is empty, that means there were no matches
+    const total = totalAgg.length > 0 ? totalAgg[0].total : 0;
+    
+    // Calculate pagination metadata
+    const totalPages = Math.ceil(total / perPage);
 
     // map to frontend mock shape used in Tutor.jsx
-    const tutors = profiles.map(p => {
+    const mappedTutors = tutors.map(p => {
       return {
         id: p._id,
         name: p.user?.name || '',
@@ -219,13 +227,16 @@ export const getTutors = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(
       200,
       {
-        tutors,
-        totalTutors,
+        tutors: mappedTutors,
         totalPages,
         currentPage: pageNumber,
-        activeTutors,
-        pendingTutors,
-        topRatedTutors
+        stats: {
+          totalTutors,
+          total,
+          activeTutors,
+          pendingTutors,
+          topRatedTutors
+        }
       },
       'Tutors retrieved successfully'
     ));
