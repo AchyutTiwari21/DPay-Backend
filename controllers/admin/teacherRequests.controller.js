@@ -36,7 +36,7 @@ export const getAllTeacherRequests = asyncHandler(async (req, res) => {
                     localField: 'subjects',
                     foreignField: '_id',
                     as: 'subjects',
-                    pipeline: [{ $project: { name: 1, category: 1 } }]
+                    pipeline: [{ $project: { name: 1, category: 1 } } ]
                 }
             },
 
@@ -96,63 +96,53 @@ export const getAllTeacherRequests = asyncHandler(async (req, res) => {
             });
         }
 
-        // Get total count before pagination
-        const countPipeline = [...pipeline];
-        const countResult = await ApplyTeacherRequest.aggregate(countPipeline);
-        const totalRequests = countResult.length;
-        const totalPages = Math.ceil(totalRequests / perPage);
+        // Run main query (with sort + pagination) and stats in parallel
+        const [requests, statsResults] = await Promise.all([
+            // Main aggregate with pagination
+            ApplyTeacherRequest.aggregate([
+                ...pipeline,
+                { $sort: { createdAt: -1, _id: 1 } },
+                { $skip: skip },
+                { $limit: perPage }
+            ]),
 
-        // Get counts for different statuses
-        const statusCounts = await ApplyTeacherRequest.aggregate([
-            ...pipeline.slice(0, -3), // Remove sort, skip and limit
-            {
-                $group: {
-                    _id: null,
-                    totalRequests: { $sum: 1 },
-                    pendingRequests: {
-                        $sum: {
-                            $cond: [{ $eq: ["$status", "PENDING"] }, 1, 0]
-                        }
-                    },
-                    acceptedRequests: {
-                        $sum: {
-                            $cond: [{ $eq: ["$status", "ACCEPTED"] }, 1, 0]
-                        }
-                    },
-                    rejectedRequests: {
-                        $sum: {
-                            $cond: [{ $eq: ["$status", "REJECTED"] }, 1, 0]
-                        }
-                    }
-                }
-            }
+            // Stats: total matching (for pagination) + global counts
+            Promise.all([
+                // total matching documents count using the same pipeline (before pagination)
+                ApplyTeacherRequest.aggregate([...pipeline, { $count: "total" }]),
+
+                // total requests (all documents)
+                ApplyTeacherRequest.countDocuments(),
+
+                // pending requests
+                ApplyTeacherRequest.countDocuments({ status: "PENDING" }),
+
+                // accepted requests
+                ApplyTeacherRequest.countDocuments({ status: "ACCEPTED" }),
+
+                // rejected requests
+                ApplyTeacherRequest.countDocuments({ status: "REJECTED" })
+            ])
         ]);
 
-        const counts = statusCounts[0] || {
-            totalRequests: 0,
-            pendingRequests: 0,
-            acceptedRequests: 0,
-            rejectedRequests: 0
-        };
+        // Destructure stats results
+        const [totalAgg, totalRequests, pendingRequests, acceptedRequests, rejectedRequests] = statsResults;
 
-        // Add sorting and pagination
-        pipeline.push(
-            { $sort: { createdAt: -1, _id: 1 } },
-            { $skip: skip },
-            { $limit: perPage }
-        );
+        // If totalAgg is empty, that means there were no matches for the pipeline
+        const total = totalAgg.length > 0 ? totalAgg[0].total : 0;
 
-        const requests = await ApplyTeacherRequest.aggregate(pipeline);
+        const totalPages = Math.max(0, Math.ceil(total / perPage));
 
         return res.status(200).json(
             new ApiResponse(
                 200,
                 {
                     requests,
-                    totalRequests: counts.totalRequests,
-                    pendingRequests: counts.pendingRequests,
-                    acceptedRequests: counts.acceptedRequests,
-                    rejectedRequests: counts.rejectedRequests,
+                    totalRequests,
+                    total, // number matching current filters (used for pagination)
+                    pendingRequests,
+                    acceptedRequests,
+                    rejectedRequests,
                     totalPages,
                     currentPage: pageNumber
                 },
