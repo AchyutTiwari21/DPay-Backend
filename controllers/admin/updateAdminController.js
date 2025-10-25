@@ -69,9 +69,11 @@ export const updateAdminCredentials = asyncHandler(async (req, res) => {
             user.password = newPassword;
         }
         await user.save();
+
+        const updatedUser = await User.findById(userId).select("name email avatar");
     
         return res.status(200).json(
-            new ApiResponse(200, user, "Admin credentials updated successfully.")
+            new ApiResponse(200, updatedUser, "Admin credentials updated successfully.")
         );
     } catch (error) {
         console.log("Error while updating admin credentials: ", error.message);     
