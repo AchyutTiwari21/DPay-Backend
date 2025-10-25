@@ -176,9 +176,9 @@ export const getTutors = asyncHandler(async (req, res) => {
 
     const totalTutors = await TutorProfile.countDocuments();
     const totalPages = Math.ceil(totalTutors / perPage);
-    const activeTutors = Number(counts.activeCount || 0);
-    const pendingTutors = Number(counts.pendingCount || 0);
-    const topRatedTutors = Number(counts.topRatedCount || 0);
+    const activeTutors = await TutorProfile.countDocuments({ status: 'Active' });
+    const pendingTutors = await TutorProfile.countDocuments({ verified: false });
+    const topRatedTutors = await TutorProfile.countDocuments({ rating: { $gte: 4.5 } });
 
     // default sort - newest first
     pipeline.push({ $sort: { createdAt: -1, _id: 1 } });

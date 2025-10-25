@@ -155,7 +155,7 @@ export const getStudents = asyncHandler(async (req, res) => {
       }
     ];
 
-    // If search present, add a match after the lookup/unwind so we can search user fields too
+    // Add search filter if present
     if (search) {
       const regex = new RegExp(search, 'i');
       pipeline.push({
@@ -170,48 +170,50 @@ export const getStudents = asyncHandler(async (req, res) => {
       });
     }
 
-    // If status query provided and not 'all', filter by status (case-insensitive)
+    // Add status filter if present
     if (status && status.toString().toLowerCase() !== 'all') {
-      // Accept values like 'active'|'Active'|'pending' etc.
       const statusRegex = new RegExp(`^${status}$`, 'i');
       pipeline.push({ $match: { status: statusRegex } });
     }
 
-    // default sort by createdAt desc (newest first)
+    // Sort by creation date
     pipeline.push({ $sort: { createdAt: -1, _id: 1 } });
 
-    // For counting total matching documents, clone pipeline and add $count
-    const countPipeline = [...pipeline, { $count: 'total' }];
-    const countResult = await StudentProfile.aggregate(countPipeline);
-    const totalStudents = countResult[0]?.total ? Number(countResult[0].total) : 0;
-    const totalPages = Math.ceil(totalStudents / perPage);
+    const [students, statsResults] = await Promise.all([
+      // Main students query with pagination
+      StudentProfile.aggregate([...pipeline, { $skip: skip }, { $limit: perPage }]),
 
-    // Aggregate status counts for matching set (Active / Pending)
-    const statusPipeline = [...pipeline, {
-      $group: {
-        _id: '$status',
-        count: { $sum: 1 }
-      }
-    }];
+      // Stats queries using Promise.all
+      Promise.all([
+        // Total matching documents count using the pipeline
+        StudentProfile.aggregate([...pipeline, { $count: "total" }]),
 
-    const statusAgg = await StudentProfile.aggregate(statusPipeline);
-    let activeStudents = 0;
-    let pendingVerification = 0;
-    statusAgg.forEach(s => {
-      const key = (s._id || '').toString().toLowerCase();
-      if (key === 'active') activeStudents = s.count;
-      if (key === 'pending') pendingVerification = s.count;
-    });
+        // Total students count
+        StudentProfile.countDocuments(),
 
-    // add pagination
-    pipeline.push({ $skip: skip });
-    pipeline.push({ $limit: perPage });
+        // Active students count
+        StudentProfile.countDocuments({
+          status: { $regex: /^active$/i }
+        }),
 
-    // run aggregation to get page of profiles
-    const profiles = await StudentProfile.aggregate(pipeline);
+        // Pending verification count
+        StudentProfile.countDocuments({
+          status: { $regex: /^pending$/i }
+        })
+      ])
+    ]);
+
+    // Destructure stats results
+    const [totalAgg, totalStudents, activeStudents, pendingVerification] = statsResults;
+
+    // If totalAgg is empty, that means there were no matches
+    const total = totalAgg.length > 0 ? totalAgg[0].total : 0;
     
-    // map results to frontend shape (matches mock at Student.jsx line ~46)
-    const students = profiles.map(profile => {
+    // Calculate pagination metadata
+    const totalPages = Math.ceil(total / perPage);
+
+    // Map the students data
+    const mappedStudents = students.map(profile => {
       const statusVal = (profile.status || '').toString().toLowerCase();
       const enrollmentsSource = Array.isArray(profile.tutions) && profile.tutions.length ? profile.tutions : profile.demoLessons || [];
 
@@ -265,9 +267,20 @@ export const getStudents = asyncHandler(async (req, res) => {
 
     return res.status(200).json(new ApiResponse(
       true,
-      { students, totalStudents, totalPages, currentPage: pageNumber, activeStudents, pendingVerification },
+      {
+        students: mappedStudents,
+        totalPages,
+        currentPage: pageNumber,
+        stats: {
+          totalStudents,
+          total,
+          activeStudents,
+          pendingVerification
+        }
+      },
       'Students retrieved successfully'
     ));
+
   } catch (error) {
     console.error('getStudents error:', error);
     return res.status(500).json(new ApiResponse(false, null, 'Internal Server Error'));
