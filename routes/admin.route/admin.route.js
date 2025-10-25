@@ -22,9 +22,10 @@ import {
     createPaymentRequest,
     getUpcomingDemoBookings,
     removeBooking,
-    getPayments
+    getPayments,
+    updateAdminCredentials
 } from "../../controllers/admin/index.js";
-import { verifyJWT, verifyAdmin } from "../../middlewares/index.js";
+import { verifyJWT, verifyAdmin, upload } from "../../middlewares/index.js";
 
 const router = Router();
 
@@ -73,5 +74,7 @@ router.route("/get-upcoming-demo-bookings").get(verifyJWT, verifyAdmin, getUpcom
 router.route("/remove-booking/:bookingId").delete(verifyJWT, verifyAdmin, removeBooking);
 
 router.route("/get-payments").get(verifyJWT, verifyAdmin, getPayments);
+
+router.route("/update-admin-credentials").put(verifyJWT, verifyAdmin, upload.single("avatar"), updateAdminCredentials);
 
 export default router;

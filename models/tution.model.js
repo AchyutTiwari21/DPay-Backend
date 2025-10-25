@@ -48,11 +48,7 @@ const tutionSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "Subject",
     required: true
-  }],
-  demoLesson: {
-    type: Schema.Types.ObjectId,
-    ref: "Lesson"
-  }
+  }]
 }, {timestamps: true});
 
 const Tution = mongoose.model("Tution", tutionSchema);

@@ -20,6 +20,7 @@ import { getStudent, getStudents, getStudentGrowth, updateStudentStatus } from "
 import { createPaymentRequest } from "./tutorPaymentRequest.controller.js";
 import { getUpcomingDemoBookings, removeBooking } from "./getUpcomingDemoBookings.controller.js";
 import { getPayments } from "./payment.controller.js";
+import { updateAdminCredentials } from "./updateAdminController.js";
 
 export {
     getAllTeacherRequests,
@@ -44,5 +45,6 @@ export {
     createPaymentRequest,
     getUpcomingDemoBookings,
     removeBooking,
-    getPayments
+    getPayments,
+    updateAdminCredentials
 };

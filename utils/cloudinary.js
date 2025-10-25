@@ -1,7 +1,6 @@
 import { v2 as cloudinary } from 'cloudinary';
 import fs from "fs";
 import { extractPublicId } from 'cloudinary-build-url';
-import { ApiError } from './ApiError.js';
 
 // Configuration
 cloudinary.config({ 
@@ -37,7 +36,7 @@ const deleteFromCloudinary = async (cloudinaryUrl) => {
         const response = await cloudinary.uploader.destroy(publicId);
         return response;
     } catch (error) {
-        throw new ApiError(500, "Error while deleting the image from cloudinary.", error);
+        throw new Error("Error while deleting from cloudinary: " + error.message);
     }
 }
 
