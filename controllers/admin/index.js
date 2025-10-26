@@ -16,7 +16,7 @@ import { getDashboardStats } from "./getDashboardStats.controller.js";
 import { getDashboardGrowth } from "./getDashboardGrowth.controller.js";
 import { getLatestStudents, getLatestPendingTutorApplications } from "./getDashboardData.controller.js";
 import { getUpcomingDemos } from "./getUpcomingDemos.controller.js";
-import { getStudent, getStudents, getStudentGrowth, updateStudentStatus } from "./studentDetail.controller.js";
+import { getStudent, removeStudent, getStudents, getStudentGrowth, updateStudentStatus } from "./studentDetail.controller.js";
 import { createPaymentRequest } from "./tutorPaymentRequest.controller.js";
 import { getUpcomingDemoBookings, removeBooking } from "./getUpcomingDemoBookings.controller.js";
 import { getPayments, removePayment } from "./payment.controller.js";
@@ -39,6 +39,7 @@ export {
     getLatestPendingTutorApplications,
     getUpcomingDemos,
     getStudent,
+    removeStudent,
     getStudents,
     getStudentGrowth,
     updateStudentStatus,

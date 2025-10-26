@@ -1,4 +1,5 @@
 import StudentProfile from '../../models/studentProfile.model.js';
+import User from '../../models/user.model.js';
 import { ApiResponse, asyncHandler } from '../../utils/index.js';
 import mongoose from 'mongoose';
 
@@ -57,6 +58,32 @@ export const getStudent = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, student, "Student retrieved successfully"));
   } catch (error) {
     console.error("Error retrieving student:", error.message || error);
+    return res.status(500).json(new ApiResponse(500, null, "Internal Server Error"));
+  }
+});
+
+export const removeStudent = asyncHandler(async (req, res) => {
+  const { studentId } = req.params;
+
+  // validate id
+  if (!mongoose.Types.ObjectId.isValid(studentId)) {
+    return res.status(400).json(new ApiResponse(400, null, "Invalid student id!"));
+  }
+
+  try {
+    const result = await StudentProfile.findByIdAndDelete(studentId);
+    if (!result) {
+      return res.status(404).json(new ApiResponse(404, null, "Student not found!"));
+    }
+
+    await User.findByIdAndUpdate(
+      result.user,
+      { role: 'USER' }
+    );
+
+    return res.status(200).json(new ApiResponse(200, null, "Student removed successfully!"));
+  } catch (error) {
+    console.error("Error removing student:", error.message || error);
     return res.status(500).json(new ApiResponse(500, null, "Internal Server Error"));
   }
 });
@@ -331,12 +358,12 @@ export const updateStudentStatus = asyncHandler(async (req, res) => {
   try {
     const updatedStudent = await StudentProfile.findByIdAndUpdate(studentId, { status }, { new: true });
     if (!updatedStudent) {
-      return res.status(404).json({ error: 'Student not found' });
+      return res.status(404).json({ message: 'Student not found' });
     }
 
     return res.status(200).json({ message: 'Student status updated successfully', student: updatedStudent });
   } catch (error) {
     console.error('updateStudentStatus error:', error);
-    return res.status(500).json({ error: 'Failed to update student status' });
+    return res.status(500).json({ message: 'Failed to update student status' });
   }
 });

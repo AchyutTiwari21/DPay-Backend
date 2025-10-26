@@ -17,6 +17,7 @@ import {
     getUpcomingDemos,
     getStudents,
     getStudent,
+    removeStudent,
     getStudentGrowth,
     updateStudentStatus,
     createPaymentRequest,
@@ -61,6 +62,8 @@ router.route("/latest-applications").get(verifyJWT, verifyAdmin, getLatestPendin
 router.route("/upcoming-demos").get(verifyJWT, verifyAdmin, getUpcomingDemos);
 
 router.route("/get-student/:userId").get(verifyJWT, verifyAdmin, getStudent);
+
+router.route("/remove-student/:studentId").delete(verifyJWT, verifyAdmin, removeStudent);
 
 router.route("/get-students").get(verifyJWT, verifyAdmin, getStudents);
 
