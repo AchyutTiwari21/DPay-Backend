@@ -260,3 +260,31 @@ export const getPayments = asyncHandler(async (req, res) => {
         ));
     }
 });
+
+export const removePayment = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    try {
+        const payment = await Payment.findById(id);
+        if (!payment) {
+            return res.status(404).json(new ApiResponse(
+                404,
+                null,
+                "Payment not found!"
+            ));
+        }
+
+        await Payment.findByIdAndDelete(id);
+        return res.status(200).json(new ApiResponse(
+            200,
+            null,
+            "Payment removed successfully!"
+        ));
+    } catch (error) {
+        console.error("Error removing payment:", error);
+        return res.status(500).json(new ApiResponse(
+            500,
+            null,
+            "Internal Server Error"
+        ));
+    }
+});

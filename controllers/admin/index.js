@@ -19,7 +19,7 @@ import { getUpcomingDemos } from "./getUpcomingDemos.controller.js";
 import { getStudent, getStudents, getStudentGrowth, updateStudentStatus } from "./studentDetail.controller.js";
 import { createPaymentRequest } from "./tutorPaymentRequest.controller.js";
 import { getUpcomingDemoBookings, removeBooking } from "./getUpcomingDemoBookings.controller.js";
-import { getPayments } from "./payment.controller.js";
+import { getPayments, removePayment } from "./payment.controller.js";
 import { updateAdminCredentials } from "./updateAdminController.js";
 
 export {
@@ -46,5 +46,6 @@ export {
     getUpcomingDemoBookings,
     removeBooking,
     getPayments,
+    removePayment,
     updateAdminCredentials
 };
