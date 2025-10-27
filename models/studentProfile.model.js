@@ -28,16 +28,13 @@ const studentProfileSchema = new Schema({
   },
   bankDetails: {
     accountNumber: {
-      type: String,
-      required: true
+      type: String
     },
     bankName: {
-      type: String,
-      required: true
+      type: String
     },
     ifscCode: {
-      type: String,
-      required: true
+      type: String
     }
   },
   documents: [{

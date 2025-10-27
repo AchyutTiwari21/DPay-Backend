@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { asyncHandler } from "../../../utils/index.js";
-import { Lesson, Payment, StudentProfile, User, Availability } from "../../../models/index.js";
+import { Lesson, Payment, StudentProfile, TutorProfile, User, Availability } from "../../../models/index.js";
 
 export const webhookHandler = asyncHandler(async (req, res) => {
   try {
@@ -83,6 +83,14 @@ export const webhookHandler = asyncHandler(async (req, res) => {
         );
       }
 
+      await TutorProfile.findByIdAndUpdate(
+        lessonData.tutor,
+        {
+          $push: { demoLessons: lessonData._id }
+        },
+        { new: true }
+      );  
+
       console.log("✅ Payment successful:", payment.id);
     }
 
@@ -110,15 +118,6 @@ export const webhookHandler = asyncHandler(async (req, res) => {
       if (studentProfile) {
         studentProfile.paymentHistory.push(paymentData._id);
         await studentProfile.save({ validateBeforeSave: false });
-      } else {
-        await StudentProfile.create({
-          user: paymentData.payer,
-          paymentHistory: [paymentData._id]
-        });
-        await User.findByIdAndUpdate(
-          paymentData.payer,
-          { $set: { role: "STUDENT" } }
-        );
       }
 
       console.log("❌ Payment failed:", payment.id);

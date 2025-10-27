@@ -91,6 +91,10 @@ const tutorProfileSchema = new Schema({
     type: Boolean,
     default: false
   },
+  students: [{
+    type: Schema.Types.ObjectId,
+    ref: "StudentProfile"
+  }],
   availability: [{
     type: Schema.Types.ObjectId,
     ref: "Availability"

@@ -5,7 +5,8 @@ import {
     getTutorProfile,
     addAvailability,
     updateAvailability,
-    deleteAvailability
+    deleteAvailability,
+    getDashboardStats
 } from "../../controllers/tutor/index.js";
 import {
     tutorSchema,
@@ -26,5 +27,7 @@ router.route("/add-availability").post(verifyJWT, verifyTutor, validateSchema(ad
 router.route("/update-availability").put(verifyJWT, verifyTutor, validateSchema(updateAvailabilitySchema), updateAvailability);
 
 router.route("/delete-availability").delete(verifyJWT, verifyTutor, validateSchema(deleteAvailabilitySchema), deleteAvailability);
+
+router.route("/dashboard-stats").get(verifyJWT, verifyTutor, validateSchema(z.void()), getDashboardStats);
 
 export default router;
