@@ -13,20 +13,31 @@ const tutorSchema = z.object({
     pricePerHour: z.number().min(0).max(10000).nullish(),
 }).strict();
 
-const addAvailabilitySchema = z.object({
-    day: z.string().min(3).max(20),
-    timeslots: z.array(z.string().min(5).max(5)).min(1).max(10)
-});
+// Regex for MongoDB ObjectId (24 hex characters)
+const objectIdRegex = /^[a-f\d]{24}$/i;
 
-const updateAvailabilitySchema = z.object({
-    availabilityId: z.string().min(24).max(24),
-    day: z.string().min(3).max(20).nullish(),
-    timeslots: z.array(z.string().min(5).max(20)).min(1).max(10).nullish()
-});
+const availabilitySchema = z.object({
+  day: z.enum(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]),
+  timeslots: z
+    .array(
+      z
+        .string()
+        .regex(
+          /^([01]\d|2[0-3]):([0-5]\d)$/,
+          "Time must be in HH:MM 24-hour format"
+        )
+    )
+    .min(1, "At least one timeslot is required"),
+}).strict();
 
-const deleteAvailabilitySchema = z.object({
-    availabilityId: z.string().min(24).max(24)
-});
+const tutorAvailabilitySchema = z.object({
+  availabilities: z
+    .array(availabilitySchema)
+    .max(7, "Availability can have at most 7 days"),
+  tutorId: z
+    .string()
+    .regex(objectIdRegex, "Invalid MongoDB ObjectId format"),
+}).strict();
 
 const getSubjectsQuerySchema = z.object({
   cursor: z.string().optional(),
@@ -44,8 +55,6 @@ const getSubjectsQuerySchema = z.object({
 
 export {
     tutorSchema,
-    addAvailabilitySchema,
-    updateAvailabilitySchema,
-    deleteAvailabilitySchema,
+    tutorAvailabilitySchema,
     getSubjectsQuerySchema
 };
