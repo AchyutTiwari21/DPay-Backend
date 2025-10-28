@@ -1,4 +1,5 @@
 import Lesson from '../../models/lesson.model.js'
+import TutorProfile from '../../models/tutorProfile.model.js'
 
 export async function getDemoSessions(req, res) {
   try {
@@ -51,5 +52,53 @@ export async function getBookingTrends(req, res) {
   } catch (err) {
     console.error('Error fetching booking trends:', err)
     return res.status(500).json({ message: 'Failed to fetch booking trends' })
+  }
+}
+
+export async function getDemoStats(req, res) {
+  try {
+    const userId = req.user._id;
+    if (!userId) {
+      return res.status(400).json({ message: 'Missing user id' })
+    }
+
+    const tutorProfile = await TutorProfile.findOne({ user: userId }).select('_id')
+    if (!tutorProfile) {
+      return res.status(404).json({ message: 'Tutor profile not found' })
+    }
+
+    const lessons = await Lesson.find({ tutor: tutorProfile._id })
+      .select('date time status')
+      .lean()
+
+    const now = new Date()
+    let upcoming = 0
+    let completed = 0
+    let cancelled = 0
+
+    lessons.forEach((l) => {
+      if (l.status === 'COMPLETED') completed++
+      if (l.status === 'CANCELLED') cancelled++
+
+      const dt = new Date(l.date)
+      if (l.time) {
+        const parts = l.time.split(':').map((p) => parseInt(p, 10))
+        dt.setHours(parts[0] || 0, parts[1] || 0, parts[2] || 0, 0)
+      }
+      if (dt > now && l.status === 'CONFIRMED') upcoming++
+    })
+
+    return res.status(200).json({
+      success: true,
+      stats: {
+        totalDemos: lessons.length,
+        upcomingDemos: upcoming,
+        completedDemos: completed,
+        cancelledDemos: cancelled
+      }
+    })
+  } catch (err) {
+    console.error('Error fetching demo stats:', err)
+    return res.status(500).json({ message: 'Failed to fetch demo stats' })
   }
 }

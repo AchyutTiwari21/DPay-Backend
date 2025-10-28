@@ -8,7 +8,8 @@ import {
     deleteAvailability,
     getDashboardStats,
     getDemoSessions,
-    getBookingTrends
+    getBookingTrends,
+    getDemoStats
 } from "../../controllers/tutor/index.js";
 import {
     tutorSchema,
@@ -35,5 +36,7 @@ router.route("/dashboard-stats").get(verifyJWT, verifyTutor, validateSchema(z.vo
 router.route("/demo-sessions").get(verifyJWT, verifyTutor, validateSchema(z.void()), getDemoSessions);
 
 router.route("/booking-trends").get(verifyJWT, verifyTutor, validateSchema(z.void()), getBookingTrends);
+
+router.route("/demo-stats").get(verifyJWT, verifyTutor, validateSchema(z.void()), getDemoStats);
 
 export default router;

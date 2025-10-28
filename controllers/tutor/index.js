@@ -1,7 +1,7 @@
 import { updateTutorProfile, getTutorProfile } from "./getUpdateTutorProfile.controller.js";
 import { addAvailability, updateAvailability, deleteAvailability } from "./addUpdateAvailability.js";
 import { getDashboardStats } from "./dashboardStats.controller.js";
-import { getDemoSessions, getBookingTrends } from "./getDemoSession.controller.js";
+import { getDemoSessions, getBookingTrends, getDemoStats } from "./getDemoSession.controller.js";
 
 export {
     updateTutorProfile,
@@ -11,5 +11,6 @@ export {
     deleteAvailability,
     getDashboardStats,
     getDemoSessions,
-    getBookingTrends
+    getBookingTrends,
+    getDemoStats
 };
