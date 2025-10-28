@@ -9,7 +9,8 @@ import {
     getDashboardStats,
     getDemoSessions,
     getBookingTrends,
-    getDemoStats
+    getDemoStats,
+    getTutor
 } from "../../controllers/tutor/index.js";
 import {
     tutorSchema,
@@ -38,5 +39,7 @@ router.route("/demo-sessions").get(verifyJWT, verifyTutor, validateSchema(z.void
 router.route("/booking-trends").get(verifyJWT, verifyTutor, validateSchema(z.void()), getBookingTrends);
 
 router.route("/demo-stats").get(verifyJWT, verifyTutor, validateSchema(z.void()), getDemoStats);
+
+router.route("/tutor-detail").get(verifyJWT, verifyTutor, validateSchema(z.void()), getTutor);
 
 export default router;
