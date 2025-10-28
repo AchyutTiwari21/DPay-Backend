@@ -11,6 +11,12 @@ export const addAvailability = asyncHandler(async (req, res) => {
     const { tutorId, availabilities } = req.body;
 
     try {
+        const tutorProfile = await TutorProfile.findOne({ user: userId });
+
+        if (!tutorProfile || tutorProfile._id.toString() !== tutorId) {
+            return res.status(403).json(new ApiResponse(403, null, "Forbidden: You can only add availability to your own profile"));
+        }
+
         await Availability.deleteMany({ tutor: tutorId });
 
         await TutorProfile.findByIdAndUpdate(
