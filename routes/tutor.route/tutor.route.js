@@ -9,11 +9,13 @@ import {
     getBookingTrends,
     getDemoStats,
     getTutor,
-    getDemoSessionsHandler
+    getDemoSessionsHandler,
+    sendClassRequestNotification
 } from "../../controllers/tutor/index.js";
 import {
     tutorSchema,
-    tutorAvailabilitySchema
+    tutorAvailabilitySchema,
+    sendClassRequestNotificationSchema
 } from "../../zod/tutorSchema.js";
 import { verifyJWT, verifyTutor, validateSchema, validateQuery } from "../../middlewares/index.js";
 
@@ -36,5 +38,7 @@ router.route("/demo-stats").get(verifyJWT, verifyTutor, validateSchema(z.void())
 router.route("/tutor-detail").get(verifyJWT, verifyTutor, validateSchema(z.void()), getTutor);
 
 router.route("/demo-sessions-handler").get(verifyJWT, verifyTutor, validateSchema(z.void()), getDemoSessionsHandler);
+
+router.route("/send-class-request-notification").post(verifyJWT, verifyTutor, validateSchema(sendClassRequestNotificationSchema), sendClassRequestNotification);
 
 export default router;

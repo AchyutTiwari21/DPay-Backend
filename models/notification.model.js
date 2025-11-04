@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const notificationSchema = new mongoose.Schema({
   user: { 
@@ -16,7 +16,7 @@ const notificationSchema = new mongoose.Schema({
   },
   type: { 
     type: String, 
-    enum: ["booking", "payment", "message", "system", "support"], 
+    enum: ["booking", "payment", "message", "system", "support", "request"], 
     default: "system" 
   },
   isRead: { 
@@ -26,6 +26,11 @@ const notificationSchema = new mongoose.Schema({
   link: { 
     type: String 
   }, // optional, e.g. "/support/4567"
+  lesson: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Lesson"
+  }
 }, {timestamps: true});
 
-module.exports = mongoose.model("Notification", notificationSchema);
+const Notification = mongoose.model("Notification", notificationSchema);
+export default Notification;

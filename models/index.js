@@ -10,3 +10,4 @@ export { default as OTP } from "./otp.model.js";
 export { default as ApplyTeacherRequest } from "./applyTeacherRequest.model.js";
 export { default as Tution } from "./tution.model.js";
 export { default as TutorPaymentRequest } from "./tutorPaymentRequest.model.js";
+export { default as Notification } from "./notification.model.js";

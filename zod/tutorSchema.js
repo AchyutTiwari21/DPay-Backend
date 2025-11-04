@@ -53,8 +53,15 @@ const getSubjectsQuerySchema = z.object({
   search: z.string().optional()
 });
 
+const sendClassRequestNotificationSchema = z.object({
+  lessonId: z
+    .string()
+    .regex(objectIdRegex, "Invalid MongoDB ObjectId format"),
+}).strict();
+
 export {
     tutorSchema,
     tutorAvailabilitySchema,
-    getSubjectsQuerySchema
+    getSubjectsQuerySchema,
+    sendClassRequestNotificationSchema
 };

@@ -1,6 +1,6 @@
-import Lesson from '../../models/lesson.model.js';
-import TutorProfile from '../../models/tutorProfile.model.js';
+import { User, Lesson, TutorProfile, Notification } from '../../models/index.js';
 import { ApiResponse, asyncHandler } from '../../utils/index.js';
+import { mailSender } from '../../utils/mailSender.js';
 
 
 export async function getDemoSessions(req, res) {
@@ -295,5 +295,58 @@ export const getDemoSessionsHandler = asyncHandler(async (req, res) => {
   } catch (err) {
     console.error("Error in getDemoSessionsHandler:", err);
     return res.status(500).json(new ApiResponse(500, null, "Failed to fetch demo bookings"));
+  }
+});
+
+export const sendClassRequestNotification = asyncHandler(async (req, res) => {
+  const userId =  req?.user?._id;
+  if (!userId) {
+    return res.status(400).json(new ApiResponse(400, null, "Missing user id"));
+  }
+
+  try {
+    // find tutor profile
+    const tutorProfile = await TutorProfile.findOne({ user: userId });
+    if (!tutorProfile) {
+      return res.status(404).json(new ApiResponse(404, null, "Tutor profile not found"));
+    }
+
+    const user = await User.findById(userId).select('name email');
+    if (!user) {
+      return res.status(404).json(new ApiResponse(404, null, "User not found"));
+    }
+    
+    const { lessonId } = req.body;
+    if (!lessonId) {
+      return res.status(400).json(new ApiResponse(400, null, "Missing lessonId in request body"));
+    }
+  
+    const lesson = await Lesson.findById(lessonId)
+    .populate('student', '_id name email')
+    .populate('subject', 'name');
+    if (!lesson) {
+      return res.status(404).json(new ApiResponse(404, null, "Lesson not found"));
+    }
+    
+    if(tutorProfile._id.toString() !== lesson.tutor.toString()) {
+      return res.status(403).json(new ApiResponse(403, null, "Unauthorized: Tutor does not match lesson tutor"));
+    }
+
+    const notification = new Notification({
+      user: lesson.student._id,
+      title: "New Class Request",
+      message: `You have a new class request from ${user.name} for the subject ${lesson.subject.name}.`,
+      type: "request",
+      lesson: lesson._id
+    });
+
+    await notification.save();
+
+    await mailSender(lesson.student.email, "New Class Request", `Hello ${lesson.student.name},\n\nYou have received a new class request from ${user.name} for the subject ${lesson.subject.name}.\n\nPlease log in to your account to view and respond to the request.\n\nBest regards,\nDPay Team`);
+
+    return res.status(201).json(new ApiResponse(201, notification, "Notification sent successfully"));
+  } catch (error) {
+    console.error("Error sending class request notification:", error);
+    return res.status(500).json(new ApiResponse(500, null, "Failed to send notification"));
   }
 });

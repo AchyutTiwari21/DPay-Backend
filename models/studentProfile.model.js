@@ -60,7 +60,11 @@ const studentProfileSchema = new Schema({
     type: Number,
     min: 1,
     max: 5
-  }
+  },
+  notifications: [{
+    type: Schema.Types.ObjectId,
+    ref: "Notification"
+  }]
 }, {timestamps: true});
 
 const StudentProfile = mongoose.model("StudentProfile", studentProfileSchema);
