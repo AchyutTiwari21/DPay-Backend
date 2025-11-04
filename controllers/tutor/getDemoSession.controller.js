@@ -252,7 +252,7 @@ export const getDemoSessionsHandler = asyncHandler(async (req, res) => {
     const [bookingsAgg, statsResults] = await Promise.all([
       Lesson.aggregate([
         ...pipeline,
-        { $sort: { date: 1, time: 1 } },
+        { $sort: { date: -1 } },
         { $skip: skip },
         { $limit: perPage }
       ]),
