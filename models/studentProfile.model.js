@@ -15,6 +15,9 @@ const studentProfileSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "Tution"
   }],
+  schoolBoard: {
+    type: String
+  },
   walletBalance: {
     type: Number,
     default: 0,

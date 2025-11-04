@@ -30,6 +30,13 @@ const lessonSchema = new Schema({
     enum: ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED", "EXPIRED"],
     default: "PENDING",
   },
+  meetingLink: {
+    type: String,
+    required: true
+  },
+  notes: {
+    type: String,
+  },
   payment: { 
     type: Schema.Types.ObjectId, 
     ref: "Payment"

@@ -1,5 +1,7 @@
-import Lesson from '../../models/lesson.model.js'
-import TutorProfile from '../../models/tutorProfile.model.js'
+import Lesson from '../../models/lesson.model.js';
+import TutorProfile from '../../models/tutorProfile.model.js';
+import { ApiResponse, asyncHandler } from '../../utils/index.js';
+
 
 export async function getDemoSessions(req, res) {
   try {
@@ -102,3 +104,196 @@ export async function getDemoStats(req, res) {
     return res.status(500).json({ message: 'Failed to fetch demo stats' })
   }
 }
+
+export const getDemoSessionsHandler = asyncHandler(async (req, res) => {
+  const {
+    page = 1,
+    limit = 10,
+    search,
+    subject,
+    status,
+    dateFrom,
+    dateTo
+  } = req.query;
+
+  // ensure authenticated tutor
+  const userId =  req?.user?._id;
+  if (!userId) {
+    return res.status(400).json(new ApiResponse(400, null, "Missing user id"));
+  }
+
+  // find tutor profile
+  const tutorProfile = await TutorProfile.findOne({ user: userId }).select('_id');
+  if (!tutorProfile) {
+    return res.status(404).json(new ApiResponse(404, null, "Tutor profile not found"));
+  }
+
+  try {
+    const pageNumber = Number(page) || 1;
+    const perPage = Number(limit) || 10;
+    const skip = (pageNumber - 1) * perPage;
+    const now = new Date();
+
+    // base match - restrict to this tutor
+    const pipeline = [
+      {
+        $match: {
+          tutor: tutorProfile._id
+        }
+      }
+    ];
+
+    // date range filter
+    if (dateFrom || dateTo) {
+      const dateFilter = {};
+      if (dateFrom) dateFilter.$gte = new Date(dateFrom);
+      if (dateTo) dateFilter.$lte = new Date(dateTo);
+      pipeline.push({ $match: { date: dateFilter } });
+    }
+
+    // status filter (frontend sends lowercase like 'pending')
+    if (status) {
+      pipeline.push({ $match: { status: status.toUpperCase() } });
+    }
+
+    // lookups to populate student (user), student profile and subject
+    pipeline.push(
+      // student (user) details
+      {
+        $lookup: {
+          from: "users",
+          localField: "student",
+          foreignField: "_id",
+          as: "studentDetails",
+          pipeline: [
+            { $project: { _id: 1, name: 1, email: 1, avatar: 1 } }
+          ]
+        }
+      },
+      { $unwind: { path: "$studentDetails", preserveNullAndEmptyArrays: true } },
+
+      // student profile (phone, address, schoolBoard, rating)
+      {
+        $lookup: {
+          from: "studentprofiles",
+          localField: "student",
+          foreignField: "user",
+          as: "studentProfile",
+          pipeline: [
+            { $project: { phone: 1, address: 1, schoolBoard: 1, rating: 1 } }
+          ]
+        }
+      },
+      { $unwind: { path: "$studentProfile", preserveNullAndEmptyArrays: true } },
+
+      // subject details
+      {
+        $lookup: {
+          from: "subjects",
+          localField: "subject",
+          foreignField: "_id",
+          as: "subjectDetails",
+          pipeline: [{ $project: { name: 1 } }]
+        }
+      },
+      { $unwind: { path: "$subjectDetails", preserveNullAndEmptyArrays: true } }
+    );
+
+    // search filter (student name or subject name)
+    if (search) {
+      pipeline.push({
+        $match: {
+          $or: [
+            { "studentDetails.name": { $regex: search, $options: "i" } },
+            { "subjectDetails.name": { $regex: search, $options: "i" } }
+          ]
+        }
+      });
+    }
+
+    // subject filter by name
+    if (subject) {
+      pipeline.push({
+        $match: {
+          "subjectDetails.name": subject
+        }
+      });
+    }
+
+    // project fields needed by frontend (table + drawer)
+    pipeline.push({
+      $project: {
+        id: "$_id",
+        student: {
+          _id: "$studentDetails._id",
+          name: "$studentDetails.name",
+          email: "$studentDetails.email",
+          avatar: "$studentDetails.avatar",
+          phone: "$studentProfile.phone",
+          address: "$studentProfile.address",
+          rating: "$studentProfile.rating",
+          schoolBoard: "$studentProfile.schoolBoard"
+        },
+        subject: "$subjectDetails.name",
+        course: "$studentProfile.schoolBoard", // maps to "School Board" used in drawer
+        date: { $dateToString: { format: "%Y-%m-%d", date: "$date" } },
+        rawDate: "$date",
+        time: "$time",
+        duration: 1, // not stored in model, placeholder (frontend can handle missing)
+        price: 1,    // placeholder
+        status: { $toLower: "$status" }, // convert to lowercase to match frontend checks
+        meetingLink: 1,
+        notes: 1,
+        createdAt: { $dateToString: { format: "%Y-%m-%dT%H:%M:%S.%LZ", date: "$createdAt" } }
+      }
+    });
+
+    // get bookings (with pagination) and compute stats in parallel
+    const [bookingsAgg, statsResults] = await Promise.all([
+      Lesson.aggregate([
+        ...pipeline,
+        { $sort: { date: 1, time: 1 } },
+        { $skip: skip },
+        { $limit: perPage }
+      ]),
+      Promise.all([
+        // total matched before pagination
+        Lesson.aggregate([...pipeline, { $count: "total" }]),
+        // total lessons for this tutor (all time)
+        Lesson.countDocuments({ tutor: tutorProfile._id }),
+        // upcoming demos (date >= now)
+        Lesson.countDocuments({ tutor: tutorProfile._id, date: { $gte: now } }),
+        // completed sessions
+        Lesson.countDocuments({ tutor: tutorProfile._id, status: "COMPLETED" }),
+        // cancelled sessions
+        Lesson.countDocuments({ tutor: tutorProfile._id, status: "CANCELLED" })
+      ])
+    ]);
+
+    const totalAgg = statsResults[0];
+    const totalMatched = totalAgg.length > 0 ? totalAgg[0].total : 0;
+    const totalPages = Math.ceil(totalMatched / perPage);
+
+    const [, totalCount, upcomingDemos, completed, cancelled] = statsResults;
+
+    return res.status(200).json(new ApiResponse(
+      200,
+      {
+        bookings: bookingsAgg,
+        totalPages,
+        currentPage: pageNumber,
+        stats: {
+          totalDemos: totalCount,
+          total: totalMatched,
+          upcomingDemos,
+          completed,
+          cancelled
+        }
+      },
+      "Demo bookings retrieved successfully"
+    ));
+  } catch (err) {
+    console.error("Error in getDemoSessionsHandler:", err);
+    return res.status(500).json(new ApiResponse(500, null, "Failed to fetch demo bookings"));
+  }
+});
