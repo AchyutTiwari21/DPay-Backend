@@ -125,6 +125,9 @@ export const getPayments = asyncHandler(async (req, res) => {
             }
         });
 
+        // Add sort to the pipeline before the final $project (so you sort by actual Date value)
+        pipeline.push({ $sort: { date: -1 } });
+
         // Format output
         pipeline.push({
             $project: {
@@ -180,7 +183,7 @@ export const getPayments = asyncHandler(async (req, res) => {
 
         // Execute aggregation with pagination
         const [payments, statsResults] = await Promise.all([
-            // Main payments query
+            // Main payments query (no need to re-add sort here)
             Payment.aggregate([...pipeline, { $skip: skip }, { $limit: perPage }]),
 
             // Stats queries

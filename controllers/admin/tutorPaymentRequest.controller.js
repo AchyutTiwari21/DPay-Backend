@@ -1,4 +1,4 @@
-import { TutorPaymentRequest, TutorProfile } from "../../models/index.js";
+import { TutorProfile, Notification } from "../../models/index.js";
 import { ApiResponse, asyncHandler } from "../../utils/index.js";
 import { mailSender } from "../../utils/mailSender.js";
 
@@ -6,7 +6,7 @@ export const createPaymentRequest = asyncHandler(async (req, res) => {
     try {
         const { tutorId, amount } = req.body;
 
-        const tutor = await TutorProfile.findById(tutorId).populate("user", "email name");
+        const tutor = await TutorProfile.findById(tutorId).populate("user", "_id email name");
 
         if(!tutor) {
             return res.status(404).json(
@@ -14,16 +14,19 @@ export const createPaymentRequest = asyncHandler(async (req, res) => {
             );
         }
 
-        const paymentRequest = new TutorPaymentRequest({
-            tutor: tutorId,
-            amount
+        const notification = await Notification.create({
+            user: tutor.user._id,
+            title: "New Payment Request",
+            message: `You have a new payment request of ₹${amount} from the admin.`,
+            type: "payment"
         });
 
-        await paymentRequest.save();
+        tutor.notifications.push(notification._id);
+        await tutor.save();
 
         await mailSender(tutor.user.email, "New Payment Request", `
             <p>Dear ${tutor.user.name},</p>
-            <p>You have a new payment request of $${amount}.</p>
+            <p>You have a new payment request of ₹${amount} from the admin.</p>
             <p>Please log in to your account to view and process the payment request.</p>
             <p>Best regards,<br/>DPay Team</p>
         `);

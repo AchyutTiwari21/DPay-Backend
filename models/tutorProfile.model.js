@@ -103,6 +103,10 @@ const tutorProfileSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "Review"
   }],
+  notifications: [{
+    type: Schema.Types.ObjectId,
+    ref: "Notification"
+  }]
 }, {timestamps: true});
 
 const TutorProfile = mongoose.model("TutorProfile", tutorProfileSchema);
