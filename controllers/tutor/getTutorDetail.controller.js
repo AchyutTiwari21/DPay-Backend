@@ -40,6 +40,8 @@ export const getTutor = asyncHandler(async (req, res) => {
             {
                 $project: {
                     _id: 1,
+                    phone: 1,
+                    address: 1,
                     title: 1,
                     subjects: "$subjects.name",
                     skills: 1,
