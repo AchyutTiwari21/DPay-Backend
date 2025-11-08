@@ -23,6 +23,7 @@ const tutorProfileSchema = new Schema({
     type: String
   },
   mode: {
+    type: String,
     enum: ["online", "offline", "hybrid"],
   },
   experience: {

@@ -4,7 +4,7 @@ const tutorSchema = z.object({
     phone: z.string().min(10).max(15).nullish(),
     address: z.string().min(5).max(100).nullish(),
     about: z.string().min(10).max(100).nullish(),
-    mode: z.enum(["online", "offline", "both"]).nullish(),
+    mode: z.enum(["online", "offline", "hybrid"]).nullish(),
     qualifications: z.array(z.string().min(1).max(50)).min(1).max(20).nullish(),
     experience: z.string().min(0).max(30).nullish(),
     lessonsCount: z.string().min(1).max(100).nullish(),
