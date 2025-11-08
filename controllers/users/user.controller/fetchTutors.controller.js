@@ -164,7 +164,8 @@ export const getTutors = asyncHandler(async (req, res) => {
                     classesTaken: 1,
                     availability: 1,
                     about: 1,
-                    education: 1
+                    education: 1,
+                    availableLocations: 1
                 }
             }
         );
@@ -257,7 +258,8 @@ export const getTutorById = asyncHandler(async (req, res) => {
                     classesTaken: 1,
                     availability: 1,
                     about: 1,
-                    education: 1
+                    education: 1,
+                    availableLocations: 1
                 }
             }
         ];
