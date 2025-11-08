@@ -127,6 +127,8 @@ export const getUpcomingDemoBookings = asyncHandler(async (req, res) => {
             });
         }
 
+        pipeline.push({ $sort: { date: -1 } });
+
         // Project stage to format output
         pipeline.push({
             $project: {

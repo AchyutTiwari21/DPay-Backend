@@ -276,6 +276,14 @@ export const removePayment = asyncHandler(async (req, res) => {
             ));
         }
 
+        if (payment.status === "PAID" || payment.status === "PENDING") {
+            return res.status(400).json(new ApiResponse(
+                400,
+                null,
+                "Paid or pending payments cannot be removed!"
+            ));
+        }
+
         await Payment.findByIdAndDelete(id);
         return res.status(200).json(new ApiResponse(
             200,
