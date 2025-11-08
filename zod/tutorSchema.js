@@ -4,15 +4,16 @@ const tutorSchema = z.object({
     phone: z.string().min(10).max(15).nullish(),
     address: z.string().min(5).max(100).nullish(),
     about: z.string().min(10).max(100).nullish(),
-    mode: z.enum(["online", "offline", "hybrid"]).nullish(),
+    mode: z.enum(["online", "offline", "both"]).nullish(),
     qualifications: z.array(z.string().min(1).max(50)).min(1).max(20).nullish(),
     experience: z.string().min(0).max(30).nullish(),
-    lessonsCount: z.number().min(0).max(100000).nullish(),
+    lessonsCount: z.string().min(1).max(100).nullish(),
     skills: z.array(z.string().min(1).max(50)).min(1).max(20).nullish(),
     languages: z.array(z.string().min(1).max(50)).min(1).max(5).nullish(),
     title: z.string().min(2).max(100).nullish(),
-    subjects: z.array(z.string().min(2).max(50)).min(1).max(10).nullish(),
-    pricePerHour: z.number().min(0).max(10000).nullish(),
+    subjects: z.array(z.string().min(1).max(50)).min(1).max(10).nullish(),
+    pricePerHour: z.string().min(1).max(100).nullish(),
+    availableLocations: z.array(z.string().min(2).max(100)).min(1).max(10).nullish(),
 }).strict();
 
 // Regex for MongoDB ObjectId (24 hex characters)

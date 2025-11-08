@@ -1,4 +1,4 @@
-import { TutorProfile } from "../../models/index.js";
+import { TutorProfile, Subject } from "../../models/index.js";
 import { ApiResponse, asyncHandler } from "../../utils/index.js";
 
 export const getTutorProfile = asyncHandler(async (req, res) => {
@@ -21,7 +21,7 @@ export const getTutorProfile = asyncHandler(async (req, res) => {
 export const updateTutorProfile = asyncHandler(async (req, res) => {
     const user = req.user;
 
-    const { phone, address, about, mode, education, experience, classesTaken, skills, languages, title, subjects, pricePerHour } = req.body;
+    const { phone, address, about, mode, education, experience, classesTaken, skills, languages, title, subjects, pricePerHour, availableLocations } = req.body;
 
     try {
         let classesTakenNum;
@@ -33,9 +33,14 @@ export const updateTutorProfile = asyncHandler(async (req, res) => {
             pricePerHourNum = Number(pricePerHour);
         }
 
+        let subjectIds;
+        if (subjects && Array.isArray(subjects)) {
+            subjectIds = await Subject.find({ name: { $in: subjects } }).select('_id');
+        }
+
         const updatedProfile = await TutorProfile.findOneAndUpdate(
             { user: user._id },
-            { phone, address, about, mode, education, experience, classesTaken: classesTakenNum, skills, languages, title, subjects, pricePerHour: pricePerHourNum },
+            { phone, address, about, mode, education, experience, classesTaken: classesTakenNum, skills, languages, title, subjects: subjectIds, pricePerHour: pricePerHourNum, availableLocations },
             { new: true }
         );
 

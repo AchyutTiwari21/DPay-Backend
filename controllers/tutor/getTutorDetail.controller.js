@@ -54,7 +54,8 @@ export const getTutor = asyncHandler(async (req, res) => {
                     classesTaken: 1,
                     availability: 1,
                     about: 1,
-                    education: 1
+                    education: 1,
+                    availableLocations: 1
                 }
             }
         ];

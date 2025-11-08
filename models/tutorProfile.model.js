@@ -22,10 +22,9 @@ const tutorProfileSchema = new Schema({
   title: {
     type: String
   },
-  mode: [{
-    type: String,
-    enum: ["Online", "Offline"]
-  }],
+  mode: {
+    enum: ["online", "offline", "hybrid"],
+  },
   experience: {
     type: Number
   },
@@ -50,6 +49,9 @@ const tutorProfileSchema = new Schema({
     type: Number,
     min: 1
   },
+  availableLocations: [{ 
+    type: String 
+  }],
   demoLessons: [{
     type: Schema.Types.ObjectId,
     ref: "Lesson"

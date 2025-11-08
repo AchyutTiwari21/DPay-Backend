@@ -31,8 +31,7 @@ const lessonSchema = new Schema({
     default: "PENDING",
   },
   meetingLink: {
-    type: String,
-    required: true
+    type: String
   },
   notes: {
     type: String,
