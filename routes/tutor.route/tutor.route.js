@@ -10,20 +10,23 @@ import {
     getDemoStats,
     getTutor,
     getDemoSessionsHandler,
-    sendClassRequestNotification
+    sendClassRequestNotification,
+    addUpdateTutorAvatar
 } from "../../controllers/tutor/index.js";
 import {
     tutorSchema,
     tutorAvailabilitySchema,
     sendClassRequestNotificationSchema
 } from "../../zod/tutorSchema.js";
-import { verifyJWT, verifyTutor, validateSchema, validateQuery } from "../../middlewares/index.js";
+import { verifyJWT, verifyTutor, validateSchema, upload } from "../../middlewares/index.js";
 
 const router = Router();
 
 router.route("/update-profile").put(verifyJWT, verifyTutor, validateSchema(tutorSchema), updateTutorProfile);
 
 router.route("/profile").get(verifyJWT, verifyTutor, validateSchema(z.void()), getTutorProfile);
+
+router.route("/add-update-avatar").put(verifyJWT, verifyTutor, validateSchema(z.void()), upload.single("avatar"), addUpdateTutorAvatar);
 
 router.route("/add-availability").post(verifyJWT, verifyTutor, validateSchema(tutorAvailabilitySchema), addAvailability);
 

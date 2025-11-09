@@ -1,5 +1,6 @@
-import { TutorProfile, Subject } from "../../models/index.js";
+import { User, TutorProfile, Subject } from "../../models/index.js";
 import { ApiResponse, asyncHandler } from "../../utils/index.js";
+import { uploadOnCloudinary, deleteFromCloudinary } from "../../utils/cloudinary.js";
 
 export const getTutorProfile = asyncHandler(async (req, res) => {
     const user = req.user;
@@ -58,5 +59,41 @@ export const updateTutorProfile = asyncHandler(async (req, res) => {
         return res.status(500).json(
             new ApiResponse(500, null, "Internal Server Error")
         );
+    }
+});
+
+export const addUpdateTutorAvatar = asyncHandler(async (req, res) => {
+    const userId = req.user?._id;
+    if(!userId) {
+        return res.status(401).json(new ApiResponse(401, null, "Unauthorized"));
+    }
+
+    const avatar = req.file?.path;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json(new ApiResponse(404, null, "User not found"));
+        }
+
+        if(user?.avatar) {
+            const deleteResponse = await deleteFromCloudinary(user.avatar);
+            if(!deleteResponse) {
+                return res.status(500).json(new ApiResponse(500, null, "Error deleting old avatar from cloudinary"));
+            }
+        }
+
+        const cloudinaryResponse = await uploadOnCloudinary(avatar);
+        if(!cloudinaryResponse) {
+            return res.status(500).json(new ApiResponse(500, null, "Error uploading new avatar to cloudinary"));
+        }
+
+        user.avatar = cloudinaryResponse.url;
+        await user.save();
+
+        return res.status(200).json(new ApiResponse(200, cloudinaryResponse.url, "Tutor avatar updated successfully"));
+    } catch (error) {
+        console.error("Error updating tutor avatar:", error.message);
+        return res.status(500).json(new ApiResponse(500, null, "Internal Server Error"));
     }
 });
