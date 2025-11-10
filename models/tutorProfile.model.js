@@ -39,9 +39,6 @@ const tutorProfileSchema = new Schema({
   languages: [{ 
     type: String 
   }],
-  title: {
-    type: String
-  },
   subjects: [{
     type: Schema.Types.ObjectId,
     ref: "Subject"
