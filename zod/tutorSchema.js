@@ -30,7 +30,7 @@ const availabilitySchema = z.object({
           "Time must be in HH:MM 24-hour format"
         )
     )
-    .min(1, "At least one timeslot is required"),
+    .min(0, "At least one timeslot is required"),
 }).strict();
 
 const tutorAvailabilitySchema = z.object({
