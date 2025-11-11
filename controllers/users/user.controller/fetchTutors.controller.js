@@ -182,7 +182,8 @@ export const getTutors = asyncHandler(async (req, res) => {
         let tutors = await TutorProfile.aggregate(pipeline);
 
         // Count total docs (for frontend page calculation)
-        const totalTutors = await TutorProfile.countDocuments();
+        const countResult = await TutorProfile.aggregate([...pipeline, { $count: "total" }]);
+        const totalTutors = countResult[0]?.total || 0;
         const totalPages = Math.ceil(totalTutors / perPage);
 
         return res.status(200).json(new ApiResponse(
