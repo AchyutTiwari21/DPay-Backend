@@ -35,6 +35,17 @@ export const getTutor = asyncHandler(async (req, res) => {
                     ]
                 }
             },
+            {
+                $lookup: {
+                    from: "notifications",
+                    localField: "notifications",
+                    foreignField: "_id",
+                    as: "notifications",
+                    pipeline: [
+                        { $sort: { createdAt: -1 } },
+                    ]
+                }
+            },
 
             // Project fields in the same format
             {
@@ -55,7 +66,8 @@ export const getTutor = asyncHandler(async (req, res) => {
                     availability: 1,
                     about: 1,
                     education: 1,
-                    availableLocations: 1
+                    availableLocations: 1,
+                    notifications: 1
                 }
             }
         ];

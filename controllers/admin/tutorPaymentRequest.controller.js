@@ -18,7 +18,7 @@ export const createPaymentRequest = asyncHandler(async (req, res) => {
             user: tutor.user._id,
             title: "New Payment Request",
             message: `You have a new payment request of ₹${amount} from the admin.`,
-            type: "payment"
+            type: "request",
         });
 
         tutor.notifications.push(notification._id);

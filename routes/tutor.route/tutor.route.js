@@ -11,12 +11,14 @@ import {
     getTutor,
     getDemoSessionsHandler,
     sendClassRequestNotification,
-    addUpdateTutorAvatar
+    addUpdateTutorAvatar,
+    markNotificationsAsRead
 } from "../../controllers/tutor/index.js";
 import {
     tutorSchema,
     tutorAvailabilitySchema,
-    sendClassRequestNotificationSchema
+    sendClassRequestNotificationSchema,
+    markNotificationsAsReadSchema
 } from "../../zod/tutorSchema.js";
 import { verifyJWT, verifyTutor, validateSchema, upload } from "../../middlewares/index.js";
 
@@ -43,5 +45,7 @@ router.route("/tutor-detail").get(verifyJWT, verifyTutor, validateSchema(z.void(
 router.route("/demo-sessions-handler").get(verifyJWT, verifyTutor, validateSchema(z.void()), getDemoSessionsHandler);
 
 router.route("/send-class-request-notification").post(verifyJWT, verifyTutor, validateSchema(sendClassRequestNotificationSchema), sendClassRequestNotification);
+
+router.route("/mark-notifications-as-read").put(verifyJWT, verifyTutor, validateSchema(markNotificationsAsReadSchema), markNotificationsAsRead);
 
 export default router;

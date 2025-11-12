@@ -1,4 +1,4 @@
-import { ApplyTeacherRequest, TutorProfile, User } from "../../models/index.js";
+import { ApplyTeacherRequest, TutorProfile, User, Notification } from "../../models/index.js";
 import { ApiResponse, asyncHandler } from "../../utils/index.js";
 import { mailSender } from "../../utils/mailSender.js";
 
@@ -177,7 +177,7 @@ export const updateTeacherRequest = asyncHandler(async (req, res) => {
         let message = "";
 
         if(status == "ACCEPTED") {
-            await TutorProfile.create({
+            const tutorProfile = await TutorProfile.create({
                 user: updatedRequest.user._id,
                 address: updatedRequest.address,
                 phone: updatedRequest.phone,
@@ -193,6 +193,16 @@ export const updateTeacherRequest = asyncHandler(async (req, res) => {
                 <p>Congratulations! Your application to become a tutor has been accepted.</p>
                 <p>We are excited to have you on board.</p>
             `);
+
+            const notification = await Notification.create({
+                user: updatedRequest.user._id,
+                title: "Application Accepted",
+                message: "Congratulations! Your application to become a tutor has been accepted. Pay the required fees to activate your tutor profile.",
+                type: "request",
+            });
+
+            tutorProfile.notifications.push(notification._id);
+            await tutorProfile.save();
 
             message = "Teacher request accepted and Tutor Profile created.";
         } else if(status == "REJECTED") {

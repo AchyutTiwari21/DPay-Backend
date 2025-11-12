@@ -62,9 +62,14 @@ const sendClassRequestNotificationSchema = z.object({
     .regex(objectIdRegex, "Invalid MongoDB ObjectId format"),
 }).strict();
 
+const markNotificationsAsReadSchema = z.object({
+  notificationIds: z.array(z.string().regex(objectIdRegex, "Invalid MongoDB ObjectId format")).min(1, "At least one notification ID is required").max(100, "Cannot mark more than 100 notifications as read at once"),
+}).strict();
+
 export {
     tutorSchema,
     tutorAvailabilitySchema,
     getSubjectsQuerySchema,
-    sendClassRequestNotificationSchema
+    sendClassRequestNotificationSchema,
+    markNotificationsAsReadSchema
 };
