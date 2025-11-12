@@ -198,7 +198,7 @@ export const updateTeacherRequest = asyncHandler(async (req, res) => {
                 user: updatedRequest.user._id,
                 title: "Application Accepted",
                 message: "Congratulations! Your application to become a tutor has been accepted. Pay the required fees to activate your tutor profile.",
-                type: "request",
+                type: "payment-request",
             });
 
             tutorProfile.notifications.push(notification._id);

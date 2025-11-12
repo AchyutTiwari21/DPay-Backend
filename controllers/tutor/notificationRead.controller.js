@@ -21,3 +21,21 @@ export const markNotificationsAsRead = asyncHandler(async (req, res) => {
         return res.status(500).json(new ApiResponse(500, null, "Internal Server Error"));
     }
 });
+
+export const removeNotification = asyncHandler(async (req, res) => {
+    const userId = req.user?._id;
+    if (!userId) {
+        return res.status(401).json(new ApiResponse(401, null, "Unauthorized"));
+    }
+    try {
+        const { notificationId } = req.params;
+        const deletionResult = await Notification.deleteOne({ _id: notificationId, user: userId });
+        if (deletionResult.deletedCount === 0) {
+            return res.status(404).json(new ApiResponse(404, null, "Notification not found"));
+        }
+        return res.status(200).json(new ApiResponse(200, null, "Notification removed successfully"));
+    } catch (error) {
+        console.error("Error removing notification:", error);
+        return res.status(500).json(new ApiResponse(500, null, "Internal Server Error"));
+    }
+});

@@ -12,7 +12,8 @@ import {
     getDemoSessionsHandler,
     sendClassRequestNotification,
     addUpdateTutorAvatar,
-    markNotificationsAsRead
+    markNotificationsAsRead,
+    removeNotification
 } from "../../controllers/tutor/index.js";
 import {
     tutorSchema,
@@ -47,5 +48,7 @@ router.route("/demo-sessions-handler").get(verifyJWT, verifyTutor, validateSchem
 router.route("/send-class-request-notification").post(verifyJWT, verifyTutor, validateSchema(sendClassRequestNotificationSchema), sendClassRequestNotification);
 
 router.route("/mark-notifications-as-read").put(verifyJWT, verifyTutor, validateSchema(markNotificationsAsReadSchema), markNotificationsAsRead);
+
+router.route("/remove-notification/:notificationId").delete(verifyJWT, verifyTutor, removeNotification);
 
 export default router;

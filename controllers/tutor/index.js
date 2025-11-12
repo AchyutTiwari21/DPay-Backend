@@ -3,7 +3,7 @@ import { addAvailability } from "./addUpdateAvailability.js";
 import { getDashboardStats } from "./dashboardStats.controller.js";
 import { getDemoSessions, getBookingTrends, getDemoStats, getDemoSessionsHandler, sendClassRequestNotification } from "./getDemoSession.controller.js";
 import { getTutor } from "./getTutorDetail.controller.js";
-import { markNotificationsAsRead } from "./notificationRead.controller.js";
+import { markNotificationsAsRead, removeNotification } from "./notificationRead.controller.js";
 
 export {
     updateTutorProfile,
@@ -17,5 +17,6 @@ export {
     getTutor,
     getDemoSessionsHandler,
     sendClassRequestNotification,
-    markNotificationsAsRead
+    markNotificationsAsRead,
+    removeNotification
 };
