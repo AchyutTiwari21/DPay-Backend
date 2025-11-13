@@ -4,6 +4,7 @@ import { getDashboardStats } from "./dashboardStats.controller.js";
 import { getDemoSessions, getBookingTrends, getDemoStats, getDemoSessionsHandler, sendClassRequestNotification } from "./getDemoSession.controller.js";
 import { getTutor } from "./getTutorDetail.controller.js";
 import { markNotificationsAsRead, removeNotification } from "./notificationRead.controller.js";
+import { initiateTutorPayout, verifyTutorPayout } from "./tutorPayout.controller.js";
 
 export {
     updateTutorProfile,
@@ -18,5 +19,7 @@ export {
     getDemoSessionsHandler,
     sendClassRequestNotification,
     markNotificationsAsRead,
-    removeNotification
+    removeNotification,
+    initiateTutorPayout,
+    verifyTutorPayout
 };

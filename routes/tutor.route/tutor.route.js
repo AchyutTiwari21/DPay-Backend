@@ -13,13 +13,16 @@ import {
     sendClassRequestNotification,
     addUpdateTutorAvatar,
     markNotificationsAsRead,
-    removeNotification
+    removeNotification,
+    initiateTutorPayout,
+    verifyTutorPayout
 } from "../../controllers/tutor/index.js";
 import {
     tutorSchema,
     tutorAvailabilitySchema,
     sendClassRequestNotificationSchema,
-    markNotificationsAsReadSchema
+    markNotificationsAsReadSchema,
+    verifyTutorPayoutSchema
 } from "../../zod/tutorSchema.js";
 import { verifyJWT, verifyTutor, validateSchema, upload } from "../../middlewares/index.js";
 
@@ -50,5 +53,9 @@ router.route("/send-class-request-notification").post(verifyJWT, verifyTutor, va
 router.route("/mark-notifications-as-read").put(verifyJWT, verifyTutor, validateSchema(markNotificationsAsReadSchema), markNotificationsAsRead);
 
 router.route("/remove-notification/:notificationId").delete(verifyJWT, verifyTutor, removeNotification);
+
+router.route("/pay-tutor-payout").post(verifyJWT, verifyTutor, validateSchema(z.void()), initiateTutorPayout);
+
+router.route("/verify-tutor-payout").post(verifyJWT, verifyTutor, validateSchema(verifyTutorPayoutSchema), verifyTutorPayout);
 
 export default router;

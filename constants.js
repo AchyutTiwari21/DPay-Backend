@@ -6,7 +6,9 @@ export const cookieOptions = {
     secure: true
 };
 
-export let sessionAmount = 2000;
+export const sessionAmount = 2000;
+
+export const tutorPayoutAmount = 5000;
 
 export const googleOAuthRedirectUrl = `${process.env.BACKEND_URL}/api/auth/googleCallback`;
 
