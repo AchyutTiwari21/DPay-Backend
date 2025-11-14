@@ -26,7 +26,7 @@ export const webhookHandler = asyncHandler(async (req, res) => {
     if (event === "payment.captured") {
       const payment = req.body.payload.payment.entity;
 
-      if (payment.notes && payment.notes === "Demo Class Payment") {
+      if (payment.notes && payment.notes.type === "Demo Class Payment") {
         let paymentMethod = null;
         if (payment.method === "netbanking") paymentMethod = "Net Banking";
         else if (payment.method === "card") paymentMethod = "Card";
@@ -93,7 +93,7 @@ export const webhookHandler = asyncHandler(async (req, res) => {
         );  
       }
 
-      if (payment.notes && payment.notes === "Tutor Payout") {
+      if (payment.notes && payment.notes.type === "Tutor Payout") {
         let paymentMethod = null;
         if (payment.method === "netbanking") paymentMethod = "Net Banking";
         else if (payment.method === "card") paymentMethod = "Card";
@@ -132,7 +132,7 @@ export const webhookHandler = asyncHandler(async (req, res) => {
     else if (event === "payment.failed") {
       const payment = req.body.payload.payment.entity;
 
-      if (payment.notes && payment.notes === "Demo Class Payment") {
+      if (payment.notes && payment.notes.type === "Demo Class Payment") {
         let paymentMethod = null;
         if (payment.method === "netbanking") paymentMethod = "Net Banking";
         else if (payment.method === "card") paymentMethod = "Card";
@@ -157,7 +157,7 @@ export const webhookHandler = asyncHandler(async (req, res) => {
         }
       }
 
-      if (payment.notes && payment.notes === "Tutor Payout") {
+      if (payment.notes && payment.notes.type === "Tutor Payout") {
         let paymentMethod = null;
         if (payment.method === "netbanking") paymentMethod = "Net Banking";
         else if (payment.method === "card") paymentMethod = "Card";
@@ -173,7 +173,6 @@ export const webhookHandler = asyncHandler(async (req, res) => {
           },
           { new: true }
         );
-        
         await TutorProfile.findOneAndUpdate(
           { _id: payment.notes.tutorId },
           {
@@ -183,8 +182,7 @@ export const webhookHandler = asyncHandler(async (req, res) => {
           { new: true }
         );
       }
-
-
+      
       console.log("❌ Payment failed:", payment.id);
     }
 

@@ -18,7 +18,8 @@ const PaymentSchema = new Schema({
     },
     paymentId: {
         type: String,
-        unique: true
+        unique: true,
+        sparse: true
     },
     type: {
         type: String,

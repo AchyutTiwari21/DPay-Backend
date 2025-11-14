@@ -1,4 +1,4 @@
-import { Notification } from "../../models/index.js";
+import { Notification, TutorProfile } from "../../models/index.js";
 import { asyncHandler, ApiResponse } from "../../utils/index.js";
 
 export const markNotificationsAsRead = asyncHandler(async (req, res) => {
@@ -33,6 +33,12 @@ export const removeNotification = asyncHandler(async (req, res) => {
         if (deletionResult.deletedCount === 0) {
             return res.status(404).json(new ApiResponse(404, null, "Notification not found"));
         }
+
+        await TutorProfile.updateOne(
+            { user: userId },
+            { $pull: { notifications: notificationId } }
+        );
+
         return res.status(200).json(new ApiResponse(200, null, "Notification removed successfully"));
     } catch (error) {
         console.error("Error removing notification:", error);
