@@ -15,6 +15,10 @@ const studentProfileSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "Tution"
   }],
+  marks: [{
+    type: Schema.Types.ObjectId,
+    ref: "Marks"
+  }],
   schoolBoard: {
     type: String
   },
