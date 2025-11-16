@@ -1,4 +1,4 @@
-import { User, Lesson, TutorProfile, Notification } from '../../models/index.js';
+import { User, Lesson, TutorProfile, Notification, StudentProfile } from '../../models/index.js';
 import { ApiResponse, asyncHandler } from '../../utils/index.js';
 import { mailSender } from '../../utils/mailSender.js';
 
@@ -332,6 +332,8 @@ export const sendClassRequestNotification = asyncHandler(async (req, res) => {
       return res.status(403).json(new ApiResponse(403, null, "Unauthorized: Tutor does not match lesson tutor"));
     }
 
+    const student = await StudentProfile.findOne({user: lesson.student._id});
+
     const notification = new Notification({
       user: lesson.student._id,
       title: "New Class Request",
@@ -341,6 +343,14 @@ export const sendClassRequestNotification = asyncHandler(async (req, res) => {
     });
 
     await notification.save();
+
+    student.notifications.push(notification._id);
+
+    if (!student) {
+      return res.status(404).json(new ApiResponse(404, null, "Student profile not found"));
+    }
+
+    await student.save();
 
     await mailSender(lesson.student.email, "New Class Request", `Hello ${lesson.student.name},\n\nYou have received a new class request from ${user.name} for the subject ${lesson.subject.name}.\n\nPlease log in to your account to view and respond to the request.\n\nBest regards,\nDPay Team`);
 
