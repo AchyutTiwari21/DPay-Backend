@@ -338,7 +338,7 @@ export const sendClassRequestNotification = asyncHandler(async (req, res) => {
       user: lesson.student._id,
       title: "New Class Request",
       message: `You have a new class request from ${user.name} for the subject ${lesson.subject.name}.`,
-      type: "request",
+      type: "class-request",
       lesson: lesson._id
     });
 
