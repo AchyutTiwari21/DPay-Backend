@@ -12,6 +12,7 @@ import {
     getDemoSessionsHandler,
     sendClassRequestNotification,
     addMeetingLinkHandler,
+    markSessionComplete,
     addUpdateTutorAvatar,
     markNotificationsAsRead,
     removeNotification,
@@ -61,5 +62,7 @@ router.route("/pay-tutor-payout").post(verifyJWT, verifyTutor, validateSchema(z.
 router.route("/verify-tutor-payout").post(verifyJWT, verifyTutor, validateSchema(verifyTutorPayoutSchema), verifyTutorPayout);
 
 router.route("/add-meeting-link").put(verifyJWT, verifyTutor, validateSchema(addMeetingLinkHandlerSchema), addMeetingLinkHandler);
+
+router.route("/mark-session-complete/:lessonId").put(verifyJWT, verifyTutor, validateSchema(z.void()), markSessionComplete);
 
 export default router;

@@ -387,3 +387,48 @@ export const addMeetingLinkHandler = asyncHandler(async (req, res) => {
     return res.status(500).json(new ApiResponse(500, null, "Failed to add meeting link"));
   }
 });
+
+export const markSessionComplete = asyncHandler(async (req, res) => {
+  const userId =  req?.user?._id;
+  if (!userId) {
+    return res.status(400).json(new ApiResponse(400, null, "Missing user id"));
+  }
+
+  try {
+    const { lessonId } = req.params;
+
+    if(!lessonId) {
+      return res.status(400).json(
+        new ApiResponse(400, null, "Session Id is required.")
+      );
+    }
+
+    const tutorProfile = await TutorProfile.findOne({user: userId});
+
+    if(!tutorProfile) {
+      return res.status(400).json(
+        new ApiResponse(400, null, "No Tutor Profile found.")
+      );
+    }
+
+    const lesson = await Lesson.findById(lessonId);
+    if (!lesson) {
+      return res.status(404).json(new ApiResponse(404, null, "Session not found"));
+    }
+    if(tutorProfile._id.toString() !== lesson.tutor.toString()) {
+      return res.status(403).json(new ApiResponse(403, null, "Unauthorized: Tutor does not match lesson tutor"));
+    }
+
+    lesson.status = "COMPLETED";
+    await lesson.save();
+
+    return res.status(200).json(
+      new ApiResponse(200, null, "Status updated successfully!")
+    );
+  } catch (error) {
+    console.error("Error while marking session complete.");
+    return res.status(500).json(
+      new ApiResponse(500, null, "Error while marking session complete.")
+    );
+  }
+})
