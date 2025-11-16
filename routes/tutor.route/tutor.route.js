@@ -11,6 +11,7 @@ import {
     getTutor,
     getDemoSessionsHandler,
     sendClassRequestNotification,
+    addMeetingLinkHandler,
     addUpdateTutorAvatar,
     markNotificationsAsRead,
     removeNotification,
@@ -22,7 +23,8 @@ import {
     tutorAvailabilitySchema,
     sendClassRequestNotificationSchema,
     markNotificationsAsReadSchema,
-    verifyTutorPayoutSchema
+    verifyTutorPayoutSchema,
+    addMeetingLinkHandlerSchema
 } from "../../zod/tutorSchema.js";
 import { verifyJWT, verifyTutor, validateSchema, upload } from "../../middlewares/index.js";
 
@@ -57,5 +59,7 @@ router.route("/remove-notification/:notificationId").delete(verifyJWT, verifyTut
 router.route("/pay-tutor-payout").post(verifyJWT, verifyTutor, validateSchema(z.void()), initiateTutorPayout);
 
 router.route("/verify-tutor-payout").post(verifyJWT, verifyTutor, validateSchema(verifyTutorPayoutSchema), verifyTutorPayout);
+
+router.route("/add-meeting-link").put(verifyJWT, verifyTutor, validateSchema(addMeetingLinkHandlerSchema), addMeetingLinkHandler);
 
 export default router;

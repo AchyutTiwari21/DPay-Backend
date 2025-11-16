@@ -350,3 +350,40 @@ export const sendClassRequestNotification = asyncHandler(async (req, res) => {
     return res.status(500).json(new ApiResponse(500, null, "Failed to send notification"));
   }
 });
+
+export const addMeetingLinkHandler = asyncHandler(async (req, res) => {
+  const userId =  req?.user?._id;
+  if (!userId) {
+    return res.status(400).json(new ApiResponse(400, null, "Missing user id"));
+  }
+  try {
+    const { lessonId, meetingLink } = req.body;
+    if (!lessonId || !meetingLink) {
+      return res.status(400).json(new ApiResponse(400, null, "Missing lessonId or meetingLink in request body"));
+    }
+    // find tutor profile
+    const tutorProfile = await TutorProfile.findOne({ user: userId });
+    if (!tutorProfile) {
+      return res.status(404).json(new ApiResponse(404, null, "Tutor profile not found"));
+    }
+    const lesson = await Lesson.findById(lessonId);
+    if (!lesson) {
+      return res.status(404).json(new ApiResponse(404, null, "Lesson not found"));
+    }
+    if(tutorProfile._id.toString() !== lesson.tutor.toString()) {
+      return res.status(403).json(new ApiResponse(403, null, "Unauthorized: Tutor does not match lesson tutor"));
+    }
+
+    if(lesson.meetingLink) {
+      return res.status(400).json(new ApiResponse(400, null, "Meeting link already exists for this lesson"));
+    }
+
+    lesson.meetingLink = meetingLink;
+    await lesson.save();
+
+    return res.status(200).json(new ApiResponse(200, null, "Meeting link added successfully"));
+  } catch (error) {
+    console.error("Error adding meeting link:", error);
+    return res.status(500).json(new ApiResponse(500, null, "Failed to add meeting link"));
+  }
+});

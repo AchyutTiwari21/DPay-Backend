@@ -83,7 +83,12 @@ const verifyTutorPayoutSchema = z.object({
     .string()
     .length(64, "Signature must be a 64-character hex string")
     .regex(/^[a-f0-9]+$/, "Invalid signature format"),
-});
+}).strict();
+
+const addMeetingLinkHandlerSchema = z.object({
+    lessonId: z.string().regex(objectIdRegex, "Invalid MongoDB ObjectId format"),
+    meetingLink: z.string().url()
+}).strict();
 
 export {
     tutorSchema,
@@ -91,5 +96,6 @@ export {
     getSubjectsQuerySchema,
     sendClassRequestNotificationSchema,
     markNotificationsAsReadSchema,
-    verifyTutorPayoutSchema
+    verifyTutorPayoutSchema,
+    addMeetingLinkHandlerSchema
 };
