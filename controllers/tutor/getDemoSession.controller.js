@@ -5,10 +5,27 @@ import { mailSender } from '../../utils/mailSender.js';
 
 export async function getDemoSessions(req, res) {
   try {
+    const userId = req?.user?._id;
+    if(!userId) {
+      return res.status(401).json(
+        new ApiResponse(401, null, "User is required.")
+      );
+    }
+
+    const tutorProfile = await TutorProfile.findOne({user: userId}).select('_id');
+    if(!tutorProfile) {
+      return res.status(401).json(
+        new ApiResponse(401, null, "Tutor Profile not found.")
+      );
+    }
+
     const startOfToday = new Date()
     startOfToday.setHours(0, 0, 0, 0)
 
-    const lessons = await Lesson.find({ date: { $gte: startOfToday } })
+    const lessons = await Lesson.find({ 
+      tutor: tutorProfile?._id,
+      date: { $gte: startOfToday } 
+    })
       .sort({ date: 1 }) // ascending by date
       .limit(3)
       .populate({ path: 'student', select: 'name' })
@@ -32,6 +49,20 @@ export async function getDemoSessions(req, res) {
 
 export async function getBookingTrends(req, res) {
   try {
+    const userId = req?.user?._id;
+    if(!userId) {
+      return res.status(401).json(
+        new ApiResponse(401, null, "User id not found")
+      );
+    }
+
+    const tutorProfile = await TutorProfile.findOne({user: userId}).select('_id');
+    if(!tutorProfile) {
+      return res.status(401).json(
+        new ApiResponse(401, null, "Tutor Profile not found.")
+      );
+    }
+
     const now = new Date()
     const bookings = []
 
@@ -44,6 +75,7 @@ export async function getBookingTrends(req, res) {
 
       // Count lessons scheduled in this month
       const count = await Lesson.countDocuments({
+        tutor: tutorProfile?._id,
         date: { $gte: startOfMonth, $lt: startOfNextMonth }
       })
 
