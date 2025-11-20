@@ -17,9 +17,6 @@ export const getTutors = asyncHandler(async (req, res) => {
 
     try {
         let pipeline = [];
-        pipeline.push({
-            $match: { status: "Active", paymentStatus: "Paid" }
-        });
 
         // ##########################################################
         // 1️⃣ LOCATION-BASED SORTING USING $geoNear (if coords exist)
@@ -37,10 +34,15 @@ export const getTutors = asyncHandler(async (req, res) => {
                     },
                     distanceField: "distance",
                     spherical: true,
+                    key: "location",
                     query: { status: "Active", paymentStatus: "Paid" }
                 }
             });
         }
+
+        pipeline.push({
+            $match: { status: "Active", paymentStatus: "Paid" }
+        });
 
         // ##########################################################
         // 2️⃣ LOCATION TEXT SEARCH (CITY / STATE / AREA NAME)

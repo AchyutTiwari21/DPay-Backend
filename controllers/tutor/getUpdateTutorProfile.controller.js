@@ -97,3 +97,64 @@ export const addUpdateTutorAvatar = asyncHandler(async (req, res) => {
         return res.status(500).json(new ApiResponse(500, null, "Internal Server Error"));
     }
 });
+
+export const addTutorLocation = asyncHandler(async (req, res) => {
+    const user = req.user;
+
+    const { address, latitude, longitude, city, state, country } = req.body;
+
+    try {
+        // Validate fields
+        if (!address) {
+            return res.status(400).json(
+                new ApiResponse(400, null, "Address is required")
+            );
+        }
+
+        if (!latitude || !longitude) {
+            return res.status(400).json(
+                new ApiResponse(400, null, "Latitude and Longitude are required")
+            );
+        }
+
+        // Build location object
+        const locationData = {
+            type: "Point",
+            coordinates: [Number(longitude), Number(latitude)] // IMPORTANT: [lng, lat]
+        };
+
+        // Update tutor profile
+        const updatedProfile = await TutorProfile.findOneAndUpdate(
+            { user: user._id },
+            {
+                address,
+                location: locationData,
+                city,
+                state,
+                country
+            },
+            { new: true }
+        );
+
+        if (!updatedProfile) {
+            return res.status(404).json(
+                new ApiResponse(404, null, "Tutor profile not found")
+            );
+        }
+
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                updatedProfile,
+                "Tutor location updated successfully"
+            )
+        );
+
+    } catch (error) {
+        console.error("Error updating tutor location:", error.message);
+        return res.status(500).json(
+            new ApiResponse(500, null, "Internal Server Error")
+        );
+    }
+});
+

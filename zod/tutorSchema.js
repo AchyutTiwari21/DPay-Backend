@@ -16,6 +16,33 @@ const tutorSchema = z.object({
     availableLocations: z.array(z.string().min(1).max(100)).min(1).max(10).nullish(),
 }).strict();
 
+const tutorLocationSchema = z.object({
+    address: z
+        .string()
+        .min(1, "Address is required")
+        .max(200, "Address must be under 200 characters"),
+
+    latitude: z
+        .number({
+            required_error: "Latitude is required",
+            invalid_type_error: "Latitude must be a number",
+        })
+        .min(-90, "Latitude must be >= -90")
+        .max(90, "Latitude must be <= 90"),
+
+    longitude: z
+        .number({
+            required_error: "Longitude is required",
+            invalid_type_error: "Longitude must be a number",
+        })
+        .min(-180, "Longitude must be >= -180")
+        .max(180, "Longitude must be <= 180"),
+
+    city: z.string().min(1).max(100).nullish(),
+    state: z.string().min(1).max(100).nullish(),
+    country: z.string().min(1).max(100).nullish(),
+}).strict();
+
 // Regex for MongoDB ObjectId (24 hex characters)
 const objectIdRegex = /^[a-f\d]{24}$/i;
 
@@ -92,6 +119,7 @@ const addMeetingLinkHandlerSchema = z.object({
 
 export {
     tutorSchema,
+    tutorLocationSchema,
     tutorAvailabilitySchema,
     getSubjectsQuerySchema,
     sendClassRequestNotificationSchema,

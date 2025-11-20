@@ -1,4 +1,4 @@
-import { updateTutorProfile, getTutorProfile, addUpdateTutorAvatar } from "./getUpdateTutorProfile.controller.js";
+import { updateTutorProfile, getTutorProfile, addUpdateTutorAvatar, addTutorLocation } from "./getUpdateTutorProfile.controller.js";
 import { addAvailability } from "./addUpdateAvailability.js";
 import { getDashboardStats } from "./dashboardStats.controller.js";
 import { getDemoSessions, getBookingTrends, getDemoStats, getDemoSessionsHandler, sendClassRequestNotification, addMeetingLinkHandler, markSessionComplete } from "./getDemoSession.controller.js";
@@ -23,5 +23,6 @@ export {
     markNotificationsAsRead,
     removeNotification,
     initiateTutorPayout,
-    verifyTutorPayout
+    verifyTutorPayout,
+    addTutorLocation
 };

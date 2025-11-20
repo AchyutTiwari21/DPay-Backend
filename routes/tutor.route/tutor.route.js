@@ -17,7 +17,8 @@ import {
     markNotificationsAsRead,
     removeNotification,
     initiateTutorPayout,
-    verifyTutorPayout
+    verifyTutorPayout,
+    addTutorLocation
 } from "../../controllers/tutor/index.js";
 import {
     tutorSchema,
@@ -25,13 +26,16 @@ import {
     sendClassRequestNotificationSchema,
     markNotificationsAsReadSchema,
     verifyTutorPayoutSchema,
-    addMeetingLinkHandlerSchema
+    addMeetingLinkHandlerSchema,
+    tutorLocationSchema
 } from "../../zod/tutorSchema.js";
 import { verifyJWT, verifyTutor, validateSchema, upload } from "../../middlewares/index.js";
 
 const router = Router();
 
 router.route("/update-profile").put(verifyJWT, verifyTutor, validateSchema(tutorSchema), updateTutorProfile);
+
+router.route("/add-location").put(verifyJWT, verifyTutor, validateSchema(tutorLocationSchema), addTutorLocation);
 
 router.route("/profile").get(verifyJWT, verifyTutor, validateSchema(z.void()), getTutorProfile);
 
