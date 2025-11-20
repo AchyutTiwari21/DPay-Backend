@@ -3,16 +3,67 @@ import { ApiResponse, asyncHandler } from "../../../utils/index.js";
 import mongoose from "mongoose";
 
 export const getTutors = asyncHandler(async (req, res) => {
-    const { page = 1, limit = 7, search, language, minPrice, maxPrice } = req.query;
+    const {
+        page = 1,
+        limit = 7,
+        search,
+        language,
+        minPrice,
+        maxPrice,
+        lat,
+        lng,           // user's current coordinates
+        locationText   // typed location search (optional)
+    } = req.query;
 
     try {
         let pipeline = [];
-
         pipeline.push({
             $match: { status: "Active", paymentStatus: "Paid" }
         });
 
-        // 🔹 Price Range filter
+        // ##########################################################
+        // 1️⃣ LOCATION-BASED SORTING USING $geoNear (if coords exist)
+        // ##########################################################
+        let userCoordinates = null;
+
+        if (lat && lng) {
+            userCoordinates = [parseFloat(lng), parseFloat(lat)];
+
+            pipeline.push({
+                $geoNear: {
+                    near: {
+                        type: "Point",
+                        coordinates: userCoordinates
+                    },
+                    distanceField: "distance",
+                    spherical: true,
+                    query: { status: "Active", paymentStatus: "Paid" }
+                }
+            });
+        }
+
+        // ##########################################################
+        // 2️⃣ LOCATION TEXT SEARCH (CITY / STATE / AREA NAME)
+        // ##########################################################
+        if (locationText) {
+            const locRegex = new RegExp(locationText, "i");
+
+            pipeline.push({
+                $match: {
+                    $or: [
+                        { city: locRegex },
+                        { state: locRegex },
+                        { country: locRegex },
+                        { address: locRegex },
+                        { availableLocations: locRegex }
+                    ]
+                }
+            });
+        }
+
+        // ##########################################################
+        // 3️⃣ PRICE FILTER
+        // ##########################################################
         if (minPrice && maxPrice) {
             pipeline.push({
                 $match: {
@@ -24,21 +75,25 @@ export const getTutors = asyncHandler(async (req, res) => {
             });
         }
 
-        // 🔹 Search filter (with scoring)
+        // ##########################################################
+        // 4️⃣ SEARCH FILTER + SCORING
+        // ##########################################################
         if (search) {
             const regex = new RegExp(search, "i");
 
-            // 1️⃣ Get matching subject IDs
-            const subjectIds = await Subject.find({ $or: [
-                { name: regex },
-                { category: regex }
-            ] }).distinct("_id");
+            const subjectIds = await Subject.find({
+                $or: [
+                    { name: regex },
+                    { category: regex }
+                ]
+            }).distinct("_id");
 
             pipeline.push({
                 $addFields: {
                     score: {
                         $add: [
                             { $cond: [{ $regexMatch: { input: "$title", regex } }, 1, 0] },
+
                             {
                                 $cond: [
                                     {
@@ -59,59 +114,77 @@ export const getTutors = asyncHandler(async (req, res) => {
                                     0
                                 ]
                             },
-                            // 🔹 Replace search-language check with language query parameter
+
                             {
-                            $cond: [
-                                {
-                                    $gt: [
-                                        {
-                                            $size: {
-                                                $filter: {
-                                                input: "$languages",
-                                                as: "l",
-                                                cond: language && language !== "any"
-                                                    ? { $regexMatch: { input: "$$l", regex: new RegExp(language, "i") } } // ✅ use query param
-                                                    : false
+                                $cond: [
+                                    {
+                                        $gt: [
+                                            {
+                                                $size: {
+                                                    $filter: {
+                                                        input: "$languages",
+                                                        as: "l",
+                                                        cond:
+                                                            language && language !== "any"
+                                                                ? {
+                                                                    $regexMatch: {
+                                                                        input: "$$l",
+                                                                        regex: new RegExp(language, "i")
+                                                                    }
+                                                                }
+                                                                : false
+                                                    }
                                                 }
-                                            }
-                                        },
-                                        0
-                                    ]
-                                },
-                                2,
-                                0
-                            ]
+                                            },
+                                            0
+                                        ]
+                                    },
+                                    2,
+                                    0
+                                ]
                             },
+
                             {
-                            $cond: [
-                                {
-                                    $gt: [
-                                        { $size: { $setIntersection: ["$subjects", subjectIds] } },
-                                        0
-                                    ]
-                                },
-                                4,
-                                0
-                            ]
+                                $cond: [
+                                    {
+                                        $gt: [
+                                            {
+                                                $size: {
+                                                    $setIntersection: ["$subjects", subjectIds]
+                                                }
+                                            },
+                                            0
+                                        ]
+                                    },
+                                    4,
+                                    0
+                                ]
                             }
                         ]
                     }
                 }
-                });
-
-            // 3️⃣ Keep only tutors with score > 0
-            pipeline.push({
-                $match: { score: { $gt: 0 } }
             });
 
-            // Sort by score first
-            pipeline.push({ $sort: { score: -1, _id: 1 } });
+            pipeline.push({ $match: { score: { $gt: 0 } } });
+
+            // If location exists → sort by distance, then score
+            if (lat && lng) {
+                pipeline.push({ $sort: { distance: 1, score: -1 } });
+            } else {
+                pipeline.push({ $sort: { score: -1, _id: 1 } });
+            }
         } else {
-            // Default sort when no search term
-            pipeline.push({ $sort: { _id: 1 } });
+            // Default sorting
+            if (lat && lng) {
+                pipeline.push({ $sort: { distance: 1 } });
+            } else {
+                pipeline.push({ $sort: { _id: 1 } });
+            }
         }
 
-        // 🔹 Lookup for user, subjects and availability
+        // ##########################################################
+        // 5️⃣ Lookups (User, Subjects, Availability)
+        // ##########################################################
         pipeline.push(
             {
                 $lookup: {
@@ -165,12 +238,15 @@ export const getTutors = asyncHandler(async (req, res) => {
                     availability: 1,
                     about: 1,
                     education: 1,
-                    availableLocations: 1
+                    availableLocations: 1,
+                    distance: 1 // distance returned from $geoNear
                 }
             }
         );
 
-        // 🔹 Pagination (skip + limit)
+        // ##########################################################
+        // 6️⃣ PAGINATION
+        // ##########################################################
         const pageNumber = Number(page) || 1;
         const perPage = Number(limit) || 7;
         const skip = (pageNumber - 1) * perPage;
@@ -178,24 +254,34 @@ export const getTutors = asyncHandler(async (req, res) => {
         pipeline.push({ $skip: skip });
         pipeline.push({ $limit: perPage });
 
-        // Run query
-        let tutors = await TutorProfile.aggregate(pipeline);
+        const tutors = await TutorProfile.aggregate(pipeline);
 
-        // Count total docs (for frontend page calculation)
-        const countResult = await TutorProfile.aggregate([...pipeline, { $count: "total" }]);
-        const totalTutors = countResult[0]?.total || 0;
+        // Count total docs
+        const totalTutors = await TutorProfile.countDocuments({
+            status: "Active",
+            paymentStatus: "Paid"
+        });
+
         const totalPages = Math.ceil(totalTutors / perPage);
 
-        return res.status(200).json(new ApiResponse(
-            200,
-            { tutors, totalTutors, totalPages, currentPage: pageNumber },
-            "Tutors retrieved successfully"
-        ));
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                {
+                    tutors,
+                    totalTutors,
+                    totalPages,
+                    currentPage: pageNumber
+                },
+                "Tutors retrieved successfully"
+            )
+        );
     } catch (error) {
-        console.error("Error retrieving tutors:", error.message);
+        console.error("Error retrieving tutors:", error);
         return res.status(500).json(new ApiResponse(500, null, "Internal Server Error"));
     }
 });
+
 
 export const getTutorById = asyncHandler(async (req, res) => {
     const { id } = req.params;
