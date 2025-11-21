@@ -11,9 +11,11 @@ export const getTutors = asyncHandler(async (req, res) => {
         minPrice,
         maxPrice,
         lat,
-        lng,           // user's current coordinates
-        locationText   // typed location search (optional)
+        lng   // typed location search (optional)
     } = req.query;
+
+    console.log("Qery received: ", req.query);
+    
 
     try {
         let pipeline = [];
@@ -38,30 +40,31 @@ export const getTutors = asyncHandler(async (req, res) => {
                     query: { status: "Active", paymentStatus: "Paid" }
                 }
             });
+        } else {
+            // If no GPS, apply default matching
+            pipeline.push({
+                $match: { status: "Active", paymentStatus: "Paid" }
+            });
         }
-
-        pipeline.push({
-            $match: { status: "Active", paymentStatus: "Paid" }
-        });
 
         // ##########################################################
         // 2️⃣ LOCATION TEXT SEARCH (CITY / STATE / AREA NAME)
         // ##########################################################
-        if (locationText) {
-            const locRegex = new RegExp(locationText, "i");
+        // if (locationText) {
+        //     const locRegex = new RegExp(locationText, "i");
 
-            pipeline.push({
-                $match: {
-                    $or: [
-                        { city: locRegex },
-                        { state: locRegex },
-                        { country: locRegex },
-                        { address: locRegex },
-                        { availableLocations: locRegex }
-                    ]
-                }
-            });
-        }
+        //     pipeline.push({
+        //         $match: {
+        //             $or: [
+        //                 { city: locRegex },
+        //                 { state: locRegex },
+        //                 { country: locRegex },
+        //                 { address: locRegex },
+        //                 { availableLocations: locRegex }
+        //             ]
+        //         }
+        //     });
+        // }
 
         // ##########################################################
         // 3️⃣ PRICE FILTER

@@ -125,32 +125,60 @@ const applyTeachSchema = z.object({
 
 const tutorQuerySchema = z.object({
   page: z
-     .string()
-     .min("1")
-     .max("4")
-     .transform(Number)
-     .default("1"),
+    .string()
+    .regex(/^\d+$/)
+    .transform(Number)
+    .default("1")
+    .refine(val => val >= 1 && val <= 9999, {
+      message: "Page must be between 1 and 9999",
+    }),
+
   limit: z
     .string()
     .regex(/^\d+$/)
     .transform(Number)
-    .default("7") // match your default
-    .refine(val => val > 0 && val <= 20, {
-      message: "Limit must be between 1 and 20",
+    .default("7")
+    .refine(val => val >= 1 && val <= 50, {
+      message: "Limit must be between 1 and 50",
     }),
+
   search: z.string().optional(),
+
   language: z.string().optional(),
+
   minPrice: z
     .string()
     .regex(/^\d+$/)
     .transform(Number)
     .default("0"),
+
   maxPrice: z
     .string()
     .regex(/^\d+$/)
     .transform(Number)
     .default("9999"),
-});
+
+  // 🌍 USER’S CURRENT COORDINATES
+  lat: z
+    .string()
+    .regex(/^-?\d+(\.\d+)?$/)
+    .transform(Number)
+    .optional(),
+
+  lng: z
+    .string()
+    .regex(/^-?\d+(\.\d+)?$/)
+    .transform(Number)
+    .optional(),
+
+  // 🏙 LOCATION SEARCH TEXT
+  locationText: z
+    .string()
+    .min(1)
+    .max(100)
+    .optional(),
+}).strict();
+
 
 const subjectQuerySchema = z.object({
   cursor: z
