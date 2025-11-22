@@ -11,7 +11,8 @@ export const getTutors = asyncHandler(async (req, res) => {
         minPrice,
         maxPrice,
         lat,
-        lng   // typed location search (optional)
+        lng,
+        radius
     } = req.query;
 
     try {
@@ -24,16 +25,17 @@ export const getTutors = asyncHandler(async (req, res) => {
 
         if (lat && lng) {
             userCoordinates = [parseFloat(lng), parseFloat(lat)];
+            const radiusKm = Number(radius) || 100;
+            const radiusMeters = radiusKm * 1000;
 
             pipeline.push({
                 $geoNear: {
-                    near: {
-                        type: "Point",
-                        coordinates: userCoordinates
-                    },
+                    near: { type: "Point", coordinates: userCoordinates },
                     distanceField: "distance",
                     spherical: true,
+                    distanceMultiplier: 0.001, // convert meters → km
                     key: "location",
+                    maxDistance: radiusMeters,  // 🔥 FILTER WITHIN RADIUS
                     query: { status: "Active", paymentStatus: "Paid" }
                 }
             });
@@ -43,25 +45,6 @@ export const getTutors = asyncHandler(async (req, res) => {
                 $match: { status: "Active", paymentStatus: "Paid" }
             });
         }
-
-        // ##########################################################
-        // 2️⃣ LOCATION TEXT SEARCH (CITY / STATE / AREA NAME)
-        // ##########################################################
-        // if (locationText) {
-        //     const locRegex = new RegExp(locationText, "i");
-
-        //     pipeline.push({
-        //         $match: {
-        //             $or: [
-        //                 { city: locRegex },
-        //                 { state: locRegex },
-        //                 { country: locRegex },
-        //                 { address: locRegex },
-        //                 { availableLocations: locRegex }
-        //             ]
-        //         }
-        //     });
-        // }
 
         // ##########################################################
         // 3️⃣ PRICE FILTER
@@ -291,7 +274,6 @@ export const getTutors = asyncHandler(async (req, res) => {
         return res.status(500).json(new ApiResponse(500, null, "Internal Server Error"));
     }
 });
-
 
 export const getTutorById = asyncHandler(async (req, res) => {
     const { id } = req.params;

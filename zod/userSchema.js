@@ -171,12 +171,13 @@ const tutorQuerySchema = z.object({
     .transform(Number)
     .optional(),
 
-  // 🏙 LOCATION SEARCH TEXT
-  locationText: z
+  radius: z
     .string()
     .min(1)
-    .max(100)
-    .optional(),
+    .max(3)
+    .transform(Number)
+    .optional()
+
 }).strict();
 
 
