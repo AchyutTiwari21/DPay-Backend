@@ -14,9 +14,6 @@ export const getTutors = asyncHandler(async (req, res) => {
         lng   // typed location search (optional)
     } = req.query;
 
-    console.log("Qery received: ", req.query);
-    
-
     try {
         let pipeline = [];
 
@@ -87,18 +84,17 @@ export const getTutors = asyncHandler(async (req, res) => {
             const regex = new RegExp(search, "i");
 
             const subjectIds = await Subject.find({
-                $or: [
-                    { name: regex },
-                    { category: regex }
-                ]
+                $or: [{ name: regex }, { category: regex }]
             }).distinct("_id");
 
             pipeline.push({
                 $addFields: {
                     score: {
                         $add: [
+                            // title match = +1
                             { $cond: [{ $regexMatch: { input: "$title", regex } }, 1, 0] },
 
+                            // skills match = +3
                             {
                                 $cond: [
                                     {
@@ -120,28 +116,31 @@ export const getTutors = asyncHandler(async (req, res) => {
                                 ]
                             },
 
+                            // language match = +2
                             {
                                 $cond: [
                                     {
-                                        $gt: [
+                                        $and: [
+                                            language && language !== "any",
                                             {
-                                                $size: {
-                                                    $filter: {
-                                                        input: "$languages",
-                                                        as: "l",
-                                                        cond:
-                                                            language && language !== "any"
-                                                                ? {
+                                                $gt: [
+                                                    {
+                                                        $size: {
+                                                            $filter: {
+                                                                input: "$languages",
+                                                                as: "l",
+                                                                cond: {
                                                                     $regexMatch: {
                                                                         input: "$$l",
                                                                         regex: new RegExp(language, "i")
                                                                     }
                                                                 }
-                                                                : false
-                                                    }
-                                                }
-                                            },
-                                            0
+                                                            }
+                                                        }
+                                                    },
+                                                    0
+                                                ]
+                                            }
                                         ]
                                     },
                                     2,
@@ -149,6 +148,7 @@ export const getTutors = asyncHandler(async (req, res) => {
                                 ]
                             },
 
+                            // subject or category match = +4
                             {
                                 $cond: [
                                     {
@@ -170,22 +170,27 @@ export const getTutors = asyncHandler(async (req, res) => {
                 }
             });
 
+            // Only keep tutors that scored at least 1
             pipeline.push({ $match: { score: { $gt: 0 } } });
 
-            // If location exists → sort by distance, then score
+            // FINAL SORTING
+            // If location exists → distance first, then score
             if (lat && lng) {
                 pipeline.push({ $sort: { distance: 1, score: -1 } });
             } else {
                 pipeline.push({ $sort: { score: -1, _id: 1 } });
             }
+
         } else {
-            // Default sorting
+            // NO SEARCH → SORTING
             if (lat && lng) {
+                // user has location → sort only by distance
                 pipeline.push({ $sort: { distance: 1 } });
             } else {
                 pipeline.push({ $sort: { _id: 1 } });
             }
         }
+
 
         // ##########################################################
         // 5️⃣ Lookups (User, Subjects, Availability)
@@ -337,6 +342,10 @@ export const getTutorById = asyncHandler(async (req, res) => {
                 $project: {
                     _id: 1,
                     name: "$user.name",
+                    address: 1,
+                    city: 1,
+                    state: 1,
+                    country: 1,
                     avatar: "$user.avatar",
                     title: 1,
                     subjects: "$subjects.name",
