@@ -238,24 +238,23 @@ export const getTutors = asyncHandler(async (req, res) => {
         );
 
         // ##########################################################
-        // 6️⃣ PAGINATION
+        // 6️⃣ COUNT TOTAL BEFORE PAGINATION
         // ##########################################################
+        const countPipeline = [...pipeline];
+        const totalTutorsArray = await TutorProfile.aggregate([...countPipeline, { $count: "total" }]);
+        const totalTutors = totalTutorsArray.length > 0 ? totalTutorsArray[0].total : 0;
+
         const pageNumber = Number(page) || 1;
         const perPage = Number(limit) || 7;
         const skip = (pageNumber - 1) * perPage;
 
+        const totalPages = Math.ceil(totalTutors / perPage);
+
+        // NOW apply pagination
         pipeline.push({ $skip: skip });
         pipeline.push({ $limit: perPage });
 
         const tutors = await TutorProfile.aggregate(pipeline);
-
-        // Count total docs
-        const totalTutors = await TutorProfile.countDocuments({
-            status: "Active",
-            paymentStatus: "Paid"
-        });
-
-        const totalPages = Math.ceil(totalTutors / perPage);
 
         return res.status(200).json(
             new ApiResponse(
