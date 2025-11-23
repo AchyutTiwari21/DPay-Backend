@@ -50,7 +50,10 @@ export const getTutors = asyncHandler(async (req, res) => {
       status,         // e.g. "Active" or "Active,Pending"
       paymentStatus,  // e.g. "Paid" or "Paid,Pending"
       subjects,       // e.g. "Math,Physics"
-      isVerified      // "true" | "false"
+      isVerified,     // "true" | "false"
+      lat,
+      lng,
+      radius
     } = req.query;
 
     const pageNumber = Number(page) || 1;
@@ -58,6 +61,33 @@ export const getTutors = asyncHandler(async (req, res) => {
     const skip = (pageNumber - 1) * perPage;
 
     const pipeline = [
+      // ##########################################################
+      // 1️⃣ LOCATION-BASED SORTING USING $geoNear (if coords exist)
+      // ##########################################################
+      (() => {
+        if (lat && lng) {
+          const userCoordinates = [parseFloat(lng), parseFloat(lat)];
+          const radiusKm = Number(radius) || 100;
+          const radiusMeters = radiusKm * 1000;
+
+          return {
+            $geoNear: {
+              near: { type: "Point", coordinates: userCoordinates },
+              distanceField: "distance",
+              spherical: true,
+              distanceMultiplier: 0.001, // convert meters → km
+              key: "location",
+              maxDistance: radiusMeters,  // 🔥 FILTER WITHIN RADIUS
+              query: { status: "Active", paymentStatus: "Paid" }
+            }
+          };
+        } else {
+          return {
+            $match: { status: "Active", paymentStatus: "Paid" }
+          };
+        }
+      })(),
+
       // populate user basics
       {
         $lookup: {
@@ -107,7 +137,8 @@ export const getTutors = asyncHandler(async (req, res) => {
           paymentHistory: 1,
           subjects: 1,
           createdAt: 1,
-          status: 1
+          status: 1,
+          distance: 1 // distance returned from $geoNear
         }
       }
     ];
@@ -134,17 +165,17 @@ export const getTutors = asyncHandler(async (req, res) => {
 
     if (status && String(status).toLowerCase() !== 'all') {
       const statuses = String(status).split(',').map(s => s.trim()).filter(Boolean);
-      filterMatch.status = { $in: statuses }; // Ensure we match any of the statuses
+      filterMatch.status = { $in: statuses };
     }
 
     if (paymentStatus && String(paymentStatus).toLowerCase() !== 'all') {
       const payments = String(paymentStatus).split(',').map(s => s.trim()).filter(Boolean);
-      filterMatch.paymentStatus = { $in: payments }; // Ensure we match any of the payment statuses
+      filterMatch.paymentStatus = { $in: payments };
     }
 
     if (subjects) {
       const subjList = String(subjects).split(',').map(s => s.trim()).filter(Boolean);
-      filterMatch['subjects.name'] = { $in: subjList }; // Match any of the subject names
+      filterMatch['subjects.name'] = { $in: subjList };
     }
 
     if (typeof isVerified !== 'undefined' && isVerified !== '') {
@@ -156,6 +187,15 @@ export const getTutors = asyncHandler(async (req, res) => {
     // apply filters if any
     if (Object.keys(filterMatch).length > 0) {
       pipeline.push({ $match: filterMatch });
+    }
+
+    // ##########################################################
+    // SORTING (distance first if geolocation, then by ID)
+    // ##########################################################
+    if (lat && lng) {
+      pipeline.push({ $sort: { distance: 1, _id: 1 } });
+    } else {
+      pipeline.push({ $sort: { _id: 1 } });
     }
 
     const [tutors, statsResults] = await Promise.all([
@@ -220,7 +260,8 @@ export const getTutors = asyncHandler(async (req, res) => {
           amount: pay.amount || 0,
           status: pay.status || '',
           transactionId: pay.razorpay_payment_id || ''
-        })) : []
+        })) : [],
+        distance: p.distance ? parseFloat(p.distance).toFixed(2) : null // Include distance in km
       };
     });
 
