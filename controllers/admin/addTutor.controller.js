@@ -78,12 +78,7 @@ export const getTutors = asyncHandler(async (req, res) => {
               distanceMultiplier: 0.001, // convert meters → km
               key: "location",
               maxDistance: radiusMeters,  // 🔥 FILTER WITHIN RADIUS
-              query: { status: "Active", paymentStatus: "Paid" }
             }
-          };
-        } else {
-          return {
-            $match: { status: "Active", paymentStatus: "Paid" }
           };
         }
       })(),
