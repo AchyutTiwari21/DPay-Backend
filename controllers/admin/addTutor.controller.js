@@ -4,8 +4,8 @@ import { mailSender } from "../../utils/mailSender.js";
 import mongoose from "mongoose";
 
 export const addTutor = asyncHandler(async (req, res) => {
-    const { email } = req.body;
-
+    const { email, address, latitude, longitude } = req.body;
+    
     try {
         const userRecord = await User.findOne({
             email
@@ -13,15 +13,38 @@ export const addTutor = asyncHandler(async (req, res) => {
 
         if(!userRecord) {
             return res.status(404).json(new ApiResponse(
-                false,
+                404,
                 null,
                 "User not registered."
             ));
         }
 
-        await TutorProfile.create({
-            user: userRecord._id,
+        const tutorExists = await TutorProfile.findOne({
+            user: userRecord._id
         });
+
+        if(tutorExists) {
+            return res.status(400).json(new ApiResponse(
+                400,
+                null,
+                "Tutor profile already exists for this user."
+            ));
+        }
+
+        const tutorData = {
+            user: userRecord._id,
+        };
+
+        // Add location if coordinates provided
+        if (latitude && longitude && address) {
+            tutorData.location = {
+                type: "Point",
+                coordinates: [parseFloat(longitude), parseFloat(latitude)]
+            };
+            tutorData.address = address;
+        }
+
+        await TutorProfile.create(tutorData);
 
         const user = await User.findByIdAndUpdate(userRecord._id, { $set: { role: "TUTOR" } });
 
@@ -80,6 +103,8 @@ export const getTutors = asyncHandler(async (req, res) => {
               maxDistance: radiusMeters,  // 🔥 FILTER WITHIN RADIUS
             }
           };
+        } else {
+          return { $match: {} }; // no-op stage
         }
       })(),
 
