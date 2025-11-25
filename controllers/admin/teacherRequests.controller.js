@@ -177,14 +177,44 @@ export const updateTeacherRequest = asyncHandler(async (req, res) => {
         let message = "";
 
         if(status == "ACCEPTED") {
-            const tutorProfile = await TutorProfile.create({
+            // Fetch geolocation coordinates from address
+            let location = null;
+            if (updatedRequest.address) {
+                try {
+                    const geoResponse = await fetch(
+                        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(updatedRequest.address)}`
+                    );
+                    const geoData = await geoResponse.json();
+
+                    if (geoData && geoData.length > 0) {
+                        const { lat, lon } = geoData[0];
+                        location = {
+                            type: "Point",
+                            coordinates: [parseFloat(lon), parseFloat(lat)] // [longitude, latitude]
+                        };
+                    }
+                } catch (geoError) {
+                    console.error("Error fetching geolocation:", geoError.message);
+                    // Continue without location if API fails
+                }
+            }
+
+            // Create tutor profile with location
+            const tutorProfileData = {
                 user: updatedRequest.user._id,
                 address: updatedRequest.address,
                 phone: updatedRequest.phone,
                 subjects: updatedRequest.subjects,
                 experience: updatedRequest.experience,
                 education: updatedRequest.qualifications,
-            });
+            };
+
+            // Add location if successfully fetched
+            if (location) {
+                tutorProfileData.location = location;
+            }
+
+            const tutorProfile = await TutorProfile.create(tutorProfileData);
 
             const user = await User.findByIdAndUpdate(updatedRequest.user._id, { $set: { role: "TUTOR" } });
 
