@@ -51,10 +51,6 @@ const studentProfileSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "Payment"
   }],
-  coins: {
-    type: Number,
-    default: 0
-  },
   status: {
     type: String,
     enum: ["active", "inactive"],

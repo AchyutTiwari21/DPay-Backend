@@ -1,7 +1,7 @@
 import StudentProfile from '../../models/studentProfile.model.js';
 import { asyncHandler, ApiResponse } from '../../utils/index.js';
 
-const fetchUpcomingDemoLesson = asyncHandler(async (req, res) => {
+export const fetchUpcomingDemoLesson = asyncHandler(async (req, res) => {
   try {
     const userId = req.user?._id ?? req.user?.id;
     if (!userId) return res.status(401).json(
@@ -118,5 +118,3 @@ const fetchUpcomingDemoLesson = asyncHandler(async (req, res) => {
     );
   }
 });
-
-export default fetchUpcomingDemoLesson;

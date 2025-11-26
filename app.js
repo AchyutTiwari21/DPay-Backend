@@ -30,7 +30,7 @@ import authRouter from "./routes/user.route/auth.route.js";
 import userRouter from "./routes/user.route/user.route.js";
 import adminRouter from "./routes/admin.route/admin.route.js";
 import tutorRouter from "./routes/tutor.route/tutor.route.js";
-import studentRouter from "./routes/student.route/student.controller.js";
+import studentRouter from "./routes/student.route/student.route.js";
 import webhookRouter from "./routes/user.route/webhook.route.js";
 
 app.use("/api/webhook", webhookRouter);
