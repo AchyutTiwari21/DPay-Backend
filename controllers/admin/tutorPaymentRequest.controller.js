@@ -9,9 +9,10 @@ export const createPaymentRequest = asyncHandler(async (req, res) => {
         const tutor = await TutorProfile.findById(tutorId).populate("user", "_id email name");
 
         if(!tutor) {
-            return res.status(404).json(
+            res.status(404).json(
                 new ApiResponse(404, null, "Tutor not found")
             );
+            return;
         }
 
         const notification = await Notification.create({
@@ -24,6 +25,14 @@ export const createPaymentRequest = asyncHandler(async (req, res) => {
         tutor.notifications.push(notification._id);
         await tutor.save();
 
+        res.status(201).json(
+            new ApiResponse(
+                201,
+                null,
+                "Payment request sent successfully!",
+            )
+        );
+
         await mailSender(tutor.user.email, "New Payment Request", `
             <p>Dear ${tutor.user.name},</p>
             <p>You have a new payment request of ₹${amount} from the admin.</p>
@@ -31,13 +40,7 @@ export const createPaymentRequest = asyncHandler(async (req, res) => {
             <p>Best regards,<br/>DPay Team</p>
         `);
 
-        return res.status(201).json(
-            new ApiResponse(
-                201,
-                null,
-                "Payment request sent successfully!",
-            )
-        );
+        return;
     } catch (error) {
         console.error("Error creating payment request:", error);
         return res.status(500).json({ message: "Internal server error" });
