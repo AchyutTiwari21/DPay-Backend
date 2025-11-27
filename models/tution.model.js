@@ -7,32 +7,28 @@ const tutionSchema = new Schema({
     ref: "TutorProfile", 
     required: true 
   },
-  students: [{ 
+  student: { 
     type: Schema.Types.ObjectId, 
     ref: "StudentProfile", 
     required: true 
-  }],
+  },
   title: {
     type: String,
     required: true
   },
   startDate: { 
-    type: Date, 
-    required: true 
+    type: Date
   },
   endDate: {
-    type: Date,
-    required: true
+    type: Date
   },
   schedule: [{
     day: {
       type: String,
       enum: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-      required: true
     },
     time: {
-      type: String,
-      required: true
+      type: String
     }
   }],
   status: {
@@ -41,8 +37,7 @@ const tutionSchema = new Schema({
     default: "PENDING",
   },
   fees: {
-    type: Number,
-    required: true
+    type: Number
   },
   subjects: [{
     type: Schema.Types.ObjectId,
