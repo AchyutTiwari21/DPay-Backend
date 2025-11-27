@@ -384,9 +384,11 @@ export const sendClassRequestNotification = asyncHandler(async (req, res) => {
 
     await student.save();
 
+    res.status(201).json(new ApiResponse(201, notification, "Notification sent successfully"));
+
     await mailSender(lesson.student.email, "New Class Request", `Hello ${lesson.student.name},\n\nYou have received a new class request from ${user.name} for the subject ${lesson.subject.name}.\n\nPlease log in to your account to view and respond to the request.\n\nBest regards,\nDPay Team`);
 
-    return res.status(201).json(new ApiResponse(201, notification, "Notification sent successfully"));
+    return;
   } catch (error) {
     console.error("Error sending class request notification:", error);
     return res.status(500).json(new ApiResponse(500, null, "Failed to send notification"));

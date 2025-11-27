@@ -48,15 +48,17 @@ export const addTutor = asyncHandler(async (req, res) => {
 
         const user = await User.findByIdAndUpdate(userRecord._id, { $set: { role: "TUTOR" } });
 
+        res.status(201).json(
+            new ApiResponse(201, null, "Tutor added successfully")
+        );
+
         await mailSender(user.email, "Congratulations! You are now a tutor", `
             <p>Dear ${user.name},</p>
             <p>Congratulations! You have been successfully added as a tutor.</p>
             <p>We are excited to have you on board.</p>
         `);
 
-        return res.status(201).json(
-            new ApiResponse(201, null, "Tutor added successfully")
-        );
+        return;
     } catch (error) {
         console.log("Error adding tutor:", error.message);
 
@@ -370,12 +372,14 @@ export const removeTutor = asyncHandler(async (req, res) => {
         await TutorProfile.findByIdAndDelete(tutorId);
         const user = await User.findByIdAndUpdate(tutor.user, { $set: { role: "USER" } });
 
+        res.status(200).json(new ApiResponse(200, null, "Tutor removed successfully!"));
+
         await mailSender(user.email, "You have been removed as a tutor", `
             <p>Dear ${user.name},</p>
             <p>You have been removed as a tutor.</p>
         `);
 
-        return res.status(200).json(new ApiResponse(200, null, "Tutor removed successfully!"));
+        return;
     } catch (error) {
         console.error("Error removing tutor:", error.message);
         return res.status(500).json(new ApiResponse(500, null, "Internal Server Error"));

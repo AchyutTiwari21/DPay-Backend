@@ -37,7 +37,9 @@ export const acceptRejectClassRequest = asyncHandler(async (req, res) => {
 
             const studentProfile = await StudentProfile.findById(studentId);
             studentProfile.tutions.push(tution._id);
+            if(!studentProfile.tutors.includes(lesson.tutor)) studentProfile.tutors.push(lesson.tutor);
             await studentProfile.save();
+
 
             const tutorProfile = await TutorProfile.findById(lesson.tutor).populate('user');
             tutorProfile.tutions.push(tution._id);
@@ -46,7 +48,7 @@ export const acceptRejectClassRequest = asyncHandler(async (req, res) => {
             }
             await tutorProfile.save();
 
-            res.status(200).json(new ApiResponse(200, tution, "Class request accepted and tution created"));
+            res.status(200).json(new ApiResponse(200, tution, "Class request accepted."));
             await mailSender(
                 tutorProfile.user?.email,
                 "Class Request Accepted",
@@ -54,7 +56,7 @@ export const acceptRejectClassRequest = asyncHandler(async (req, res) => {
             );
             return;
         } else if(status === "REJECTED") {
-            res.status(200).json(new ApiResponse(200, null, "Class request rejected"));
+            res.status(200).json(new ApiResponse(200, null, "Class request rejected."));
             const lesson = await Lesson.findById(notification.lesson);
             if (!lesson) {
                 return;

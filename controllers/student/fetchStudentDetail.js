@@ -9,7 +9,10 @@ export const fetchStudentDetail = asyncHandler(async (req, res) => {
     );
 
     const studentProfile = await StudentProfile.findOne({ user: userId })
-      .populate('notifications')
+      .populate({
+        path: 'notifications',
+        options: { sort: { createdAt: -1 } }
+      })
       .select('_id walletBalance status notifications marks');
     
     if (!studentProfile) {
