@@ -151,6 +151,30 @@ export const webhookHandler = asyncHandler(async (req, res) => {
         );
       }
 
+      if(payment.notes && payment.notes.type === "Tutor Subscription Payment") {
+        const paymentData = await Payment.findOneAndUpdate(
+          { orderId: payment.order_id },
+          {
+            paymentId: payment.id,
+            status: "PAID",
+            date: new Date()
+          },
+          { new: true }
+        );
+        if (!paymentData) {
+          console.error("⚠️ Payment record not found for order:", payment.order_id);
+          return;
+        }
+        await TutorProfile.findOneAndUpdate(
+          { _id: payment.notes.tutorId },
+          {            
+            isSubscribed: true,
+            subscriptionStartDate: new Date(),
+            subscriptionExpiresAt: new Date(new Date().setMonth(new Date().getMonth() + 6)) },
+          { new: true }
+        );
+      }      
+
       console.log("✅ Payment successful:", payment.id);
     }
 
@@ -209,6 +233,17 @@ export const webhookHandler = asyncHandler(async (req, res) => {
       }
 
       if(payment.notes && payment.notes.type === "Student Subscription Payment") {
+        await Payment.findOneAndUpdate(
+          { orderId: payment.order_id },
+          {
+            paymentId: payment.id,
+            status: "FAILED",
+          },
+          { new: true }
+        );
+      }
+
+      if(payment.notes && payment.notes.type === "Tutor Subscription Payment") {
         await Payment.findOneAndUpdate(
           { orderId: payment.order_id },
           {
