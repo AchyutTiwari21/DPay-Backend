@@ -43,4 +43,7 @@ app.use("/api/student", studentRouter);
 import { startCleanupJob } from "./utils/cleanup.js";
 startCleanupJob();
 
+import { startSubscriptionCheck } from "./utils/subscriptionCron.js";
+startSubscriptionCheck();
+
 export { app };

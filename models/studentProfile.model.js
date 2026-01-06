@@ -68,7 +68,10 @@ const studentProfileSchema = new Schema({
   notifications: [{
     type: Schema.Types.ObjectId,
     ref: "Notification"
-  }]
+  }],
+  isSubscribed: { type: Boolean, default: false },
+  subscriptionStartDate: { type: Date },
+  subscriptionExpiresAt: { type: Date },
 }, {timestamps: true});
 
 const StudentProfile = mongoose.model("StudentProfile", studentProfileSchema);

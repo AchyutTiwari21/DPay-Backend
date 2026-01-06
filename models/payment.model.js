@@ -23,7 +23,7 @@ const PaymentSchema = new Schema({
     },
     type: {
         type: String,
-        enum: ["Demo Class Payment", "Registration Payment", "Tutor Payout"],
+        enum: ["Demo Class Payment", "Registration Payment", "Tutor Payout", "Subscription Payment"],
         required: true,
     },
     status: {

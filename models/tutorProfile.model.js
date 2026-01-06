@@ -82,7 +82,11 @@ const tutorProfileSchema = new Schema({
   students: [{ type: Schema.Types.ObjectId, ref: "StudentProfile" }],
   availability: [{ type: Schema.Types.ObjectId, ref: "Availability" }],
   reviews: [{ type: Schema.Types.ObjectId, ref: "Review" }],
-  notifications: [{ type: Schema.Types.ObjectId, ref: "Notification" }]
+  notifications: [{ type: Schema.Types.ObjectId, ref: "Notification" }],
+
+  isSubscribed: { type: Boolean, default: false },
+  subscriptionStartDate: { type: Date },
+  subscriptionExpiresAt: { type: Date },
 
 }, {timestamps: true});
 

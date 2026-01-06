@@ -3,7 +3,6 @@ import { Lesson, TutorProfile, Payment, Subject } from "../../../models/index.js
 import Razorpay from "razorpay";
 import crypto from "crypto";
 import { sessionAmount } from "../../../constants.js";
-import { type } from "os";
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
