@@ -3,6 +3,7 @@ import { fetchUpcomingDemoLesson } from './fetchUpcomingDemoLesson.controller.js
 import { fetchStudentDetail } from './fetchStudentDetail.js';
 import { acceptRejectClassRequest } from './acceptRejectClassRequest.controller.js';
 import { markNotificationsAsRead, removeNotification } from './updateNotification.controller.js';
+import { buySubscription } from './studentSubscription.controller.js';
 
 export {
   getStudentDashboardStats,
@@ -10,5 +11,6 @@ export {
   fetchStudentDetail,
   acceptRejectClassRequest,
   markNotificationsAsRead,
-  removeNotification
+  removeNotification,
+  buySubscription
 };
