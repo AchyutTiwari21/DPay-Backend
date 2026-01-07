@@ -22,7 +22,7 @@ export const buySubscription = asyncHandler(async (req, res) => {
         if(tutorProfile.isSubscribed) {
             return res.status(400).json(new ApiResponse(400, null, "Tutor is already subscribed."));
         }
-        const subscriptionAmount = 1500; // Example subscription amount
+        const subscriptionAmount = 1000; // Example subscription amount
 
         const options = {
             amount: subscriptionAmount * 100, // Convert to paise

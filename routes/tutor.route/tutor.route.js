@@ -18,7 +18,8 @@ import {
     removeNotification,
     initiateTutorPayout,
     verifyTutorPayout,
-    addTutorLocation
+    addTutorLocation,
+    buySubscription
 } from "../../controllers/tutor/index.js";
 import {
     tutorSchema,
@@ -68,5 +69,7 @@ router.route("/verify-tutor-payout").post(verifyJWT, verifyTutor, validateSchema
 router.route("/add-meeting-link").put(verifyJWT, verifyTutor, validateSchema(addMeetingLinkHandlerSchema), addMeetingLinkHandler);
 
 router.route("/mark-session-complete/:lessonId").put(verifyJWT, verifyTutor, validateSchema(z.void()), markSessionComplete);
+
+router.route("/buy-subscription").post(verifyJWT, verifyTutor, validateSchema(z.void()), buySubscription);
 
 export default router;

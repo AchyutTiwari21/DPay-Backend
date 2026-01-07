@@ -37,6 +37,6 @@ router.route("/mark-notifications-as-read").put(
 
 router.route("/remove-notification/:notificationId").delete(verifyJWT, removeNotification);
 
-router.route("/buy-subscription").post(z.void(), verifyJWT, buySubscription);
+router.route("/buy-subscription").post(validateSchema(z.void()), verifyJWT, buySubscription);
 
 export default router;
