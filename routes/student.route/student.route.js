@@ -12,7 +12,8 @@ import {
 } from "../../controllers/student/index.js";
 import { 
     acceptRejectClassRequestSchema,
-    markNotificationsAsReadSchema
+    markNotificationsAsReadSchema,
+    verifyPaymentSchema
 } from "../../zod/student.schema.js";
 import { verifyJWT, validateSchema } from "../../middlewares/index.js";
 
@@ -40,6 +41,6 @@ router.route("/remove-notification/:notificationId").delete(verifyJWT, removeNot
 
 router.route("/buy-subscription").post(validateSchema(z.void()), verifyJWT, buySubscription);
 
-router.route("/verify-subscription-payment").post(validateSchema(z.void()), verifyJWT, verifySubscriptionPayment);
+router.route("/verify-subscription-payment").post(validateSchema(verifyPaymentSchema), verifyJWT, verifySubscriptionPayment);
 
 export default router;

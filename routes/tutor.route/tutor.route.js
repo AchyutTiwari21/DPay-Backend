@@ -29,7 +29,8 @@ import {
     markNotificationsAsReadSchema,
     verifyTutorPayoutSchema,
     addMeetingLinkHandlerSchema,
-    tutorLocationSchema
+    tutorLocationSchema,
+    verifyPaymentSchema
 } from "../../zod/tutorSchema.js";
 import { verifyJWT, verifyTutor, validateSchema, upload } from "../../middlewares/index.js";
 
@@ -73,6 +74,6 @@ router.route("/mark-session-complete/:lessonId").put(verifyJWT, verifyTutor, val
 
 router.route("/buy-subscription").post(verifyJWT, verifyTutor, validateSchema(z.void()), buySubscription);
 
-router.route("/verify-subscription-payment").post(verifyJWT, verifyTutor, validateSchema(z.void()), verifySubscriptionPayment);
+router.route("/verify-subscription-payment").post(verifyJWT, verifyTutor, validateSchema(verifyPaymentSchema), verifySubscriptionPayment);
 
 export default router;

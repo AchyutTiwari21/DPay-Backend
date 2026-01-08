@@ -15,7 +15,27 @@ const markNotificationsAsReadSchema = z.object({
   notificationIds: z.array(z.string().regex(objectIdRegex, "Invalid MongoDB ObjectId format")).min(1, "At least one notification ID is required").max(100, "Cannot mark more than 100 notifications as read at once"),
 }).strict();
 
+const verifyPaymentSchema = z.object({
+    razorpay_order_id: z
+    .string()
+    .min(10, "Order ID is required")
+    .max(40, "Order ID too long")
+    .regex(/^order_/, "Invalid order ID format"),
+
+  razorpay_payment_id: z
+    .string()
+    .min(10, "Payment ID is required")
+    .max(40, "Payment ID too long")
+    .regex(/^pay_/, "Invalid payment ID format"),
+
+  razorpay_signature: z
+    .string()
+    .length(64, "Signature must be a 64-character hex string")
+    .regex(/^[a-f0-9]+$/, "Invalid signature format"),
+}).strict();
+
 export { 
     acceptRejectClassRequestSchema,
-    markNotificationsAsReadSchema
+    markNotificationsAsReadSchema,
+    verifyPaymentSchema
 };
