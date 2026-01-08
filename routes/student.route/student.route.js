@@ -7,7 +7,8 @@ import {
     acceptRejectClassRequest,
     markNotificationsAsRead,
     removeNotification,
-    buySubscription
+    buySubscription,
+    verifySubscriptionPayment
 } from "../../controllers/student/index.js";
 import { 
     acceptRejectClassRequestSchema,
@@ -38,5 +39,7 @@ router.route("/mark-notifications-as-read").put(
 router.route("/remove-notification/:notificationId").delete(verifyJWT, removeNotification);
 
 router.route("/buy-subscription").post(validateSchema(z.void()), verifyJWT, buySubscription);
+
+router.route("/verify-subscription-payment").post(validateSchema(z.void()), verifyJWT, verifySubscriptionPayment);
 
 export default router;

@@ -1,7 +1,7 @@
 import { asyncHandler, ApiResponse } from "../../utils/index.js";
 import Razorpay from "razorpay";
 import crypto from "crypto";
-import { StudentProfile, Payment } from "../../models/index.js";
+import { StudentProfile, Payment, User } from "../../models/index.js";
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -15,9 +15,10 @@ export const buySubscription = asyncHandler(async (req, res) => {
             return res.status(401).json(new ApiResponse(401, null, "Unauthorized"));
         }
 
-        const studentProfile = await StudentProfile.findOne({ user: userId });
+        let studentProfile = await StudentProfile.findOne({ user: userId });
         if(!studentProfile) {
-            return res.status(404).json(new ApiResponse(404, null, "Student profile not found"));
+            studentProfile = await StudentProfile.create({ user: userId });
+            await User.findByIdAndUpdate(userId, { role: "STUDENT" });
         }
         if(studentProfile.isSubscribed) {
             return res.status(400).json(new ApiResponse(400, null, "Student is already subscribed."));

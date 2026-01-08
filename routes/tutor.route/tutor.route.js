@@ -19,7 +19,8 @@ import {
     initiateTutorPayout,
     verifyTutorPayout,
     addTutorLocation,
-    buySubscription
+    buySubscription,
+    verifySubscriptionPayment
 } from "../../controllers/tutor/index.js";
 import {
     tutorSchema,
@@ -71,5 +72,7 @@ router.route("/add-meeting-link").put(verifyJWT, verifyTutor, validateSchema(add
 router.route("/mark-session-complete/:lessonId").put(verifyJWT, verifyTutor, validateSchema(z.void()), markSessionComplete);
 
 router.route("/buy-subscription").post(verifyJWT, verifyTutor, validateSchema(z.void()), buySubscription);
+
+router.route("/verify-subscription-payment").post(verifyJWT, verifyTutor, validateSchema(z.void()), verifySubscriptionPayment);
 
 export default router;
