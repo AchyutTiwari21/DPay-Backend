@@ -176,6 +176,11 @@ const tutorQuerySchema = z.object({
     .min(1)
     .max(3)
     .transform(Number)
+    .optional(),
+
+  verified: z
+    .string()
+    .transform((val) => val === 'true' || val === '1')
     .optional()
 
 }).strict();

@@ -12,7 +12,8 @@ export const getTutors = asyncHandler(async (req, res) => {
         maxPrice,
         lat,
         lng,
-        radius
+        radius,
+        verified
     } = req.query;
 
     try {
@@ -22,6 +23,11 @@ export const getTutors = asyncHandler(async (req, res) => {
         // 1️⃣ LOCATION-BASED SORTING USING $geoNear (if coords exist)
         // ##########################################################
         let userCoordinates = null;
+
+        const baseQuery = { status: "Active", paymentStatus: "Paid" };
+        if (verified) {
+            baseQuery.verified = true;
+        }
 
         if (lat && lng) {
             userCoordinates = [parseFloat(lng), parseFloat(lat)];
@@ -36,13 +42,13 @@ export const getTutors = asyncHandler(async (req, res) => {
                     distanceMultiplier: 0.001, // convert meters → km
                     key: "location",
                     maxDistance: radiusMeters,  // 🔥 FILTER WITHIN RADIUS
-                    query: { status: "Active", paymentStatus: "Paid" }
+                    query: baseQuery
                 }
             });
         } else {
             // If no GPS, apply default matching
             pipeline.push({
-                $match: { status: "Active", paymentStatus: "Paid" }
+                $match: baseQuery
             });
         }
 
