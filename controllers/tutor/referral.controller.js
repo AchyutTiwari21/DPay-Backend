@@ -18,7 +18,7 @@ export const createReferral = asyncHandler(async (req, res) => {
         studentPhone,
         location,
     });
-    res.status(201).json(new ApiResponse(201, null, "Referral created successfully"));
+    res.status(201).json(new ApiResponse(201, null, "Referral Submitted Successfully!"));
 });
 
 export const getReferralsByTutor = asyncHandler(async (req, res) => {

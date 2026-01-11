@@ -134,7 +134,7 @@ const verifyPaymentSchema = z.object({
     .string()
     .length(64, "Signature must be a 64-character hex string")
     .regex(/^[a-f0-9]+$/, "Invalid signature format"),
-}).strint();
+}).strict();
 
 const referralSchema = z.object({
     studentName: z.string().min(1).max(100),
