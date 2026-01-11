@@ -134,7 +134,15 @@ const verifyPaymentSchema = z.object({
     .string()
     .length(64, "Signature must be a 64-character hex string")
     .regex(/^[a-f0-9]+$/, "Invalid signature format"),
-})
+}).strint();
+
+const referralSchema = z.object({
+    studentName: z.string().min(1).max(100),
+    subjectToTeach: z.string().min(1).max(100),
+    studentEmail: z.string().email().max(100),
+    studentPhone: z.string().min(7).max(15),
+    location: z.string().min(1).max(200),
+}).strict();
 
 export {
     tutorSchema,
@@ -145,5 +153,6 @@ export {
     markNotificationsAsReadSchema,
     verifyTutorPayoutSchema,
     addMeetingLinkHandlerSchema,
-    verifyPaymentSchema
+    verifyPaymentSchema,
+    referralSchema
 };
