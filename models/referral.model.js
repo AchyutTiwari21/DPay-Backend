@@ -27,12 +27,16 @@ const ReferralSchema = new Schema({
         type: String,
         required: true,
     },
+    rewardCoins: {
+        type: Number,
+        min: 0,
+    },
     status: {
         type: String,
         enum: ["PENDING", "ACCEPTED", "REJECTED"],
         default: "PENDING"
     }
-});
+}, { timestamps: true });
 
 const Referral = mongoose.model("Referral", ReferralSchema);
 export default Referral;    

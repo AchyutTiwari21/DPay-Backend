@@ -21,6 +21,7 @@ import { createPaymentRequest } from "./tutorPaymentRequest.controller.js";
 import { getUpcomingDemoBookings, removeBooking } from "./getUpcomingDemoBookings.controller.js";
 import { getPayments, removePayment } from "./payment.controller.js";
 import { updateAdminCredentials } from "./updateAdminController.js";
+import { getAllReferrals } from "./referral.controller.js";
 
 export {
     getAllTeacherRequests,
@@ -48,5 +49,6 @@ export {
     removeBooking,
     getPayments,
     removePayment,
-    updateAdminCredentials
+    updateAdminCredentials,
+    getAllReferrals
 };

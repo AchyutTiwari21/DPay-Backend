@@ -88,6 +88,8 @@ const tutorProfileSchema = new Schema({
   subscriptionStartDate: { type: Date },
   subscriptionExpiresAt: { type: Date },
 
+  coins: { type: Number, default: 0, min: 0 },
+  
 }, {timestamps: true});
 
 // 📌 Required for geospatial queries
