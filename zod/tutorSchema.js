@@ -136,14 +136,6 @@ const verifyPaymentSchema = z.object({
     .regex(/^[a-f0-9]+$/, "Invalid signature format"),
 }).strict();
 
-const referralSchema = z.object({
-    studentName: z.string().min(1).max(100),
-    subjectToTeach: z.string().min(1).max(100),
-    studentEmail: z.string().email().max(100),
-    studentPhone: z.string().min(7).max(15),
-    location: z.string().min(1).max(200),
-}).strict();
-
 export {
     tutorSchema,
     tutorLocationSchema,
@@ -153,6 +145,5 @@ export {
     markNotificationsAsReadSchema,
     verifyTutorPayoutSchema,
     addMeetingLinkHandlerSchema,
-    verifyPaymentSchema,
-    referralSchema
+    verifyPaymentSchema
 };

@@ -232,6 +232,14 @@ const verifyOrderSchema = z.object({
     .regex(/^[a-f0-9]+$/, "Invalid signature format"),
 });
 
+const referralSchema = z.object({
+    studentName: z.string().min(1).max(100),
+    subjectToTeach: z.string().min(1).max(100),
+    studentEmail: z.string().email().max(100),
+    studentPhone: z.string().min(7).max(15),
+    location: z.string().min(1).max(200),
+}).strict();
+
 export {
     signupSchema,
     signinSchema,
@@ -244,5 +252,6 @@ export {
     tutorQuerySchema,
     subjectQuerySchema,
     createOrderSchema,
-    verifyOrderSchema
+    verifyOrderSchema,
+    referralSchema
 }

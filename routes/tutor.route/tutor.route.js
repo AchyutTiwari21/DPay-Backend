@@ -21,8 +21,6 @@ import {
     addTutorLocation,
     buySubscription,
     verifySubscriptionPayment,
-    createReferral,
-    getReferralsByTutor
 } from "../../controllers/tutor/index.js";
 import {
     tutorSchema,
@@ -32,8 +30,7 @@ import {
     verifyTutorPayoutSchema,
     addMeetingLinkHandlerSchema,
     tutorLocationSchema,
-    verifyPaymentSchema,
-    referralSchema
+    verifyPaymentSchema
 } from "../../zod/tutorSchema.js";
 import { verifyJWT, verifyTutor, validateSchema, upload } from "../../middlewares/index.js";
 
@@ -78,9 +75,5 @@ router.route("/mark-session-complete/:lessonId").put(verifyJWT, verifyTutor, val
 router.route("/buy-subscription").post(verifyJWT, verifyTutor, validateSchema(z.void()), buySubscription);
 
 router.route("/verify-subscription-payment").post(verifyJWT, verifyTutor, validateSchema(verifyPaymentSchema), verifySubscriptionPayment);
-
-router.route("/create-referral").post(verifyJWT, verifyTutor, validateSchema(referralSchema), createReferral);
-
-router.route("/referrals").get(verifyJWT, verifyTutor, validateSchema(z.void()), getReferralsByTutor);
 
 export default router;
