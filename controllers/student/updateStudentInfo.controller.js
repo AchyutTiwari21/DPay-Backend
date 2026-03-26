@@ -5,7 +5,7 @@ import { uploadOnCloudinary, deleteFromCloudinary } from "../../utils/cloudinary
 export const getStudentProfile = asyncHandler(async (req, res) => {
     const user = req.user;
     try {
-        const profile = await StudentProfile.findOne({ user: user._id }).populate("user", "name email phone").select("address schoolBoard");
+        const profile = await StudentProfile.findOne({ user: user._id }).populate("user", "name email phone avatar").select("address schoolBoard");
 
         if (!profile) {
             return res.status(404).json(new ApiResponse(404, null, "Student profile not found"));
@@ -20,6 +20,7 @@ export const getStudentProfile = asyncHandler(async (req, res) => {
 export const updateStudentProfile = asyncHandler(async (req, res) => {
     const userId = req.user?.id;
     const { email, name, phone, address, schoolBoard } = req.body;
+
     if(!userId) {
         return res.status(402).json(
             new ApiResponse(402, null, "User ID is required.")
@@ -78,9 +79,26 @@ export const updateStudentProfile = asyncHandler(async (req, res) => {
 
         profile.address = address;
         profile.schoolBoard = schoolBoard;
+        profile.phone = phone;
         await profile.save();
 
-        return res.status(200).json(new ApiResponse(200, profile, "Student profile updated successfully"));
+        const updatedUser = await User.findById(userId).select("name email phone avatar");
+        const updatedProfile = await StudentProfile.findOne({ user: userId }).select("address schoolBoard");
+
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                {
+                    name: updatedUser?.name,
+                    email: updatedUser?.email,
+                    phone: updatedUser?.phone,
+                    avatar: updatedUser?.avatar,
+                    address: updatedProfile?.address,
+                    schoolBoard: updatedProfile?.schoolBoard,
+                },
+                "Student profile updated successfully"
+            )
+        );
     } catch (error) {
         console.error("Error updating student profile:", error.message);
         return res.status(500).json(new ApiResponse(500, null, "Internal Server Error"));
