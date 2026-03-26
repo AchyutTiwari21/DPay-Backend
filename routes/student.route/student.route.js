@@ -8,14 +8,17 @@ import {
     markNotificationsAsRead,
     removeNotification,
     buySubscription,
-    verifySubscriptionPayment
+    verifySubscriptionPayment,
+    getStudentProfile,
+    updateStudentProfile
 } from "../../controllers/student/index.js";
 import { 
     acceptRejectClassRequestSchema,
     markNotificationsAsReadSchema,
-    verifyPaymentSchema
+    verifyPaymentSchema,
+    profileUpdateSchema
 } from "../../zod/student.schema.js";
-import { verifyJWT, validateSchema } from "../../middlewares/index.js";
+import { verifyJWT, validateSchema, upload } from "../../middlewares/index.js";
 
 const router = Router();
 
@@ -42,5 +45,9 @@ router.route("/remove-notification/:notificationId").delete(verifyJWT, removeNot
 router.route("/buy-subscription").post(validateSchema(z.void()), verifyJWT, buySubscription);
 
 router.route("/verify-subscription-payment").post(validateSchema(verifyPaymentSchema), verifyJWT, verifySubscriptionPayment);
+
+router.route("/profile").get(validateSchema(z.void()), verifyJWT, getStudentProfile);
+
+router.route("/update-student-profile").put(upload.single("avatar"), validateSchema(profileUpdateSchema), verifyJWT, updateStudentProfile);
 
 export default router;

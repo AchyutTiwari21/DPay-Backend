@@ -4,6 +4,7 @@ import { fetchStudentDetail } from './fetchStudentDetail.js';
 import { acceptRejectClassRequest } from './acceptRejectClassRequest.controller.js';
 import { markNotificationsAsRead, removeNotification } from './updateNotification.controller.js';
 import { buySubscription, verifySubscriptionPayment } from './studentSubscription.controller.js';
+import { getStudentProfile, updateStudentProfile } from './updateStudentInfo.controller.js';
 
 export {
   getStudentDashboardStats,
@@ -13,5 +14,7 @@ export {
   markNotificationsAsRead,
   removeNotification,
   buySubscription,
-  verifySubscriptionPayment
+  verifySubscriptionPayment,
+  getStudentProfile,
+  updateStudentProfile
 };

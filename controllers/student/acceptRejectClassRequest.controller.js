@@ -29,7 +29,7 @@ export const acceptRejectClassRequest = asyncHandler(async (req, res) => {
             const tution = new Tution({
                 tutor: lesson.tutor,
                 student: studentId,
-                title: `Tution for ${lesson.subject?.name}`,
+                title: `${lesson.subject?.name}`,
                 status: "CONFIRMED",
                 subjects: [lesson.subject]
             });

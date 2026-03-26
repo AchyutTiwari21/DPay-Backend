@@ -34,8 +34,34 @@ const verifyPaymentSchema = z.object({
     .regex(/^[a-f0-9]+$/, "Invalid signature format"),
 }).strict();
 
+const profileUpdateSchema = z.object({
+    name: z.string()
+        .min(1, "Name is required")
+        .max(100, "Name is too long"),
+    
+    email: z.string()
+        .email("Invalid email format")
+        .min(1, "Email is required"),
+    
+    phone: z.string()
+        .min(10, "Phone number must be at least 10 characters")
+        .max(15, "Phone number is too long"),
+    
+    address: z.string()
+        .min(1, "Address is required")
+        .max(255, "Address is too long"),
+    
+    schoolBoard: z.string()
+        .min(1, "School board is required")
+        .max(100),
+
+    // Avatar is usually optional and comes from req.file
+    avatar: z.string().optional().nullish(),
+}).strict();
+
 export { 
     acceptRejectClassRequestSchema,
     markNotificationsAsReadSchema,
-    verifyPaymentSchema
+    verifyPaymentSchema,
+    profileUpdateSchema
 };
