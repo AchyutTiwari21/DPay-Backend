@@ -24,7 +24,6 @@ passport.use(
             authType: "GOOGLE",
           });
         } else {
-          user.avatar = profile.photos[0].value;
           user.googleId = profile.id;
           user.authType = "GOOGLE";
           await user.save({ validateBeforeSave: false });
