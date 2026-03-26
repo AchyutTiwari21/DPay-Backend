@@ -89,7 +89,7 @@ export const removeStudent = asyncHandler(async (req, res) => {
 });
 
 export const getStudents = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 10, search, status } = req.query;
+  const { page = 1, limit = 10, search, status, isSubscribed } = req.query;
 
   try {
     const pageNumber = Number(page) || 1;
@@ -175,6 +175,7 @@ export const getStudents = asyncHandler(async (req, res) => {
           coins: 1,
           walletBalance: 1,
           status: 1,
+          isSubscribed: 1,
           createdAt: 1,
           tutions: 1,
           paymentHistory: 1
@@ -201,6 +202,16 @@ export const getStudents = asyncHandler(async (req, res) => {
     if (status && status.toString().toLowerCase() !== 'all') {
       const statusRegex = new RegExp(`^${status}$`, 'i');
       pipeline.push({ $match: { status: statusRegex } });
+    }
+
+    // Add subscription filter if present
+    if (typeof isSubscribed !== 'undefined' && isSubscribed !== '') {
+      const subscribedValue = String(isSubscribed).toLowerCase();
+      if (subscribedValue === 'true' || subscribedValue === '1') {
+        pipeline.push({ $match: { isSubscribed: true } });
+      } else if (subscribedValue === 'false' || subscribedValue === '0') {
+        pipeline.push({ $match: { isSubscribed: false } });
+      }
     }
 
     // Sort by creation date
@@ -278,6 +289,7 @@ export const getStudents = asyncHandler(async (req, res) => {
         subjects,
         assignedTutor,
         status: statusVal || 'pending',
+        isSubscribed: !!profile.isSubscribed,
         coins: typeof profile.coins === 'number' ? profile.coins : (profile.walletBalance || 0),
         registrationDate: profile.createdAt ? new Date(profile.createdAt).toISOString().split('T')[0] : null,
         address: profile.address || '',

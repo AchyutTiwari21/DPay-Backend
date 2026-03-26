@@ -76,6 +76,7 @@ export const getTutors = asyncHandler(async (req, res) => {
       paymentStatus,  // e.g. "Paid" or "Paid,Pending"
       subjects,       // e.g. "Math,Physics"
       isVerified,     // "true" | "false"
+      isSubscribed,   // "true" | "false"
       lat,
       lng,
       radius
@@ -160,6 +161,7 @@ export const getTutors = asyncHandler(async (req, res) => {
           subjects: 1,
           createdAt: 1,
           status: 1,
+          isSubscribed: 1,
           distance: 1 // distance returned from $geoNear
         }
       }
@@ -204,6 +206,12 @@ export const getTutors = asyncHandler(async (req, res) => {
       const val = String(isVerified).toLowerCase();
       if (val === 'true' || val === '1') filterMatch.verified = true;
       else if (val === 'false' || val === '0') filterMatch.verified = false;
+    }
+
+    if (typeof isSubscribed !== 'undefined' && isSubscribed !== '') {
+      const val = String(isSubscribed).toLowerCase();
+      if (val === 'true' || val === '1') filterMatch.isSubscribed = true;
+      else if (val === 'false' || val === '0') filterMatch.isSubscribed = false;
     }
 
     // apply filters if any
@@ -272,6 +280,7 @@ export const getTutors = asyncHandler(async (req, res) => {
         status: p.status,
         paymentStatus: p.paymentStatus || 'Pending',
         isVerified: !!p.verified,
+        isSubscribed: !!p.isSubscribed,
         registrationDate: p.registrationDate
           ? new Date(p.registrationDate).toISOString().split('T')[0]
           : (p.createdAt ? new Date(p.createdAt).toISOString().split('T')[0] : null),
