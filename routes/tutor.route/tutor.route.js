@@ -21,6 +21,7 @@ import {
     addTutorLocation,
     buySubscription,
     verifySubscriptionPayment,
+    getTutorStudents
 } from "../../controllers/tutor/index.js";
 import {
     tutorSchema,
@@ -75,5 +76,7 @@ router.route("/mark-session-complete/:lessonId").put(verifyJWT, verifyTutor, val
 router.route("/buy-subscription").post(verifyJWT, verifyTutor, validateSchema(z.void()), buySubscription);
 
 router.route("/verify-subscription-payment").post(verifyJWT, verifyTutor, validateSchema(verifyPaymentSchema), verifySubscriptionPayment);
+
+router.route("/students").get(verifyJWT, verifyTutor, validateSchema(z.void()), getTutorStudents);
 
 export default router;
