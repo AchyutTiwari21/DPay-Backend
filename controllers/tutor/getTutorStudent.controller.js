@@ -25,3 +25,38 @@ export const getTutorStudents = asyncHandler(async (req, res) => {
     }
 });
 
+export const getTuitions = asyncHandler(async (req, res) => {
+    try {
+        const userId = req?.user?._id;
+        if(!userId) {
+            return res.status(401).json(new ApiResponse(401, null, "Unauthorized"));
+        }
+        const tutorProfile = await TutorProfile.findOne({ user: userId }).populate({
+            path: "tutions",
+            select: "student title startDate endDate schedule status fees subjects",
+            populate: [
+                {
+                    path: "student",
+                    select: "user",
+                    populate: {
+                        path: "user",
+                        select: "name email avatar",
+                    },
+                },
+                {
+                    path: "subjects",
+                    select: "name",
+                },
+            ],
+        });
+
+        if(!tutorProfile) {
+            return res.status(404).json(new ApiResponse(404, null, "Tutor profile not found"));
+        }
+        return res.status(200).json(new ApiResponse(200, tutorProfile.tutions, "Tuitions retrieved successfully"));
+    } catch (error) {
+        console.error("Error fetching tutor tuitions:", error);
+        return res.status(500).json(new ApiResponse(500, null, "Internal server error"));
+    }
+});
+

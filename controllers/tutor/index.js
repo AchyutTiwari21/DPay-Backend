@@ -6,7 +6,7 @@ import { getTutor } from "./getTutorDetail.controller.js";
 import { markNotificationsAsRead, removeNotification } from "./notificationRead.controller.js";
 import { initiateTutorPayout, verifyTutorPayout } from "./tutorPayout.controller.js";
 import { buySubscription, verifySubscriptionPayment } from "./tutorSubscription.controller.js";
-import { getTutorStudents } from "./getTutorStudent.controller.js";
+import { getTutorStudents, getTuitions } from "./getTutorStudent.controller.js";
 
 export {
     updateTutorProfile,
@@ -29,5 +29,6 @@ export {
     addTutorLocation,
     buySubscription,
     verifySubscriptionPayment,
-    getTutorStudents
+    getTutorStudents,
+    getTuitions
 };

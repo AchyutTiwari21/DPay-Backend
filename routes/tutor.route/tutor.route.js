@@ -21,7 +21,8 @@ import {
     addTutorLocation,
     buySubscription,
     verifySubscriptionPayment,
-    getTutorStudents
+    getTutorStudents,
+    getTuitions
 } from "../../controllers/tutor/index.js";
 import {
     tutorSchema,
@@ -78,5 +79,7 @@ router.route("/buy-subscription").post(verifyJWT, verifyTutor, validateSchema(z.
 router.route("/verify-subscription-payment").post(verifyJWT, verifyTutor, validateSchema(verifyPaymentSchema), verifySubscriptionPayment);
 
 router.route("/students").get(verifyJWT, verifyTutor, validateSchema(z.void()), getTutorStudents);
+
+router.route("/tuitions").get(verifyJWT, verifyTutor, validateSchema(z.void()), getTuitions);
 
 export default router;
