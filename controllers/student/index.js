@@ -5,7 +5,7 @@ import { acceptRejectClassRequest } from './acceptRejectClassRequest.controller.
 import { markNotificationsAsRead, removeNotification } from './updateNotification.controller.js';
 import { buySubscription, verifySubscriptionPayment } from './studentSubscription.controller.js';
 import { getStudentProfile, updateStudentProfile } from './updateStudentInfo.controller.js';
-import { getStudentTution } from './getStudentTution.controller.js';
+import { getStudentTution, getStudentTutor } from './getStudentTution.controller.js';
 
 export {
   getStudentDashboardStats,
@@ -18,5 +18,6 @@ export {
   verifySubscriptionPayment,
   getStudentProfile,
   updateStudentProfile,
-  getStudentTution
+  getStudentTution,
+  getStudentTutor
 };

@@ -11,7 +11,8 @@ import {
     verifySubscriptionPayment,
     getStudentProfile,
     updateStudentProfile,
-    getStudentTution
+    getStudentTution,
+    getStudentTutor
 } from "../../controllers/student/index.js";
 import { 
     acceptRejectClassRequestSchema,
@@ -52,5 +53,7 @@ router.route("/profile").get(validateSchema(z.void()), verifyJWT, getStudentProf
 router.route("/update-student-profile").put(upload.single("avatar"), validateSchema(profileUpdateSchema), verifyJWT, updateStudentProfile);
 
 router.route("/tutions").get(validateSchema(z.void()), verifyJWT, getStudentTution);
+
+router.route("/tutors").get(validateSchema(z.void()), verifyJWT, getStudentTutor);
 
 export default router;
