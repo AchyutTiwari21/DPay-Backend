@@ -138,11 +138,22 @@ export const getStudents = asyncHandler(async (req, res) => {
               }
             },
             { $unwind: { path: '$tutorInfo', preserveNullAndEmptyArrays: true } },
-            { $addFields: { tutorName: '$tutorInfo.name' } },
+            {
+              $lookup: {
+                from: 'subjects',
+                localField: 'subjects',
+                foreignField: '_id',
+                as: 'subjects',
+                pipeline: [{ $project: { name: 1 } }]
+              }
+            },
+            { $unwind: { path: '$subjects', preserveNullAndEmptyArrays: true } },
+            { $addFields: { tutorName: '$tutorInfo.name', subjectNames: '$subjects.name' } },
             { 
               $project: {
                 title: 1,
                 tutorName: 1,
+                subjectNames: 1,
                 startDate: 1,
                 endDate: 1,
                 status: 1,
@@ -256,7 +267,9 @@ export const getStudents = asyncHandler(async (req, res) => {
       const enrollmentsSource = Array.isArray(profile.tutions) && profile.tutions.length ? profile.tutions : profile.demoLessons || [];
 
       const enrollments = (Array.isArray(enrollmentsSource) ? enrollmentsSource : []).map(e => ({
-        course: e.title || e.course || e.name || 'Course',
+        course: Array.isArray(e.subjectNames)
+          ? e.subjectNames.join(', ')
+          : (e.subjectNames || e.subject || e.title || e.course || e.name || 'Course'),
         startDate: e.startDate ? new Date(e.startDate).toISOString().split('T')[0]
                   : (e.createdAt ? new Date(e.createdAt).toISOString().split('T')[0] : null),
         status: (e.status || 'active').toString().toLowerCase()
@@ -271,7 +284,10 @@ export const getStudents = asyncHandler(async (req, res) => {
 
       // subjects: attempt to derive from tutions/demoLessons if available (may be empty)
       const subjects = (Array.isArray(profile.tutions) && profile.tutions.length)
-        ? profile.tutions.map(t => t.subject || t.title || t.course).filter(Boolean)
+        ? profile.tutions.flatMap(t => {
+            if (Array.isArray(t.subjectNames)) return t.subjectNames.filter(Boolean);
+            return [t.subjectNames || t.subject || t.title || t.course].filter(Boolean);
+          })
         : (Array.isArray(profile.demoLessons) ? profile.demoLessons.map(d => d.subject || d.title || d.name).filter(Boolean) : []);
 
       // assignedTutor: take tutorName or tutor.name if populated on tution

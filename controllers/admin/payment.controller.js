@@ -46,7 +46,7 @@ export const getPayments = asyncHandler(async (req, res) => {
                     foreignField: "_id",
                     as: "payerDetails",
                     pipeline: [
-                        { $project: { name: 1, role: 1 } }
+                        { $project: { name: 1, role: 1, email: 1, phone: 1 } }
                     ]
                 }
             },
@@ -134,6 +134,8 @@ export const getPayments = asyncHandler(async (req, res) => {
                 id: "$_id",
                 paymentId: 1,
                 payerName: "$payerDetails.name",
+                payerEmail: "$payerDetails.email",
+                payerPhone: "$payerDetails.phone",
                 role: "$payerDetails.role",
                 amount: 1,
                 currency: 1,
