@@ -60,3 +60,33 @@ export const getTuitions = asyncHandler(async (req, res) => {
     }
 });
 
+export const addTuitionData = asyncHandler(async (req, res) => {
+    try {
+        const userId = req?.user?._id;
+        if(!userId) {
+            return res.status(401).json(new ApiResponse(401, null, "Unauthorized"));
+        }
+        const tutorProfile = await TutorProfile.findOne({ user: userId });
+        if(!tutorProfile) {
+            return res.status(404).json(new ApiResponse(404, null, "Tutor profile not found"));
+        }
+        const { tutionId } = req.params;
+        const { title, startDate, endDate, schedule, status, fees } = req.body;
+
+        const tuition = tutorProfile.tutions.id(tutionId);
+        if(!tuition) {
+            return res.status(404).json(new ApiResponse(404, null, "Tuition not found"));
+        }
+        if(title) tuition.title = title;
+        if(startDate) tuition.startDate = startDate;
+        if(endDate) tuition.endDate = endDate;
+        if(schedule) tuition.schedule = schedule;
+        if(status) tuition.status = status;
+        if(fees) tuition.fees = fees;
+        await tutorProfile.save();
+        return res.status(200).json(new ApiResponse(200, tuition, "Tuition updated successfully"));
+    } catch (error) {
+        console.error("Error updating tuition data:", error);
+        return res.status(500).json(new ApiResponse(500, null, "Internal server error"));
+    }
+});

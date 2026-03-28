@@ -22,7 +22,8 @@ import {
     buySubscription,
     verifySubscriptionPayment,
     getTutorStudents,
-    getTuitions
+    getTuitions,
+    addTuitionData
 } from "../../controllers/tutor/index.js";
 import {
     tutorSchema,
@@ -32,7 +33,8 @@ import {
     verifyTutorPayoutSchema,
     addMeetingLinkHandlerSchema,
     tutorLocationSchema,
-    verifyPaymentSchema
+    verifyPaymentSchema,
+    tuitionSchema
 } from "../../zod/tutorSchema.js";
 import { verifyJWT, verifyTutor, validateSchema, upload } from "../../middlewares/index.js";
 
@@ -81,5 +83,7 @@ router.route("/verify-subscription-payment").post(verifyJWT, verifyTutor, valida
 router.route("/students").get(verifyJWT, verifyTutor, validateSchema(z.void()), getTutorStudents);
 
 router.route("/tuitions").get(verifyJWT, verifyTutor, validateSchema(z.void()), getTuitions);
+
+router.route("/add-tuitions-data").post(verifyJWT, verifyTutor, validateSchema(tuitionSchema), addTuitionData);
 
 export default router;

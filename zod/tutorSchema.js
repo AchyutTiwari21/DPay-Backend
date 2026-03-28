@@ -136,6 +136,24 @@ const verifyPaymentSchema = z.object({
     .regex(/^[a-f0-9]+$/, "Invalid signature format"),
 }).strict();
 
+const tuitionSchema = z.object({
+  title: z.string().min(1).max(100).optional(),
+  startDate: z.coerce.date().optional(),
+  endDate: z.coerce.date().optional(),
+  
+  // Validates the nested array of schedule objects
+  schedule: z.array(
+    z.object({
+      day: z.enum(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]),
+      time: z.string()
+    })
+  ).optional(),
+
+  status: z.enum(["PENDING", "CONFIRMED", "ONGOING", "COMPLETED", "CANCELLED"]).optional(),
+  
+  fees: z.coerce.number().min(0).optional(),
+}).strict();
+
 export {
     tutorSchema,
     tutorLocationSchema,
@@ -145,5 +163,6 @@ export {
     markNotificationsAsReadSchema,
     verifyTutorPayoutSchema,
     addMeetingLinkHandlerSchema,
-    verifyPaymentSchema
+    verifyPaymentSchema,
+    tuitionSchema
 };
