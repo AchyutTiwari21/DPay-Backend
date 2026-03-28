@@ -12,8 +12,6 @@ export const acceptRejectClassRequest = asyncHandler(async (req, res) => {
             return res.status(404).json(new ApiResponse(404, null, "Notification not found"));
         }
 
-        console.log("Notifications: ", notification);  
-
         if(notification.user.toString() !== userId.toString()) {
             return res.status(403).json(new ApiResponse(403, null, "Unauthorized action"));
         }
@@ -24,7 +22,6 @@ export const acceptRejectClassRequest = asyncHandler(async (req, res) => {
 
         if(status === "ACCEPTED") {
             const lesson = await Lesson.findById(notification.lesson).populate('subject');
-            console.log("Lesson: ", lesson);
             
             if (!lesson) {
                 return res.status(404).json(new ApiResponse(404, null, "Lesson not found"));

@@ -84,6 +84,6 @@ router.route("/students").get(verifyJWT, verifyTutor, validateSchema(z.void()), 
 
 router.route("/tuitions").get(verifyJWT, verifyTutor, validateSchema(z.void()), getTuitions);
 
-router.route("/add-tuitions-data").post(verifyJWT, verifyTutor, validateSchema(tuitionSchema), addTuitionData);
+router.route("/add-tuition-data/:tutionId").put(verifyJWT, verifyTutor, validateSchema(tuitionSchema), addTuitionData);
 
 export default router;

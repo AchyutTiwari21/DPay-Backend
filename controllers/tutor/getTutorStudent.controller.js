@@ -1,5 +1,5 @@
 import { asyncHandler, ApiResponse } from "../../utils/index.js";
-import { TutorProfile } from "../../models/index.js";
+import { TutorProfile, Tution } from "../../models/index.js";
 
 export const getTutorStudents = asyncHandler(async (req, res) => {
     try {
@@ -73,9 +73,12 @@ export const addTuitionData = asyncHandler(async (req, res) => {
         const { tutionId } = req.params;
         const { title, startDate, endDate, schedule, status, fees } = req.body;
 
-        const tuition = tutorProfile.tutions.id(tutionId);
+        const tuition = await Tution.findById(tutionId);
         if(!tuition) {
             return res.status(404).json(new ApiResponse(404, null, "Tuition not found"));
+        }
+        if(tuition.tutor.toString() !== tutorProfile._id.toString()) {
+            return res.status(403).json(new ApiResponse(403, null, "Unauthorized to update this tuition"));
         }
         if(title) tuition.title = title;
         if(startDate) tuition.startDate = startDate;
@@ -83,7 +86,7 @@ export const addTuitionData = asyncHandler(async (req, res) => {
         if(schedule) tuition.schedule = schedule;
         if(status) tuition.status = status;
         if(fees) tuition.fees = fees;
-        await tutorProfile.save();
+        await tuition.save();
         return res.status(200).json(new ApiResponse(200, tuition, "Tuition updated successfully"));
     } catch (error) {
         console.error("Error updating tuition data:", error);
