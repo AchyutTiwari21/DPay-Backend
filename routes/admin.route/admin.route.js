@@ -26,7 +26,8 @@ import {
     getPayments,
     removePayment,
     updateAdminCredentials,
-    getAllReferrals
+    getAllReferrals,
+    acceptRejectReferral
 } from "../../controllers/admin/index.js";
 import { verifyJWT, verifyAdmin, upload } from "../../middlewares/index.js";
 
@@ -85,5 +86,7 @@ router.route("/update-admin-credentials").put(verifyJWT, verifyAdmin, upload.sin
 router.route("/remove-payment/:id").delete(verifyJWT, verifyAdmin, removePayment);
 
 router.route("/get-referrals").get(verifyJWT, verifyAdmin, getAllReferrals);
+
+router.route("/accept-reject-referral/:referralId").put(verifyJWT, verifyAdmin, acceptRejectReferral);
 
 export default router;

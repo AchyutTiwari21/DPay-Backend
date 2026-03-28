@@ -1,4 +1,4 @@
-import { Referral } from "../../models/index.js";
+import { Referral, User } from "../../models/index.js";
 import { ApiResponse, asyncHandler } from "../../utils/index.js";
 
 export const getAllReferrals = asyncHandler(async (req, res) => {
@@ -193,3 +193,58 @@ export const getAllReferrals = asyncHandler(async (req, res) => {
         ));
     }
 });
+
+export const acceptRejectReferral = asyncHandler(async (req, res) => {
+    const { referralId } = req.params;
+    const { action } = req.body;
+
+    try {
+        const referral = await Referral.findById(referralId);
+        if (!referral) {
+            return res.status(404).json(new ApiResponse(
+                404,
+                null,
+                "Referral not found"
+            ));
+        }
+
+        const user = await User.findById(referral.referrer);
+        if (!user) {
+            return res.status(404).json(new ApiResponse(
+                404,
+                null,
+                "Referrer user not found"
+            ));
+        }
+
+        if (action === "accept") {
+            referral.status = "ACCEPTED";
+            referral.rewardCoins = 100; // Example reward coins for accepted referral
+            user.rewardCoins += referral.rewardCoins;
+            await user.save();
+        } else if (action === "reject") {
+            referral.status = "REJECTED";
+            referral.rewardCoins = 0;
+        } else {
+            return res.status(400).json(new ApiResponse(
+                400,
+                null,
+                "Invalid action. Must be 'accept' or 'reject'."
+            ));
+        }
+        await referral.save();
+        return res.status(200).json(new ApiResponse(
+            200,
+            referral,
+            "Referral updated successfully"
+        ));
+    } catch (error) {
+        console.error("Error updating referral:", error);
+        return res.status(500).json(new ApiResponse(
+            500,
+            null,
+            "Internal Server Error"
+        ));
+    }
+});
+
