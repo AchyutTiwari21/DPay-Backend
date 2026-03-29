@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { asyncHandler } from "../../../utils/index.js";
-import { Lesson, Payment, StudentProfile, TutorProfile, User, Availability } from "../../../models/index.js";
+import { Lesson, Payment, StudentProfile, TutorProfile, User, Availability, Notification, Admin } from "../../../models/index.js";
 
 export const webhookHandler = asyncHandler(async (req, res) => {
   try {
@@ -48,7 +48,19 @@ export const webhookHandler = asyncHandler(async (req, res) => {
           console.error("⚠️ Payment record not found for order:", payment.order_id);
           return;
         }
-  
+
+        const admin = await Admin.findOne({ role: "superadmin" });
+        if (admin) {
+          const notification = await Notification.create({
+            user: admin.user,
+            title: "Payment Received for Demo Class",
+            message: `Payment Received for Demo Class. Payment ID: ${paymentData._id}`,
+            type: "payment",
+          });
+          admin.notifications.push(notification._id);
+          await admin.save({ validateBeforeSave: false });
+        }
+
         const lessonData = await Lesson.findByIdAndUpdate(paymentData.lesson, {
           $set: { status: "CONFIRMED", payment: paymentData._id }
         });
@@ -66,7 +78,7 @@ export const webhookHandler = asyncHandler(async (req, res) => {
           }
         );
   
-        const studentProfile = await StudentProfile.findOne({ user: paymentData.payer });
+        const studentProfile = await StudentProfile.findOne({ user: paymentData.payer }).populate("user", "name email");
   
         if (studentProfile) {
           studentProfile.demoLessons.push(paymentData.lesson);
@@ -84,13 +96,35 @@ export const webhookHandler = asyncHandler(async (req, res) => {
           );
         }
   
-        await TutorProfile.findByIdAndUpdate(
+        const tutorProfile = await TutorProfile.findByIdAndUpdate(
           lessonData.tutor,
           {
             $push: { demoLessons: lessonData._id }
           },
           { new: true }
-        );  
+        ).populate("user", "name email");  
+
+        if(tutorProfile && admin) {
+          const tutorNotification = await Notification.create({
+            user: tutorProfile.user._id,
+            title: "New Demo Class Booked",
+            message: `A new demo class has been booked. Student: ${studentProfile.user.name}, Date: ${bookingDate.toDateString()}, Time: ${lessonData.time}`,
+            type: "booking"
+          });
+
+          tutorProfile.notifications.push(tutorNotification._id);
+          await tutorProfile.save({ validateBeforeSave: false });
+
+          const adminNotification = await Notification.create({
+            user: admin.user._id,
+            title: "New Demo Class Booked",
+            message: `A new demo class has been booked. Tutor: ${tutorProfile.user.name}, Student: ${studentProfile.user.name}, Date: ${bookingDate.toDateString()}, Time: ${lessonData.time}`,
+            type: "booking"
+          });
+
+          admin.notifications.push(adminNotification._id);
+          await admin.save({ validateBeforeSave: false });
+        }
       }
 
       if (payment.notes && payment.notes.type === "Tutor Payout") {
@@ -116,14 +150,28 @@ export const webhookHandler = asyncHandler(async (req, res) => {
           return;
         }
 
-        await TutorProfile.findOneAndUpdate(
+        const tutorProfile = await TutorProfile.findOneAndUpdate(
           { _id: payment.notes.tutorId },
           {
             paymentStatus: "Paid",
             $push: { paymentHistory: paymentData._id }
           },
           { new: true }
-        );
+        ).populate("user", "name email");
+
+        if(tutorProfile) {
+          const admin = await Admin.findOne({ role: "superadmin" });
+          if (admin) {
+            const notification = await Notification.create({
+              user: admin.user,
+              title: "Tutor Payout Processed",
+              message: `A payout has been processed for Tutor: ${tutorProfile.user.name}, Amount: ${paymentData.amount / 100} ${paymentData.currency.toUpperCase()}`,
+              type: "payment"
+            });
+            admin.notifications.push(notification._id);
+            await admin.save({ validateBeforeSave: false });
+          }
+        }
       }
 
       if(payment.notes && payment.notes.type === "Student Subscription Payment") {
@@ -140,7 +188,7 @@ export const webhookHandler = asyncHandler(async (req, res) => {
           console.error("⚠️ Payment record not found for order:", payment.order_id);
           return;
         }
-        await StudentProfile.findOneAndUpdate(
+        const studentProfile = await StudentProfile.findOneAndUpdate(
           { _id: payment.notes.studentId },
           {
             isSubscribed: true,
@@ -148,7 +196,21 @@ export const webhookHandler = asyncHandler(async (req, res) => {
             subscriptionExpiresAt: new Date(new Date().setFullYear(new Date().getFullYear() + 1))
           },
           { new: true }
-        );
+        ).populate("user", "name email");
+
+        if(studentProfile) {
+          const admin = await Admin.findOne({ role: "superadmin" });
+          if (admin) {
+            const notification = await Notification.create({
+              user: admin.user,
+              title: "Student Subscription Activated",
+              message: `A new student subscription has been activated. Student: ${studentProfile.user.name}, Amount: ${paymentData.amount / 100} ${paymentData.currency.toUpperCase()}`,
+              type: "payment"
+            });
+            admin.notifications.push(notification._id);
+            await admin.save({ validateBeforeSave: false });
+          }
+        }
       }
 
       if(payment.notes && payment.notes.type === "Tutor Subscription Payment") {
@@ -165,14 +227,28 @@ export const webhookHandler = asyncHandler(async (req, res) => {
           console.error("⚠️ Payment record not found for order:", payment.order_id);
           return;
         }
-        await TutorProfile.findOneAndUpdate(
+        const tutorProfile = await TutorProfile.findOneAndUpdate(
           { _id: payment.notes.tutorId },
           {            
             isSubscribed: true,
             subscriptionStartDate: new Date(),
             subscriptionExpiresAt: new Date(new Date().setMonth(new Date().getMonth() + 6)) },
           { new: true }
-        );
+        ).populate("user", "name email");
+
+        if(tutorProfile) {
+          const admin = await Admin.findOne({ role: "superadmin" });
+          if (admin) {
+            const notification = await Notification.create({
+              user: admin.user,
+              title: "Tutor Subscription Activated",
+              message: `A new tutor subscription has been activated. Tutor: ${tutorProfile.user.name}, Amount: ${paymentData.amount / 100} ${paymentData.currency.toUpperCase()}`,
+              type: "payment"
+            });
+            admin.notifications.push(notification._id);
+            await admin.save({ validateBeforeSave: false });
+          }
+        }
       }      
 
       console.log("✅ Payment successful:", payment.id);
