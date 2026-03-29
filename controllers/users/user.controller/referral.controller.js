@@ -1,4 +1,4 @@
-import { Referral } from "../../../models/index.js";
+import { Referral, Notification, Admin } from "../../../models/index.js";
 import { ApiResponse, asyncHandler } from "../../../utils/index.js";
 
 export const createReferral = asyncHandler(async (req, res) => {
@@ -12,7 +12,20 @@ export const createReferral = asyncHandler(async (req, res) => {
         studentEmail,
         studentPhone,
         location,
+    }); 
+
+    const admin = await Admin.findOne({ role: "superadmin" });
+
+    const notification = await Notification.create({
+        user: admin.user,
+        title: "New Referral from " + req.user.name,
+        message: `${req.user.name} referred a student (${studentName}) for ${subjectToTeach}. Check the Referral section.`,
+        type: "referral",
     });
+
+    admin.notifications.push(notification._id);
+    await admin.save();
+
     res.status(201).json(new ApiResponse(201, null, "Referral Submitted Successfully!"));
 });
 

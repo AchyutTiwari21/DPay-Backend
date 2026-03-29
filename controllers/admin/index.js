@@ -22,6 +22,7 @@ import { getUpcomingDemoBookings, removeBooking } from "./getUpcomingDemoBooking
 import { getPayments, removePayment } from "./payment.controller.js";
 import { updateAdminCredentials } from "./updateAdminController.js";
 import { getAllReferrals, acceptRejectReferral } from "./referral.controller.js";
+import { getNotifications, markNotificationsAsRead, removeNotification } from "./getNotifications.controller.js";
 
 export {
     getAllTeacherRequests,
@@ -51,5 +52,8 @@ export {
     removePayment,
     updateAdminCredentials,
     getAllReferrals,
-    acceptRejectReferral
+    acceptRejectReferral,
+    getNotifications,
+    markNotificationsAsRead,
+    removeNotification
 };

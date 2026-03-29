@@ -27,11 +27,20 @@ import {
     removePayment,
     updateAdminCredentials,
     getAllReferrals,
-    acceptRejectReferral
+    acceptRejectReferral,
+    getNotifications,
+    markNotificationsAsRead,
+    removeNotification
 } from "../../controllers/admin/index.js";
 import { verifyJWT, verifyAdmin, upload } from "../../middlewares/index.js";
 
 const router = Router();
+
+router.route("/get-notifications").get(verifyJWT, verifyAdmin, getNotifications);
+
+router.route("/mark-notifications-as-read").put(verifyJWT, verifyAdmin, markNotificationsAsRead);
+
+router.route("/remove-notification/:notificationId").delete(verifyJWT, verifyAdmin, removeNotification);
 
 router.route("/teacher-requests").get(verifyJWT, verifyAdmin, getAllTeacherRequests);
 
