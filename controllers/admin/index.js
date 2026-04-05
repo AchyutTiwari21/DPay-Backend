@@ -23,6 +23,7 @@ import { getPayments, removePayment } from "./payment.controller.js";
 import { updateAdminCredentials } from "./updateAdminController.js";
 import { getAllReferrals, acceptRejectReferral } from "./referral.controller.js";
 import { getNotifications, markNotificationsAsRead, removeNotification } from "./getNotifications.controller.js";
+import { getTuitions, getTutionById } from "./getTuition.controller.js";
 
 export {
     getAllTeacherRequests,
@@ -55,5 +56,7 @@ export {
     acceptRejectReferral,
     getNotifications,
     markNotificationsAsRead,
-    removeNotification
+    removeNotification,
+    getTuitions,
+    getTutionById
 };

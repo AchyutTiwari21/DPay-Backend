@@ -30,7 +30,9 @@ import {
     acceptRejectReferral,
     getNotifications,
     markNotificationsAsRead,
-    removeNotification
+    removeNotification,
+    getTuitions,
+    getTutionById
 } from "../../controllers/admin/index.js";
 import { verifyJWT, verifyAdmin, upload } from "../../middlewares/index.js";
 
@@ -97,5 +99,9 @@ router.route("/remove-payment/:id").delete(verifyJWT, verifyAdmin, removePayment
 router.route("/get-referrals").get(verifyJWT, verifyAdmin, getAllReferrals);
 
 router.route("/accept-reject-referral/:referralId").put(verifyJWT, verifyAdmin, acceptRejectReferral);
+
+router.route("/get-tuitions").get(verifyJWT, verifyAdmin, getTuitions);
+
+router.route("/get-tution/:id").get(verifyJWT, verifyAdmin, getTutionById);
 
 export default router;
