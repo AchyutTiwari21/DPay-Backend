@@ -4,12 +4,12 @@ import { mailSender } from "../../utils/mailSender.js";
 import mongoose from "mongoose";
 
 export const addTutor = asyncHandler(async (req, res) => {
-    const { email, address, latitude, longitude } = req.body;
+    const { email } = req.body;
     
     try {
         const userRecord = await User.findOne({
             email
-        })
+        });
 
         if(!userRecord) {
             return res.status(404).json(new ApiResponse(
@@ -34,15 +34,6 @@ export const addTutor = asyncHandler(async (req, res) => {
         const tutorData = {
             user: userRecord._id,
         };
-
-        // Add location if coordinates provided
-        if (latitude && longitude && address) {
-            tutorData.location = {
-                type: "Point",
-                coordinates: [parseFloat(longitude), parseFloat(latitude)]
-            };
-            tutorData.address = address;
-        }
 
         await TutorProfile.create(tutorData);
 

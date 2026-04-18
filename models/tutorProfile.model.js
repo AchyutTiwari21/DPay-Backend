@@ -1,6 +1,28 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
 
+const pointSchema = new Schema(
+  {
+    type: {
+      type: String,
+      enum: ["Point"],
+      required: true
+    },
+    coordinates: {
+      type: [Number],
+      required: true,
+      validate: {
+        validator: (value) =>
+          Array.isArray(value) &&
+          value.length === 2 &&
+          value.every((coordinate) => Number.isFinite(coordinate)),
+        message: "Location coordinates must contain valid longitude and latitude values."
+      }
+    }
+  },
+  { _id: false }
+);
+
 const tutorProfileSchema = new Schema({
   user: { 
     type: Schema.Types.ObjectId, 
@@ -12,15 +34,8 @@ const tutorProfileSchema = new Schema({
 
   // 📌 NEW — Store exact geolocation
   location: {
-    type: {
-      type: String,
-      enum: ["Point"],
-      default: "Point"
-    },
-    coordinates: {
-      type: [Number], // [longitude, latitude]
-      index: "2dsphere"
-    }
+    type: pointSchema,
+    default: undefined
   },
 
   // Optional — For text-based location search
